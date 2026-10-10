@@ -353,23 +353,12 @@
       )].sort((a, b) => a.localeCompare(b, "ja"));
     }
 
-    // 複数タグを配列にする。区切り文字は ; , 、 ，
+    // 複数タグを配列にする
     function splitTags(value) {
       return String(value ?? "")
         .split(/[;,、，]/)
         .map(tag => tag.trim())
         .filter(Boolean);
-    }
-
-    // HTMLエスケープ
-    function escapeHtml(value) {
-      return String(value ?? "").replace(/[&<>"']/g, char => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-      })[char]);
     }
 
     // プルダウンの選択肢を更新
@@ -404,7 +393,7 @@
       updateClassFilter();
     }
 
-    // カテゴリーに該当するclassだけを表示
+    // 選択したカテゴリーに該当するclassだけを表示
     function updateClassFilter() {
       const selectedCategory = categoryFilter.value;
       const previousClass = classFilter.value;
@@ -423,16 +412,14 @@
         "すべてのclass"
       );
 
-      // 現在のカテゴリーに存在するclassだけを維持
       if (classes.includes(previousClass)) {
         classFilter.value = previousClass;
       }
 
-      // classを更新したらtagも更新
       updateTagFilter();
     }
 
-    // カテゴリーとclassに該当するtagだけを表示
+    // 選択したカテゴリーとclassに該当するtagだけを表示
     function updateTagFilter() {
       const selectedCategory = categoryFilter.value;
       const selectedClass = classFilter.value;
@@ -458,7 +445,6 @@
         "すべてのtag"
       );
 
-      // 現在の条件に存在するtagだけを維持
       if (tags.includes(previousTag)) {
         tagFilter.value = previousTag;
       }
@@ -551,8 +537,16 @@
           `カテゴリー「${video.category}」で絞り込む`;
 
         categoryButton.addEventListener("click", () => {
+          // カテゴリーを選択
           categoryFilter.value = video.category;
+
+          // classとtagをリセット
+          classFilter.value = "";
+          tagFilter.value = "";
+
+          // 新しいカテゴリーに合わせて選択肢を更新
           updateClassFilter();
+
           currentPage = 1;
           renderVideos();
         });
@@ -568,30 +562,46 @@
         classButton.title = `class「${video.class}」で絞り込む`;
 
         classButton.addEventListener("click", () => {
-          // そのclassを含むカテゴリーが複数ある場合は、
-          // 現在のカテゴリーを優先する
-          const currentCategory = categoryFilter.value;
-
+          // 現在のカテゴリーに対象classが存在するか確認
           const matchingVideos = videos.filter(item =>
-            item.class === video.class &&
-            (!currentCategory || item.category === currentCategory)
+            item.category === categoryFilter.value &&
+            item.class === video.class
           );
 
-          if (matchingVideos.length === 0) {
+          // カテゴリー未選択時は、全カテゴリーからclassを探す
+          const matchingAnyCategory = videos.some(item =>
+            item.class === video.class
+          );
+
+          // 選択中のカテゴリーに対象classがなければカテゴリーを解除
+          if (
+            categoryFilter.value &&
+            matchingVideos.length === 0
+          ) {
             categoryFilter.value = "";
           }
 
+          // classの候補を更新
           updateClassFilter();
 
+          // classを選択
           if (
             [...classFilter.options].some(
               option => option.value === video.class
             )
           ) {
             classFilter.value = video.class;
+          } else if (matchingAnyCategory) {
+            // 念のため全カテゴリーから候補を再構築
+            categoryFilter.value = "";
+            updateClassFilter();
+            classFilter.value = video.class;
           }
 
+          // tagをリセットし、選択したclassに合わせて更新
+          tagFilter.value = "";
           updateTagFilter();
+
           currentPage = 1;
           renderVideos();
         });
@@ -623,6 +633,7 @@
               item.tags.includes(tag)
             );
 
+            // 現在の条件にないtagなら、上位の条件を解除
             if (!tagExistsInCurrentSelection) {
               categoryFilter.value = "";
               classFilter.value = "";
