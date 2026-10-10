@@ -117,6 +117,36 @@
       padding: 30px 12px;
       color: #666;
     }
+    
+.search-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.search-panel input,
+.search-panel select,
+.search-panel button {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: white;
+  font-size: 15px;
+}
+
+.search-panel button {
+  background: #24292f;
+  color: white;
+  cursor: pointer;
+}
+
+#video-count {
+  font-weight: bold;
+}
+
   </style>
 </head>
 
@@ -125,10 +155,32 @@
     <h1>検索用</h1>
   </header>
 
-  <main>
-    <p id="video-count"></p>
-    <div id="video-list" class="video-list"></div>
-  </main>
+
+<main>
+  <div class="search-panel">
+    <input
+      type="search"
+      id="keyword"
+      placeholder="タイトル・ゲーム名・タグで検索"
+    >
+
+    <select id="game-filter">
+      <option value="">すべてのゲーム</option>
+    </select>
+
+    <select id="tag-filter">
+      <option value="">すべてのタグ</option>
+    </select>
+
+    <button id="reset-search" type="button">
+      検索条件をリセット
+    </button>
+  </div>
+
+  <p id="video-count"></p>
+  <div id="video-list" class="video-list"></div>
+</main>
+
 
   <footer>検索用</footer>
 
@@ -142,71 +194,139 @@
         id: "RQq9AXml4As"
       }
       ];
+const list = document.getElementById("video-list");
+const count = document.getElementById("video-count");
+const keyword = document.getElementById("keyword");
+const gameFilter = document.getElementById("game-filter");
+const tagFilter = document.getElementById("tag-filter");
+const resetButton = document.getElementById("reset-search");
 
-    const list = document.getElementById("video-list");
+// ゲーム名とタグの選択肢を自動作成
+const games = [...new Set(videos.map(v => v.game))]
+  .filter(Boolean)
+  .sort();
 
-    document.getElementById("video-count").textContent =
-      "登録動画数：" + videos.length + "件";
+const tags = [...new Set(videos.flatMap(v => v.tags || []))]
+  .filter(Boolean)
+  .sort();
 
-    videos.forEach(video => {
-      const card = document.createElement("article");
-      card.className = "video-card";
+games.forEach(game => {
+  const option = document.createElement("option");
+  option.value = game;
+  option.textContent = game;
+  gameFilter.appendChild(option);
+});
 
-      const player = document.createElement("div");
-      player.className = "player";
+tags.forEach(tag => {
+  const option = document.createElement("option");
+  option.value = tag;
+  option.textContent = tag;
+  tagFilter.appendChild(option);
+});
 
-      const thumbnail = document.createElement("img");
-      thumbnail.src =
-        "https://i.ytimg.com/vi/" + video.id + "/hqdefault.jpg";
-      thumbnail.alt = video.title + "のサムネイル";
-      thumbnail.loading = "lazy";
+// 検索と一覧表示
+function renderVideos() {
+  const query = keyword.value.trim().toLowerCase();
+  const selectedGame = gameFilter.value;
+  const selectedTag = tagFilter.value;
 
-      const button = document.createElement("button");
-      button.className = "play-button";
-      button.textContent = "▶ 再生";
-      button.setAttribute("aria-label", video.title + "を再生");
+  const filtered = videos.filter(video => {
+    const searchableText = [
+      video.title,
+      video.game,
+      ...(video.tags || [])
+    ].join(" ").toLowerCase();
 
-      button.addEventListener("click", () => {
-        const iframe = document.createElement("iframe");
-        iframe.src =
-          "https://www.youtube-nocookie.com/embed/" +
-          encodeURIComponent(video.id) +
-          "?autoplay=1";
-        iframe.title = video.title;
-        iframe.allow =
-          "accelerometer; autoplay; clipboard-write; " +
-          "encrypted-media; gyroscope; picture-in-picture; web-share";
-        iframe.allowFullscreen = true;
+    return (
+      searchableText.includes(query) &&
+      (!selectedGame || video.game === selectedGame) &&
+      (!selectedTag || (video.tags || []).includes(selectedTag))
+    );
+  });
 
-        player.replaceChildren(iframe);
-      });
+  count.textContent =
+    `表示件数：${filtered.length}件 / 全${videos.length}件`;
 
-      player.append(thumbnail, button);
+  list.replaceChildren();
 
-      const info = document.createElement("div");
-      info.className = "video-info";
+  if (filtered.length === 0) {
+    const message = document.createElement("p");
+    message.textContent = "該当する動画がありません。";
+    list.appendChild(message);
+    return;
+  }
 
-      const title = document.createElement("h2");
-      title.textContent = video.title;
+  filtered.forEach(video => {
+    const card = document.createElement("article");
+    card.className = "video-card";
 
-      const game = document.createElement("div");
-      game.className = "game";
-      game.textContent = "ゲーム：" + video.game;
+    const player = document.createElement("div");
+    player.className = "player";
 
-      const tags = document.createElement("div");
-      tags.className = "tags";
+    const thumbnail = document.createElement("img");
+    thumbnail.src =
+      `https://i.ytimg.com/vi/${encodeURIComponent(video.id)}/hqdefault.jpg`;
+    thumbnail.alt = `${video.title}のサムネイル`;
+    thumbnail.loading = "lazy";
 
-      video.tags.forEach(tagText => {
-        const tag = document.createElement("span");
-        tag.className = "tag";
-        tag.textContent = tagText;
-        tags.appendChild(tag);
-      });
+    const button = document.createElement("button");
+    button.className = "play-button";
+    button.textContent = "▶ 再生";
+    button.setAttribute("aria-label", `${video.title}を再生`);
 
-      info.append(title, game, tags);
-      card.append(player, info);
-      list.appendChild(card);
+    button.addEventListener("click", () => {
+      const iframe = document.createElement("iframe");
+      iframe.src =
+        `https://www.youtube-nocookie.com/embed/${encodeURIComponent(video.id)}?autoplay=1`;
+      iframe.title = video.title;
+      iframe.allow =
+        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+      iframe.allowFullscreen = true;
+      player.replaceChildren(iframe);
     });
+
+    player.append(thumbnail, button);
+
+    const info = document.createElement("div");
+    info.className = "video-info";
+
+    const title = document.createElement("h2");
+    title.textContent = video.title;
+
+    const game = document.createElement("div");
+    game.className = "game";
+    game.textContent = `ゲーム：${video.game}`;
+
+    const tagContainer = document.createElement("div");
+    tagContainer.className = "tags";
+
+    (video.tags || []).forEach(tagText => {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = tagText;
+      tagContainer.appendChild(tag);
+    });
+
+    info.append(title, game, tagContainer);
+    card.append(player, info);
+    list.appendChild(card);
+  });
+}
+
+// 条件が変更されたら自動で再検索
+keyword.addEventListener("input", renderVideos);
+gameFilter.addEventListener("change", renderVideos);
+tagFilter.addEventListener("change", renderVideos);
+
+resetButton.addEventListener("click", () => {
+  keyword.value = "";
+  gameFilter.value = "";
+  tagFilter.value = "";
+  renderVideos();
+});
+
+// 初期表示
+renderVideos();
   </script>
 </body>
 </html>
