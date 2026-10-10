@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -106,13 +107,27 @@
       overflow-wrap: anywhere;
     }
 
+    /* クリックできる分類名 */
     .video-class {
       display: inline-block;
       padding: 4px 8px;
       margin-bottom: 8px;
       background: #e8e8e8;
+      color: #333;
+      border: none;
       border-radius: 4px;
       font-size: 12px;
+      cursor: pointer;
+    }
+
+    .video-class:hover {
+      background: #d0d0d0;
+      text-decoration: underline;
+    }
+
+    .video-class:focus-visible {
+      outline: 2px solid #555;
+      outline-offset: 2px;
     }
 
     .tags {
@@ -122,12 +137,25 @@
       margin: 4px 0 12px;
     }
 
+    /* クリックできるタグ */
     .tag {
       padding: 4px 7px;
       background: #eaf2ff;
       color: #2454a6;
+      border: none;
       border-radius: 4px;
       font-size: 12px;
+      cursor: pointer;
+    }
+
+    .tag:hover {
+      background: #cfe0ff;
+      text-decoration: underline;
+    }
+
+    .tag:focus-visible {
+      outline: 2px solid #2454a6;
+      outline-offset: 2px;
     }
 
     .play-button {
@@ -255,7 +283,6 @@
     </button>
   </nav>
 
-  <!-- CSV解析ライブラリ -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
 
   <script>
@@ -266,7 +293,6 @@
     const CSV_FILE = "./videos.csv";
     const ITEMS_PER_PAGE = 50;
 
-    // CSVから読み込んだ動画データを格納する
     let videos = [];
     let currentPage = 1;
     let loadError = false;
@@ -289,7 +315,6 @@
     function normalizeVideoId(value) {
       const input = String(value || "").trim();
 
-      // YouTubeのURLが入力されていた場合にも対応
       try {
         const url = new URL(input);
 
@@ -319,7 +344,7 @@
           }
         }
       } catch (_) {
-        // URL形式でなければ、動画IDとして扱う
+        // URLでなければ動画IDとして扱う
       }
 
       return input;
@@ -356,7 +381,6 @@
           transformHeader: header => header.trim()
         });
 
-        // 列名の確認
         const fields = result.meta.fields || [];
         const requiredFields = ["title", "class", "tags", "id"];
 
@@ -367,49 +391,35 @@
         if (missingFields.length > 0) {
           throw new Error(
             "CSVの項目名が不足しています: " +
-            missingFields.join(", ") +
-            "。1行目を確認してください。"
+            missingFields.join(", ")
           );
         }
 
         videos = result.data
-          .map(row => {
-            const title = String(row.title || "").trim();
-            const videoId = normalizeVideoId(row.id);
-
-            const tags = String(row.tags || "")
+          .map(row => ({
+            title: String(row.title || "").trim(),
+            class: String(row.class || "").trim(),
+            tags: String(row.tags || "")
               .split("|")
               .map(tag => tag.trim())
-              .filter(Boolean);
-
-            return {
-              title,
-              class: String(row.class || "").trim(),
-              tags,
-              id: videoId
-            };
-          })
+              .filter(Boolean),
+            id: normalizeVideoId(row.id)
+          }))
           .filter(video => video.title && video.id);
 
         if (result.errors.length > 0) {
-          console.warn(
-            "CSV解析時の警告:",
-            result.errors
-          );
+          console.warn("CSV解析時の警告:", result.errors);
         }
 
         if (videos.length === 0) {
           throw new Error(
-            "有効な動画データがありません。CSVの内容を確認してください。"
+            "有効な動画データがありません。CSVを確認してください。"
           );
         }
 
         loadError = false;
 
-        // 分類・タグの選択肢を作成
         buildFilters();
-
-        // 動画一覧を表示
         renderVideos();
 
       } catch (error) {
@@ -434,13 +444,11 @@
       }
     }
 
-    // ===== 分類・タグの選択肢を作成 =====
+    // ===== 分類・タグの選択肢 =====
 
     function buildFilters() {
       const classes = [...new Set(
-        videos
-          .map(video => video.class)
-          .filter(Boolean)
+        videos.map(video => video.class).filter(Boolean)
       )].sort((a, b) => a.localeCompare(b, "ja"));
 
       const tags = [...new Set(
@@ -491,9 +499,7 @@
           video.class,
           ...video.tags,
           video.id
-        ]
-          .join(" ")
-          .toLocaleLowerCase("ja");
+        ].join(" ").toLocaleLowerCase("ja");
 
         const matchesKeyword =
           !keyword || searchableText.includes(keyword);
@@ -512,7 +518,7 @@
       });
     }
 
-    // ===== 動画カード作成 =====
+    // ===== 動画カード =====
 
     function createVideoCard(video) {
       const card = document.createElement("article");
@@ -541,23 +547,55 @@
       title.textContent = video.title;
       card.appendChild(title);
 
-      // 分類
+      // 分類：クリックすると分類で絞り込む
       if (video.class) {
-        const classLabel = document.createElement("span");
+        const classLabel = document.createElement("button");
+
         classLabel.className = "video-class";
+        classLabel.type = "button";
         classLabel.textContent = video.class;
+        classLabel.title =
+          "分類「" + video.class + "」で絞り込む";
+
+        classLabel.addEventListener("click", () => {
+          classFilter.value = video.class;
+          currentPage = 1;
+          renderVideos();
+
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+        });
+
         card.appendChild(classLabel);
       }
 
-      // タグ
+      // タグ：クリックするとタグで絞り込む
       if (video.tags.length > 0) {
         const tagsContainer = document.createElement("div");
         tagsContainer.className = "tags";
 
         video.tags.forEach(tag => {
-          const tagElement = document.createElement("span");
+          const tagElement = document.createElement("button");
+
           tagElement.className = "tag";
+          tagElement.type = "button";
           tagElement.textContent = tag;
+          tagElement.title =
+            "タグ「" + tag + "」で絞り込む";
+
+          tagElement.addEventListener("click", () => {
+            tagFilter.value = tag;
+            currentPage = 1;
+            renderVideos();
+
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          });
+
           tagsContainer.appendChild(tagElement);
         });
 
@@ -570,7 +608,6 @@
       playButton.type = "button";
       playButton.textContent = "▶ 再生";
 
-      // プレイヤーはクリックされるまで読み込まない
       const player = document.createElement("div");
       player.className = "player";
       player.hidden = true;
@@ -616,7 +653,8 @@
 
     function updatePagination(totalItems, totalPages) {
       pageInfo.textContent =
-        "ページ " + (totalPages === 0 ? 0 : currentPage) +
+        "ページ " +
+        (totalPages === 0 ? 0 : currentPage) +
         " / " + totalPages;
 
       prevButton.disabled =
@@ -663,7 +701,8 @@
       });
 
       status.textContent =
-        "登録動画: " + videos.length.toLocaleString("ja-JP") +
+        "登録動画: " +
+        videos.length.toLocaleString("ja-JP") +
         "件 ／ 検索結果: " +
         totalItems.toLocaleString("ja-JP") +
         "件";
