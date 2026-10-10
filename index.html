@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YouTube動画カタログ</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -21,14 +23,22 @@
 
     h1 {
       margin-top: 0;
-      font-size: 28px;
     }
 
-    .search-area {
+    .search-panel {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
-      margin-bottom: 15px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #fff;
+      border-radius: 8px;
+    }
+
+    .search-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
     input,
@@ -40,58 +50,53 @@
     input,
     select {
       width: 100%;
-      min-width: 0;
-      padding: 10px;
+      min-height: 40px;
+      padding: 8px;
       border: 1px solid #ccc;
       border-radius: 5px;
       background: #fff;
     }
 
     button {
-      padding: 8px 12px;
-      border: none;
-      border-radius: 5px;
       cursor: pointer;
     }
 
-    button:hover {
-      opacity: 0.8;
-    }
-
-    #reset-search {
-      background: #555;
+    .reset-button {
+      align-self: end;
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 0;
+      border-radius: 5px;
+      background: #333;
       color: #fff;
     }
 
     #status {
-      margin: 15px 0;
+      margin: 16px 0;
       color: #555;
     }
 
     #video-list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 20px;
+      gap: 18px;
       align-items: stretch;
     }
 
     .video-card {
+      display: flex;
+      flex-direction: column;
       min-width: 0;
       height: 100%;
       padding: 12px;
       border-radius: 8px;
       background: #fff;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-      display: flex;
-      flex-direction: column;
+      box-shadow: 0 1px 4px #00000012;
     }
 
     .thumbnail-link {
       display: block;
-      overflow: hidden;
-      border-radius: 5px;
-      background: #eee;
-      flex-shrink: 0;
+      margin-bottom: 10px;
     }
 
     .thumbnail {
@@ -99,68 +104,67 @@
       width: 100%;
       aspect-ratio: 16 / 9;
       object-fit: cover;
-      transition: opacity 0.2s;
-    }
-
-    .thumbnail-link:hover .thumbnail {
-      opacity: 0.8;
+      border-radius: 5px;
+      background: #ddd;
     }
 
     .video-title {
-      margin: 12px 0 8px;
+      margin: 0 0 10px;
       font-size: 16px;
       line-height: 1.5;
       overflow-wrap: anywhere;
     }
 
-    .video-class {
-      align-self: flex-start;
-      margin: 0 0 8px;
-      padding: 5px 9px;
-      background: #e5e5e5;
-      color: #333;
-      font-size: 13px;
-      flex-shrink: 0;
-    }
-
-    .video-game {
-      margin: 0 0 8px;
-      color: #555;
-      font-size: 13px;
-      overflow-wrap: anywhere;
-    }
-
-    .tags {
+    .video-meta {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
+    .video-category,
+    .video-class,
     .tag {
-      width: auto;
-      max-width: 100%;
       padding: 5px 8px;
-      border-radius: 15px;
-      background: #e8f1ff;
-      color: #1454a3;
-      font-size: 12px;
+      border: 0;
+      border-radius: 4px;
+      font-size: 13px;
       overflow-wrap: anywhere;
     }
 
-    .play-button {
-      width: 100%;
-      margin-top: auto;
-      background: #d92323;
-      color: #fff;
-      flex-shrink: 0;
+    .video-category {
+      background: #e3edff;
+      color: #174ea6;
     }
 
-    .player {
-      margin-top: 10px;
+    .video-class {
+      background: #e5f5e9;
+      color: #176534;
     }
 
-    .player iframe {
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin: 0 0 12px;
+    }
+
+    .tag {
+      background: #eee;
+      color: #333;
+    }
+
+    .video-category:hover,
+    .video-class:hover,
+    .tag:hover {
+      filter: brightness(0.94);
+    }
+
+    .player-container {
+      margin-bottom: 10px;
+    }
+
+    .player-container iframe {
       display: block;
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -168,37 +172,51 @@
       border-radius: 5px;
     }
 
-    .pagination {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin: 25px 0;
-    }
-
-    .pagination button {
-      background: #333;
+    .play-button {
+      width: 100%;
+      margin-top: auto;
+      padding: 10px;
+      border: 0;
+      border-radius: 5px;
+      background: #c00;
       color: #fff;
     }
 
-    .pagination button:disabled {
-      background: #ccc;
-      color: #666;
-      cursor: not-allowed;
-      opacity: 1;
+    .play-button:hover {
+      background: #a00;
     }
 
-    #page-info {
-      min-width: 90px;
-      text-align: center;
+    #pagination {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin: 24px 0;
     }
 
-    .empty-message {
-      grid-column: 1 / -1;
-      padding: 30px;
-      text-align: center;
-      color: #666;
+    #pagination button {
+      min-width: 40px;
+      min-height: 38px;
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: #fff;
+    }
+
+    #pagination button:disabled {
+      cursor: default;
+      opacity: 0.45;
+    }
+
+    #pagination button.current-page {
+      background: #333;
+      color: #fff;
+      border-color: #333;
+    }
+
+    .message {
+      padding: 20px;
       background: #fff;
       border-radius: 8px;
     }
@@ -206,10 +224,6 @@
     @media (max-width: 600px) {
       body {
         padding: 12px;
-      }
-
-      h1 {
-        font-size: 23px;
       }
 
       #video-list {
@@ -222,26 +236,38 @@
 <body>
   <h1>YouTube動画カタログ</h1>
 
-  <div class="search-area">
-    <input
-      type="search"
-      id="keyword"
-      placeholder="キーワードで検索"
-    >
+  <div class="search-panel">
+    <div class="search-item">
+      <label for="keyword">キーワード検索</label>
+      <input
+        type="search"
+        id="keyword"
+        placeholder="タイトル・分類・タグなど"
+      >
+    </div>
 
-    <select id="class-filter">
-      <option value="">すべての分類</option>
-    </select>
+    <div class="search-item">
+      <label for="category-filter">カテゴリー</label>
+      <select id="category-filter">
+        <option value="">すべてのカテゴリー</option>
+      </select>
+    </div>
 
-    <select id="game-filter">
-      <option value="">すべてのゲーム</option>
-    </select>
+    <div class="search-item">
+      <label for="class-filter">分類</label>
+      <select id="class-filter">
+        <option value="">すべての分類</option>
+      </select>
+    </div>
 
-    <select id="tag-filter">
-      <option value="">すべてのタグ</option>
-    </select>
+    <div class="search-item">
+      <label for="tag-filter">タグ</label>
+      <select id="tag-filter">
+        <option value="">すべてのタグ</option>
+      </select>
+    </div>
 
-    <button type="button" id="reset-search">
+    <button type="button" id="reset-search" class="reset-button">
       検索条件をリセット
     </button>
   </div>
@@ -250,231 +276,252 @@
 
   <div id="video-list"></div>
 
-  <div class="pagination">
-    <button type="button" id="prev-page" disabled>
-      前のページ
-    </button>
-
-    <span id="page-info">1 / 1</span>
-
-    <button type="button" id="next-page" disabled>
-      次のページ
-    </button>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
+  <div id="pagination"></div>
 
   <script>
+    "use strict";
+
+    const PAGE_SIZE = 50;
+
     const keywordInput = document.getElementById("keyword");
+    const categoryFilter = document.getElementById("category-filter");
     const classFilter = document.getElementById("class-filter");
-    const gameFilter = document.getElementById("game-filter");
     const tagFilter = document.getElementById("tag-filter");
     const resetButton = document.getElementById("reset-search");
     const statusElement = document.getElementById("status");
-    const videoList = document.getElementById("video-list");
-    const prevButton = document.getElementById("prev-page");
-    const nextButton = document.getElementById("next-page");
-    const pageInfo = document.getElementById("page-info");
-
-    const PAGE_SIZE = 50;
+    const videoListElement = document.getElementById("video-list");
+    const paginationElement = document.getElementById("pagination");
 
     let videos = [];
     let currentPage = 1;
 
-    function cleanValue(value) {
-      return String(value ?? "").trim();
-    }
-
-    // YouTubeのURLまたは動画IDから動画IDを取得
     function normalizeVideoId(value) {
-      const text = cleanValue(value);
+      const input = String(value ?? "").trim();
 
-      if (!text) {
+      if (!input) {
         return "";
       }
 
-      if (!text.includes("://")) {
-        return text;
+      // URLではなく動画IDが入力されている場合
+      if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
+        return input;
       }
 
       try {
-        const url = new URL(text);
-        const hostname = url.hostname.toLowerCase();
-        let id = "";
+        const url = new URL(
+          input.startsWith("http") ? input : "https://" + input
+        );
 
-        if (
-          hostname === "youtu.be" ||
-          hostname === "www.youtu.be"
-        ) {
-          id = url.pathname.split("/").filter(Boolean)[0] || "";
-        } else if (
-          hostname === "youtube.com" ||
-          hostname.endsWith(".youtube.com")
-        ) {
-          if (url.pathname === "/watch") {
-            id = url.searchParams.get("v") || "";
-          } else {
-            const parts = url.pathname.split("/").filter(Boolean);
-
-            if (
-              parts.length >= 2 &&
-              ["embed", "shorts", "live", "v"].includes(parts[0])
-            ) {
-              id = parts[1];
-            }
-          }
+        if (url.hostname === "youtu.be" ||
+            url.hostname.endsWith(".youtu.be")) {
+          return url.pathname.split("/").filter(Boolean)[0] || "";
         }
 
-        return id;
+        if (
+          url.hostname.includes("youtube.com") ||
+          url.hostname.includes("youtube-nocookie.com")
+        ) {
+          const queryId = url.searchParams.get("v");
+
+          if (queryId) {
+            return queryId;
+          }
+
+          const parts = url.pathname.split("/").filter(Boolean);
+          const markerIndex = parts.findIndex(part =>
+            ["embed", "shorts", "live"].includes(part)
+          );
+
+          if (markerIndex !== -1 && parts[markerIndex + 1]) {
+            return parts[markerIndex + 1];
+          }
+        }
       } catch (error) {
-        return text;
+        // URLとして解析できない値は無効とする
       }
+
+      return "";
     }
 
-    // タグを配列に変換。複数タグは | 区切り
-    function getVideoTags(video) {
-      return cleanValue(video.tags)
-        .split("|")
+    function uniqueSorted(values) {
+      return [...new Set(
+        values
+          .map(value => String(value ?? "").trim())
+          .filter(Boolean)
+      )].sort((a, b) => a.localeCompare(b, "ja"));
+    }
+
+    function splitTags(value) {
+      return String(value ?? "")
+        .split(/[;,、，]/)
         .map(tag => tag.trim())
         .filter(Boolean);
     }
 
-    // 分類・ゲームの選択肢を作成
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function addOptions(selectElement, values, defaultLabel) {
+      selectElement.replaceChildren();
+
+      const defaultOption = document.createElement("option");
+      defaultOption.value = "";
+      defaultOption.textContent = defaultLabel;
+      selectElement.appendChild(defaultOption);
+
+      values.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        selectElement.appendChild(option);
+      });
+    }
+
     function buildFilters() {
-      const classes = [...new Set(
-        videos.map(video => video.class).filter(Boolean)
-      )].sort((a, b) => a.localeCompare(b, "ja"));
+      const categories = uniqueSorted(
+        videos.map(video => video.category)
+      );
 
-      classFilter.innerHTML =
-        '<option value="">すべての分類</option>';
+      const classes = uniqueSorted(
+        videos.map(video => video.class)
+      );
 
-      classes.forEach(name => {
-        const option = document.createElement("option");
-        option.value = name;
-        option.textContent = name;
-        classFilter.appendChild(option);
-      });
+      addOptions(
+        categoryFilter,
+        categories,
+        "すべてのカテゴリー"
+      );
 
-      const games = [...new Set(
-        videos.map(video => video.game).filter(Boolean)
-      )].sort((a, b) => a.localeCompare(b, "ja"));
-
-      gameFilter.innerHTML =
-        '<option value="">すべてのゲーム</option>';
-
-      games.forEach(name => {
-        const option = document.createElement("option");
-        option.value = name;
-        option.textContent = name;
-        gameFilter.appendChild(option);
-      });
+      addOptions(
+        classFilter,
+        classes,
+        "すべての分類"
+      );
 
       updateTagFilter();
     }
 
-    // 選択中の分類に存在するタグだけを候補にする
     function updateTagFilter() {
+      const selectedCategory = categoryFilter.value;
+      const selectedClass = classFilter.value;
       const previousTag = tagFilter.value;
-      const selectedClass = classFilter.value;
 
-      const relevantVideos = selectedClass
-        ? videos.filter(video => video.class === selectedClass)
-        : videos;
-
-      const tags = [...new Set(
-        relevantVideos.flatMap(video => getVideoTags(video))
-      )].sort((a, b) => a.localeCompare(b, "ja"));
-
-      tagFilter.innerHTML =
-        '<option value="">すべてのタグ</option>';
-
-      tags.forEach(tag => {
-        const option = document.createElement("option");
-        option.value = tag;
-        option.textContent = tag;
-        tagFilter.appendChild(option);
-      });
-
-      if (tags.includes(previousTag)) {
-        tagFilter.value = previousTag;
-      } else {
-        tagFilter.value = "";
-      }
-    }
-
-    // 検索条件に合う動画を取得
-    // キーワード検索の対象はタイトル・分類・ゲーム・タグ
-    // 動画IDは検索対象外
-    function getFilteredVideos() {
-      const keyword = keywordInput.value.trim().toLocaleLowerCase();
-      const selectedClass = classFilter.value;
-      const selectedGame = gameFilter.value;
-      const selectedTag = tagFilter.value;
-
-      return videos.filter(video => {
-        const searchableText = [
-          video.title,
-          video.class,
-          video.game,
-          video.tags
-        ].join(" ").toLocaleLowerCase();
-
-        const matchesKeyword =
-          !keyword || searchableText.includes(keyword);
+      const relevantVideos = videos.filter(video => {
+        const matchesCategory =
+          !selectedCategory || video.category === selectedCategory;
 
         const matchesClass =
           !selectedClass || video.class === selectedClass;
 
-        const matchesGame =
-          !selectedGame || video.game === selectedGame;
+        return matchesCategory && matchesClass;
+      });
+
+      const tags = uniqueSorted(
+        relevantVideos.flatMap(video => video.tags)
+      );
+
+      addOptions(tagFilter, tags, "すべてのタグ");
+
+      if (tags.includes(previousTag)) {
+        tagFilter.value = previousTag;
+      }
+    }
+
+    function getFilteredVideos() {
+      const keyword = keywordInput.value.trim().toLocaleLowerCase();
+      const selectedCategory = categoryFilter.value;
+      const selectedClass = classFilter.value;
+      const selectedTag = tagFilter.value;
+
+      return videos.filter(video => {
+        const matchesKeyword =
+          !keyword ||
+          [
+            video.title,
+            video.category,
+            video.class,
+            ...video.tags
+          ].some(value =>
+            String(value).toLocaleLowerCase().includes(keyword)
+          );
+
+        const matchesCategory =
+          !selectedCategory || video.category === selectedCategory;
+
+        const matchesClass =
+          !selectedClass || video.class === selectedClass;
 
         const matchesTag =
-          !selectedTag || getVideoTags(video).includes(selectedTag);
+          !selectedTag || video.tags.includes(selectedTag);
 
         return (
           matchesKeyword &&
+          matchesCategory &&
           matchesClass &&
-          matchesGame &&
           matchesTag
         );
       });
     }
 
-    // 動画カードを作成
     function createVideoCard(video) {
       const card = document.createElement("article");
       card.className = "video-card";
 
-      // サムネイルをクリックするとYouTubeの動画ページを開く
       const thumbnailLink = document.createElement("a");
       thumbnailLink.className = "thumbnail-link";
       thumbnailLink.href =
-        `https://www.youtube.com/watch?v=${encodeURIComponent(video.id)}`;
+        "https://www.youtube.com/watch?v=" +
+        encodeURIComponent(video.id);
       thumbnailLink.target = "_blank";
       thumbnailLink.rel = "noopener noreferrer";
-      thumbnailLink.setAttribute(
-        "aria-label",
-        `${video.title} をYouTubeで開く`
-      );
+      thumbnailLink.setAttribute("aria-label", video.title);
 
       const thumbnail = document.createElement("img");
       thumbnail.className = "thumbnail";
       thumbnail.src =
-        `https://i.ytimg.com/vi/${encodeURIComponent(video.id)}/hqdefault.jpg`;
-      thumbnail.alt = `${video.title} のサムネイル`;
+        "https://i.ytimg.com/vi/" +
+        encodeURIComponent(video.id) +
+        "/hqdefault.jpg";
+      thumbnail.alt = video.title;
       thumbnail.loading = "lazy";
-      thumbnail.decoding = "async";
+      thumbnail.referrerPolicy = "strict-origin-when-cross-origin";
 
       thumbnailLink.appendChild(thumbnail);
       card.appendChild(thumbnailLink);
 
-      // タイトル
       const title = document.createElement("h2");
       title.className = "video-title";
-      title.textContent = video.title || "タイトル未設定";
+      title.textContent = video.title || "タイトルなし";
       card.appendChild(title);
 
-      // 分類ボタン
+      const meta = document.createElement("div");
+      meta.className = "video-meta";
+
+      if (video.category) {
+        const categoryButton = document.createElement("button");
+        categoryButton.type = "button";
+        categoryButton.className = "video-category";
+        categoryButton.textContent = video.category;
+        categoryButton.title =
+          `カテゴリー「${video.category}」で絞り込む`;
+
+        categoryButton.addEventListener("click", () => {
+          categoryFilter.value = video.category;
+          updateTagFilter();
+          currentPage = 1;
+          renderVideos();
+        });
+
+        meta.appendChild(categoryButton);
+      }
+
       if (video.class) {
         const classButton = document.createElement("button");
         classButton.type = "button";
@@ -487,127 +534,182 @@
           updateTagFilter();
           currentPage = 1;
           renderVideos();
-
-          window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-          });
         });
 
-        card.appendChild(classButton);
+        meta.appendChild(classButton);
       }
 
-      // ゲーム名。クリックするとゲームで絞り込む
-      if (video.game) {
-        const gameButton = document.createElement("button");
-        gameButton.type = "button";
-        gameButton.className = "video-game";
-        gameButton.textContent = video.game;
-        gameButton.title = `ゲーム「${video.game}」で絞り込む`;
+      card.appendChild(meta);
 
-        gameButton.addEventListener("click", () => {
-          gameFilter.value = video.game;
-          currentPage = 1;
-          renderVideos();
+      if (video.tags.length > 0) {
+        const tagList = document.createElement("div");
+        tagList.className = "tag-list";
 
-          window.scrollTo({
-            top: 0,
-            behavior: "smooth"
+        video.tags.forEach(tag => {
+          const tagButton = document.createElement("button");
+          tagButton.type = "button";
+          tagButton.className = "tag";
+          tagButton.textContent = "#" + tag;
+          tagButton.title = `タグ「${tag}」で絞り込む`;
+
+          tagButton.addEventListener("click", () => {
+            const category = categoryFilter.value;
+            const selectedClass = classFilter.value;
+
+            const tagExistsInCurrentSelection = videos.some(item =>
+              (!category || item.category === category) &&
+              (!selectedClass || item.class === selectedClass) &&
+              item.tags.includes(tag)
+            );
+
+            // 現在のカテゴリー・分類に存在しないタグなら、
+            // その条件を解除してタグを選択する
+            if (!tagExistsInCurrentSelection) {
+              categoryFilter.value = "";
+              classFilter.value = "";
+              updateTagFilter();
+            }
+
+            tagFilter.value = tag;
+            currentPage = 1;
+            renderVideos();
           });
+
+          tagList.appendChild(tagButton);
         });
 
-        card.appendChild(gameButton);
+        card.appendChild(tagList);
       }
 
-      // タグボタン
-      const tagsContainer = document.createElement("div");
-      tagsContainer.className = "tags";
+      const playerContainer = document.createElement("div");
+      playerContainer.className = "player-container";
+      playerContainer.hidden = true;
+      card.appendChild(playerContainer);
 
-      getVideoTags(video).forEach(tag => {
-        const tagButton = document.createElement("button");
-        tagButton.type = "button";
-        tagButton.className = "tag";
-        tagButton.textContent = tag;
-        tagButton.title = `タグ「${tag}」で絞り込む`;
-
-        tagButton.addEventListener("click", () => {
-          const availableTags = [
-            ...tagFilter.options
-          ].map(option => option.value);
-
-          if (!availableTags.includes(tag)) {
-            classFilter.value = "";
-            updateTagFilter();
-          }
-
-          tagFilter.value = tag;
-          currentPage = 1;
-          renderVideos();
-
-          window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-          });
-        });
-
-        tagsContainer.appendChild(tagButton);
-      });
-
-      card.appendChild(tagsContainer);
-
-      // ページ内で再生するプレーヤー
       const playButton = document.createElement("button");
       playButton.type = "button";
       playButton.className = "play-button";
       playButton.textContent = "ページ内で再生";
 
-      const playerContainer = document.createElement("div");
-      playerContainer.className = "player";
-      playerContainer.hidden = true;
-
-      let iframe = null;
-
       playButton.addEventListener("click", () => {
         if (playerContainer.hidden) {
+          const iframe = document.createElement("iframe");
+
+          iframe.src =
+            "https://www.youtube-nocookie.com/embed/" +
+            encodeURIComponent(video.id) +
+            "?autoplay=1";
+
+          iframe.title = video.title || "YouTube動画";
+          iframe.loading = "lazy";
+          iframe.allow =
+            "accelerometer; autoplay; clipboard-write; encrypted-media; " +
+            "gyroscope; picture-in-picture; web-share";
+          iframe.referrerPolicy = "strict-origin-when-cross-origin";
+          iframe.allowFullscreen = true;
+
+          playerContainer.replaceChildren(iframe);
           playerContainer.hidden = false;
-
-          if (!iframe) {
-            iframe = document.createElement("iframe");
-            iframe.src =
-              `https://www.youtube-nocookie.com/embed/${encodeURIComponent(video.id)}?autoplay=1`;
-            iframe.title = video.title || "YouTube動画";
-            iframe.loading = "lazy";
-            iframe.allow =
-              "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-            iframe.referrerPolicy = "strict-origin-when-cross-origin";
-            iframe.allowFullscreen = true;
-
-            playerContainer.appendChild(iframe);
-          }
-
-          playButton.textContent = "プレーヤーを閉じる";
+          playButton.textContent = "再生を閉じる";
         } else {
+          playerContainer.replaceChildren();
           playerContainer.hidden = true;
           playButton.textContent = "ページ内で再生";
         }
       });
 
       card.appendChild(playButton);
-      card.appendChild(playerContainer);
 
       return card;
     }
 
-    // 検索結果を表示
+    function renderPagination(totalPages) {
+      paginationElement.replaceChildren();
+
+      if (totalPages <= 1) {
+        return;
+      }
+
+      function addPageButton(label, page, disabled = false, current = false) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = label;
+        button.disabled = disabled;
+
+        if (current) {
+          button.className = "current-page";
+          button.setAttribute("aria-current", "page");
+        }
+
+        button.addEventListener("click", () => {
+          currentPage = page;
+          renderVideos();
+
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+        });
+
+        paginationElement.appendChild(button);
+      }
+
+      addPageButton("前へ", currentPage - 1, currentPage === 1);
+
+      const startPage = Math.max(1, currentPage - 2);
+      const endPage = Math.min(totalPages, currentPage + 2);
+
+      if (startPage > 1) {
+        addPageButton("1", 1, false, currentPage === 1);
+
+        if (startPage > 2) {
+          const dots = document.createElement("span");
+          dots.textContent = "…";
+          paginationElement.appendChild(dots);
+        }
+      }
+
+      for (let page = startPage; page <= endPage; page++) {
+        addPageButton(
+          String(page),
+          page,
+          false,
+          page === currentPage
+        );
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          const dots = document.createElement("span");
+          dots.textContent = "…";
+          paginationElement.appendChild(dots);
+        }
+
+        addPageButton(
+          String(totalPages),
+          totalPages,
+          false,
+          currentPage === totalPages
+        );
+      }
+
+      addPageButton(
+        "次へ",
+        currentPage + 1,
+        currentPage === totalPages
+      );
+    }
+
     function renderVideos() {
       const filteredVideos = getFilteredVideos();
       const totalVideos = filteredVideos.length;
-      const totalPages = Math.max(
-        1,
-        Math.ceil(totalVideos / PAGE_SIZE)
-      );
+      const totalPages = Math.ceil(totalVideos / PAGE_SIZE);
 
-      currentPage = Math.min(currentPage, totalPages);
+      if (totalPages === 0) {
+        currentPage = 1;
+      } else {
+        currentPage = Math.min(Math.max(1, currentPage), totalPages);
+      }
 
       const startIndex = (currentPage - 1) * PAGE_SIZE;
       const pageVideos = filteredVideos.slice(
@@ -615,13 +717,13 @@
         startIndex + PAGE_SIZE
       );
 
-      videoList.replaceChildren();
+      videoListElement.replaceChildren();
 
       if (pageVideos.length === 0) {
         const message = document.createElement("div");
-        message.className = "empty-message";
+        message.className = "message";
         message.textContent = "該当する動画がありません。";
-        videoList.appendChild(message);
+        videoListElement.appendChild(message);
       } else {
         const fragment = document.createDocumentFragment();
 
@@ -629,20 +731,19 @@
           fragment.appendChild(createVideoCard(video));
         });
 
-        videoList.appendChild(fragment);
+        videoListElement.appendChild(fragment);
       }
 
       statusElement.textContent =
         `登録動画数：${videos.length.toLocaleString()}件 / ` +
-        `検索結果：${totalVideos.toLocaleString()}件`;
+        `検索結果：${totalVideos.toLocaleString()}件` +
+        (totalPages > 0
+          ? ` / ${currentPage}ページ目（全${totalPages}ページ）`
+          : "");
 
-      pageInfo.textContent = `${currentPage} / ${totalPages}`;
-
-      prevButton.disabled = currentPage <= 1;
-      nextButton.disabled = currentPage >= totalPages;
+      renderPagination(totalPages);
     }
 
-    // CSVを読み込む
     async function loadVideos() {
       try {
         const response = await fetch("./videos.csv", {
@@ -651,7 +752,7 @@
 
         if (!response.ok) {
           throw new Error(
-            `videos.csv の読み込みに失敗しました (${response.status})`
+            `videos.csvの読み込みに失敗しました（HTTP ${response.status}）`
           );
         }
 
@@ -663,109 +764,95 @@
           transformHeader: header => header.trim()
         });
 
-        if (result.errors.length > 0) {
-          console.warn("CSV読み込み時の警告:", result.errors);
-        }
-
         const requiredColumns = [
           "title",
+          "category",
           "class",
-          "game",
           "tags",
           "id"
         ];
 
-        const headers = result.meta.fields || [];
-
+        const columns = result.meta.fields || [];
         const missingColumns = requiredColumns.filter(
-          column => !headers.includes(column)
+          column => !columns.includes(column)
         );
 
         if (missingColumns.length > 0) {
           throw new Error(
-            "CSVに必要な列がありません: " +
-            missingColumns.join(", ")
+            "CSVに必要な列がありません：" + missingColumns.join(", ") +
+            "。ヘッダーを確認してください。"
           );
         }
 
+        if (result.errors.length > 0) {
+          console.warn("CSVの読み込み時に警告があります：", result.errors);
+        }
+
         videos = result.data
-          .map(row => ({
-            title: cleanValue(row.title),
-            class: cleanValue(row.class),
-            game: cleanValue(row.game),
-            tags: cleanValue(row.tags),
-            id: normalizeVideoId(row.id)
-          }))
-          .filter(video => video.title && video.id);
+          .map(row => {
+            const id = normalizeVideoId(row.id);
+
+            return {
+              title: String(row.title ?? "").trim(),
+              category: String(row.category ?? "").trim(),
+              class: String(row.class ?? "").trim(),
+              tags: splitTags(row.tags),
+              id
+            };
+          })
+          .filter(video => video.id);
 
         buildFilters();
-        currentPage = 1;
         renderVideos();
       } catch (error) {
         console.error(error);
-        statusElement.textContent =
-          "動画データを読み込めませんでした: " + error.message;
-        videoList.replaceChildren();
+
+        statusElement.textContent = "動画データの読み込みに失敗しました。";
+
+        videoListElement.replaceChildren();
+
+        const message = document.createElement("div");
+        message.className = "message";
+        message.textContent =
+          error.message +
+          " videos.csvの場所と列名を確認してください。";
+
+        videoListElement.appendChild(message);
       }
     }
 
-    // キーワード検索
     keywordInput.addEventListener("input", () => {
       currentPage = 1;
       renderVideos();
     });
 
-    // 分類変更時はタグ候補も更新
+    categoryFilter.addEventListener("change", () => {
+      updateTagFilter();
+      currentPage = 1;
+      renderVideos();
+    });
+
     classFilter.addEventListener("change", () => {
       updateTagFilter();
       currentPage = 1;
       renderVideos();
     });
 
-    // ゲーム検索
-    gameFilter.addEventListener("change", () => {
-      currentPage = 1;
-      renderVideos();
-    });
-
-    // タグ検索
     tagFilter.addEventListener("change", () => {
       currentPage = 1;
       renderVideos();
     });
 
-    // 検索条件をリセット
     resetButton.addEventListener("click", () => {
       keywordInput.value = "";
+      categoryFilter.value = "";
       classFilter.value = "";
-      gameFilter.value = "";
-      updateTagFilter();
       tagFilter.value = "";
+
+      updateTagFilter();
+
       currentPage = 1;
       renderVideos();
-    });
-
-    // 前のページ
-    prevButton.addEventListener("click", () => {
-      if (currentPage > 1) {
-        currentPage--;
-        renderVideos();
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-    });
-
-    // 次のページ
-    nextButton.addEventListener("click", () => {
-      const totalPages = Math.max(
-        1,
-        Math.ceil(getFilteredVideos().length / PAGE_SIZE)
-      );
-
-      if (currentPage < totalPages) {
-        currentPage++;
-        renderVideos();
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
     });
 
     loadVideos();
