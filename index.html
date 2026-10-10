@@ -68,10 +68,6 @@
       line-height: 1.6;
     }
 
-    #video-count {
-      font-weight: bold;
-    }
-
     .video-list {
       max-width: 1200px;
       margin: 0 auto;
@@ -444,19 +440,14 @@
       }
     }
 
-    // ===== 分類・タグの選択肢 =====
+    // ===== 分類の選択肢を作成 =====
 
     function buildFilters() {
       const classes = [...new Set(
         videos.map(video => video.class).filter(Boolean)
       )].sort((a, b) => a.localeCompare(b, "ja"));
 
-      const tags = [...new Set(
-        videos.flatMap(video => video.tags)
-      )].sort((a, b) => a.localeCompare(b, "ja"));
-
       classFilter.replaceChildren();
-      tagFilter.replaceChildren();
 
       const allClasses = document.createElement("option");
       allClasses.value = "";
@@ -470,6 +461,28 @@
         classFilter.appendChild(option);
       });
 
+      // 初期状態のタグ候補を作成
+      updateTagFilter();
+    }
+
+    // ===== 分類に応じてタグ候補を更新 =====
+
+    function updateTagFilter() {
+      const selectedClass = classFilter.value;
+      const previousTag = tagFilter.value;
+
+      // 分類が選択されている場合は、その分類の動画だけを対象にする
+      const classVideos = selectedClass
+        ? videos.filter(video => video.class === selectedClass)
+        : videos;
+
+      // 対象の動画に存在するタグだけを抽出
+      const tags = [...new Set(
+        classVideos.flatMap(video => video.tags)
+      )].sort((a, b) => a.localeCompare(b, "ja"));
+
+      tagFilter.replaceChildren();
+
       const allTags = document.createElement("option");
       allTags.value = "";
       allTags.textContent = "すべてのタグ";
@@ -481,6 +494,14 @@
         option.textContent = value;
         tagFilter.appendChild(option);
       });
+
+      // 変更後の分類にも存在するタグなら選択を維持
+      if (tags.includes(previousTag)) {
+        tagFilter.value = previousTag;
+      } else {
+        // 存在しないタグは解除
+        tagFilter.value = "";
+      }
     }
 
     // ===== 検索・絞り込み =====
@@ -547,7 +568,7 @@
       title.textContent = video.title;
       card.appendChild(title);
 
-      // 分類：クリックすると分類で絞り込む
+      // 分類名をクリックすると、その分類で絞り込む
       if (video.class) {
         const classLabel = document.createElement("button");
 
@@ -559,6 +580,10 @@
 
         classLabel.addEventListener("click", () => {
           classFilter.value = video.class;
+
+          // 分類変更に応じてタグ候補を更新
+          updateTagFilter();
+
           currentPage = 1;
           renderVideos();
 
@@ -571,7 +596,7 @@
         card.appendChild(classLabel);
       }
 
-      // タグ：クリックするとタグで絞り込む
+      // タグをクリックすると、そのタグで絞り込む
       if (video.tags.length > 0) {
         const tagsContainer = document.createElement("div");
         tagsContainer.className = "tags";
@@ -586,6 +611,16 @@
             "タグ「" + tag + "」で絞り込む";
 
           tagElement.addEventListener("click", () => {
+            // タグが現在の分類候補に存在することを確認
+            const availableTags = [
+              ...tagFilter.options
+            ].map(option => option.value);
+
+            if (!availableTags.includes(tag)) {
+              classFilter.value = "";
+              updateTagFilter();
+            }
+
             tagFilter.value = tag;
             currentPage = 1;
             renderVideos();
@@ -612,6 +647,7 @@
       player.className = "player";
       player.hidden = true;
 
+      // クリックされるまでiframeを読み込まない
       playButton.addEventListener("click", () => {
         if (player.dataset.loaded === "true") {
           player.hidden = !player.hidden;
@@ -726,6 +762,9 @@
     });
 
     classFilter.addEventListener("change", () => {
+      // 分類変更時にタグ候補も更新
+      updateTagFilter();
+
       currentPage = 1;
       renderVideos();
     });
@@ -738,6 +777,10 @@
     resetButton.addEventListener("click", () => {
       keywordInput.value = "";
       classFilter.value = "";
+
+      // 全分類に戻してからタグ候補を更新
+      updateTagFilter();
+
       tagFilter.value = "";
       currentPage = 1;
       renderVideos();
