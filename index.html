@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>検索用</title>
+  <title>動画カタログ</title>
+
   <style>
     * {
       box-sizing: border-box;
@@ -34,9 +35,41 @@
       padding: 0 16px;
     }
 
+    .search-panel {
+      display: grid;
+      grid-template-columns: repeat(
+        auto-fit, minmax(180px, 1fr)
+      );
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .search-panel input,
+    .search-panel select,
+    .search-panel button {
+      width: 100%;
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: white;
+      font-size: 15px;
+    }
+
+    .search-panel button {
+      background: #24292f;
+      color: white;
+      cursor: pointer;
+    }
+
+    .search-panel button:hover {
+      background: #404850;
+    }
+
     #video-count {
       margin-bottom: 16px;
       color: #555;
+      font-weight: bold;
     }
 
     .video-list {
@@ -90,9 +123,10 @@
     .video-info h2 {
       font-size: 18px;
       margin: 0 0 10px;
+      overflow-wrap: anywhere;
     }
 
-    .game {
+    .video-class {
       color: #555;
       font-size: 14px;
       margin-bottom: 10px;
@@ -112,221 +146,252 @@
       font-size: 12px;
     }
 
+    .no-results {
+      padding: 24px;
+      background: white;
+      border-radius: 8px;
+      text-align: center;
+      color: #666;
+    }
+
     footer {
       text-align: center;
       padding: 30px 12px;
       color: #666;
     }
-    
-.search-panel {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.search-panel input,
-.search-panel select,
-.search-panel button {
-  width: 100%;
-  min-width: 0;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: white;
-  font-size: 15px;
-}
-
-.search-panel button {
-  background: #24292f;
-  color: white;
-  cursor: pointer;
-}
-
-#video-count {
-  font-weight: bold;
-}
-
   </style>
 </head>
 
 <body>
   <header>
-    <h1>検索用</h1>
+    <h1>動画カタログ</h1>
   </header>
 
+  <main>
+    <div class="search-panel">
+      <input
+        type="search"
+        id="keyword"
+        placeholder="タイトル・分類・タグで検索"
+        aria-label="キーワード検索"
+      >
 
-<main>
-  <div class="search-panel">
-    <input
-      type="search"
-      id="keyword"
-      placeholder="タイトル・ゲーム名・タグで検索"
-    >
+      <select id="class-filter" aria-label="分類で絞り込み">
+        <option value="">すべての分類</option>
+      </select>
 
-    <select id="game-filter">
-      <option value="">すべてのゲーム</option>
-    </select>
+      <select id="tag-filter" aria-label="タグで絞り込み">
+        <option value="">すべてのタグ</option>
+      </select>
 
-    <select id="tag-filter">
-      <option value="">すべてのタグ</option>
-    </select>
+      <button id="reset-search" type="button">
+        検索条件をリセット
+      </button>
+    </div>
 
-    <button id="reset-search" type="button">
-      検索条件をリセット
-    </button>
-  </div>
+    <p id="video-count"></p>
+    <div id="video-list" class="video-list"></div>
+  </main>
 
-  <p id="video-count"></p>
-  <div id="video-list" class="video-list"></div>
-</main>
-
-
-  <footer>検索用</footer>
+  <footer>動画カタログ</footer>
 
   <script>
-    // 動画データ：ここに動画を追加します
+    // =====================================
+    // 動画データ
+    // class は動画の分類です
+    // id は YouTube の動画IDです
+    // =====================================
+
     const videos = [
       {
-        title: "ギャラクティックナイト",
-        game: "演出用動画",
-        tags: ["星のカービィ", "何処かのTZ氏"],
-        id: "RQq9AXml4As"
+        title: "サンプル動画1",
+        class: "攻略動画",
+        tags: ["攻略", "実況"],
+        id: "M7lc1UVf-VE"
+      },
+      {
+        title: "サンプル動画2",
+        class: "解説動画",
+        tags: ["解説"],
+        id: "M7lc1UVf-VE"
+      },
+      {
+        title: "サンプル動画3",
+        class: "攻略動画",
+        tags: ["プレイ動画", "検証"],
+        id: "M7lc1UVf-VE"
       }
-      ];
-const list = document.getElementById("video-list");
-const count = document.getElementById("video-count");
-const keyword = document.getElementById("keyword");
-const gameFilter = document.getElementById("game-filter");
-const tagFilter = document.getElementById("tag-filter");
-const resetButton = document.getElementById("reset-search");
+    ];
 
-// ゲーム名とタグの選択肢を自動作成
-const games = [...new Set(videos.map(v => v.game))]
-  .filter(Boolean)
-  .sort();
+    // =====================================
+    // HTML要素の取得
+    // =====================================
 
-const tags = [...new Set(videos.flatMap(v => v.tags || []))]
-  .filter(Boolean)
-  .sort();
+    const list = document.getElementById("video-list");
+    const count = document.getElementById("video-count");
+    const keyword = document.getElementById("keyword");
+    const classFilter = document.getElementById("class-filter");
+    const tagFilter = document.getElementById("tag-filter");
+    const resetButton = document.getElementById("reset-search");
 
-games.forEach(game => {
-  const option = document.createElement("option");
-  option.value = game;
-  option.textContent = game;
-  gameFilter.appendChild(option);
-});
+    // =====================================
+    // 分類・タグの選択肢を自動作成
+    // =====================================
 
-tags.forEach(tag => {
-  const option = document.createElement("option");
-  option.value = tag;
-  option.textContent = tag;
-  tagFilter.appendChild(option);
-});
+    const classes = [
+      ...new Set(videos.map(video => video.class).filter(Boolean))
+    ].sort((a, b) => a.localeCompare(b, "ja"));
 
-// 検索と一覧表示
-function renderVideos() {
-  const query = keyword.value.trim().toLowerCase();
-  const selectedGame = gameFilter.value;
-  const selectedTag = tagFilter.value;
+    const tags = [
+      ...new Set(videos.flatMap(video => video.tags || []))
+    ].sort((a, b) => a.localeCompare(b, "ja"));
 
-  const filtered = videos.filter(video => {
-    const searchableText = [
-      video.title,
-      video.game,
-      ...(video.tags || [])
-    ].join(" ").toLowerCase();
-
-    return (
-      searchableText.includes(query) &&
-      (!selectedGame || video.game === selectedGame) &&
-      (!selectedTag || (video.tags || []).includes(selectedTag))
-    );
-  });
-
-  count.textContent =
-    `表示件数：${filtered.length}件 / 全${videos.length}件`;
-
-  list.replaceChildren();
-
-  if (filtered.length === 0) {
-    const message = document.createElement("p");
-    message.textContent = "該当する動画がありません。";
-    list.appendChild(message);
-    return;
-  }
-
-  filtered.forEach(video => {
-    const card = document.createElement("article");
-    card.className = "video-card";
-
-    const player = document.createElement("div");
-    player.className = "player";
-
-    const thumbnail = document.createElement("img");
-    thumbnail.src =
-      `https://i.ytimg.com/vi/${encodeURIComponent(video.id)}/hqdefault.jpg`;
-    thumbnail.alt = `${video.title}のサムネイル`;
-    thumbnail.loading = "lazy";
-
-    const button = document.createElement("button");
-    button.className = "play-button";
-    button.textContent = "▶ 再生";
-    button.setAttribute("aria-label", `${video.title}を再生`);
-
-    button.addEventListener("click", () => {
-      const iframe = document.createElement("iframe");
-      iframe.src =
-        `https://www.youtube-nocookie.com/embed/${encodeURIComponent(video.id)}?autoplay=1`;
-      iframe.title = video.title;
-      iframe.allow =
-        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-      iframe.allowFullscreen = true;
-      player.replaceChildren(iframe);
+    classes.forEach(className => {
+      const option = document.createElement("option");
+      option.value = className;
+      option.textContent = className;
+      classFilter.appendChild(option);
     });
 
-    player.append(thumbnail, button);
-
-    const info = document.createElement("div");
-    info.className = "video-info";
-
-    const title = document.createElement("h2");
-    title.textContent = video.title;
-
-    const game = document.createElement("div");
-    game.className = "game";
-    game.textContent = `ゲーム：${video.game}`;
-
-    const tagContainer = document.createElement("div");
-    tagContainer.className = "tags";
-
-    (video.tags || []).forEach(tagText => {
-      const tag = document.createElement("span");
-      tag.className = "tag";
-      tag.textContent = tagText;
-      tagContainer.appendChild(tag);
+    tags.forEach(tagName => {
+      const option = document.createElement("option");
+      option.value = tagName;
+      option.textContent = tagName;
+      tagFilter.appendChild(option);
     });
 
-    info.append(title, game, tagContainer);
-    card.append(player, info);
-    list.appendChild(card);
-  });
-}
+    // =====================================
+    // 検索・一覧表示
+    // =====================================
 
-// 条件が変更されたら自動で再検索
-keyword.addEventListener("input", renderVideos);
-gameFilter.addEventListener("change", renderVideos);
-tagFilter.addEventListener("change", renderVideos);
+    function renderVideos() {
+      const query = keyword.value.trim().toLocaleLowerCase();
+      const selectedClass = classFilter.value;
+      const selectedTag = tagFilter.value;
 
-resetButton.addEventListener("click", () => {
-  keyword.value = "";
-  gameFilter.value = "";
-  tagFilter.value = "";
-  renderVideos();
-});
+      const filtered = videos.filter(video => {
+        const searchableText = [
+          video.title,
+          video.class,
+          ...(video.tags || [])
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLocaleLowerCase();
 
-// 初期表示
-renderVideos();
+        const matchesKeyword =
+          searchableText.includes(query);
+
+        const matchesClass =
+          !selectedClass || video.class === selectedClass;
+
+        const matchesTag =
+          !selectedTag ||
+          (video.tags || []).includes(selectedTag);
+
+        return matchesKeyword && matchesClass && matchesTag;
+      });
+
+      count.textContent =
+        `表示件数：${filtered.length}件 / 全${videos.length}件`;
+
+      list.replaceChildren();
+
+      if (filtered.length === 0) {
+        const message = document.createElement("p");
+        message.className = "no-results";
+        message.textContent = "該当する動画がありません。";
+        list.appendChild(message);
+        return;
+      }
+
+      filtered.forEach(video => {
+        const card = document.createElement("article");
+        card.className = "video-card";
+
+        // 動画プレイヤー部分
+        const player = document.createElement("div");
+        player.className = "player";
+
+        const thumbnail = document.createElement("img");
+        thumbnail.src =
+          `https://i.ytimg.com/vi/${encodeURIComponent(video.id)}/hqdefault.jpg`;
+        thumbnail.alt = `${video.title}のサムネイル`;
+        thumbnail.loading = "lazy";
+
+        const button = document.createElement("button");
+        button.className = "play-button";
+        button.type = "button";
+        button.textContent = "▶ 再生";
+        button.setAttribute(
+          "aria-label",
+          `${video.title}を再生`
+        );
+
+        button.addEventListener("click", () => {
+          const iframe = document.createElement("iframe");
+
+          iframe.src =
+            `https://www.youtube-nocookie.com/embed/${encodeURIComponent(video.id)}?autoplay=1`;
+
+          iframe.title = video.title;
+          iframe.allow =
+            "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+          iframe.allowFullscreen = true;
+
+          player.replaceChildren(iframe);
+        });
+
+        player.append(thumbnail, button);
+
+        // 動画情報部分
+        const info = document.createElement("div");
+        info.className = "video-info";
+
+        const title = document.createElement("h2");
+        title.textContent = video.title;
+
+        const classElement = document.createElement("div");
+        classElement.className = "video-class";
+        classElement.textContent =
+          `分類：${video.class || "未分類"}`;
+
+        const tagContainer = document.createElement("div");
+        tagContainer.className = "tags";
+
+        (video.tags || []).forEach(tagName => {
+          const tag = document.createElement("span");
+          tag.className = "tag";
+          tag.textContent = tagName;
+          tagContainer.appendChild(tag);
+        });
+
+        info.append(title, classElement, tagContainer);
+        card.append(player, info);
+        list.appendChild(card);
+      });
+    }
+
+    // =====================================
+    // 検索条件の変更イベント
+    // =====================================
+
+    keyword.addEventListener("input", renderVideos);
+
+    classFilter.addEventListener("change", renderVideos);
+
+    tagFilter.addEventListener("change", renderVideos);
+
+    resetButton.addEventListener("click", () => {
+      keyword.value = "";
+      classFilter.value = "";
+      tagFilter.value = "";
+
+      renderVideos();
+    });
+
+    // 初期表示
+    renderVideos();
   </script>
 </body>
 </html>
