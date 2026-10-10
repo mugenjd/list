@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>動画カタログ</title>
+  <title>YouTube動画カタログ</title>
 
   <style>
     * {
@@ -13,35 +12,30 @@
 
     body {
       margin: 0;
+      padding: 20px;
       font-family: sans-serif;
-      background: #f4f5f7;
+      background: #f5f5f5;
       color: #222;
     }
 
     header {
-      background: #24292f;
-      color: white;
-      padding: 24px 16px;
+      max-width: 1200px;
+      margin: 0 auto 24px;
     }
 
-    header h1 {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    main {
-      max-width: 1200px;
-      margin: 24px auto;
-      padding: 0 16px;
+    h1 {
+      margin-bottom: 8px;
     }
 
     .search-panel {
+      max-width: 1200px;
+      margin: 0 auto 20px;
+      padding: 16px;
+      background: white;
+      border-radius: 8px;
       display: grid;
-      grid-template-columns: repeat(
-        auto-fit, minmax(180px, 1fr)
-      );
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
-      margin-bottom: 20px;
     }
 
     .search-panel input,
@@ -49,349 +43,698 @@
     .search-panel button {
       width: 100%;
       min-width: 0;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background: white;
+      padding: 10px;
       font-size: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: white;
     }
 
     .search-panel button {
-      background: #24292f;
-      color: white;
       cursor: pointer;
+      background: #333;
+      color: white;
+      border: none;
     }
 
     .search-panel button:hover {
-      background: #404850;
+      background: #555;
+    }
+
+    #status {
+      max-width: 1200px;
+      margin: 0 auto 16px;
+      line-height: 1.6;
     }
 
     #video-count {
-      margin-bottom: 16px;
-      color: #555;
       font-weight: bold;
     }
 
     .video-list {
+      max-width: 1200px;
+      margin: 0 auto;
       display: grid;
       grid-template-columns: repeat(
-        auto-fill, minmax(260px, 1fr)
+        auto-fill,
+        minmax(min(100%, 280px), 1fr)
       );
-      gap: 20px;
+      gap: 18px;
     }
 
     .video-card {
+      min-width: 0;
+      padding: 12px;
       background: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px #00000012;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px #00000012;
     }
 
-    .player {
-      aspect-ratio: 16 / 9;
-      background: #ddd;
-      position: relative;
-    }
-
-    .player img,
-    .player iframe {
-      width: 100%;
-      height: 100%;
+    .thumbnail {
       display: block;
-      border: 0;
+      width: 100%;
+      aspect-ratio: 16 / 9;
       object-fit: cover;
+      background: #ddd;
+      border-radius: 5px;
     }
 
-    .play-button {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #e62117;
-      color: white;
-      border: 0;
-      border-radius: 12px;
-      padding: 12px 20px;
-      font-size: 20px;
-      cursor: pointer;
-    }
-
-    .video-info {
-      padding: 16px;
-    }
-
-    .video-info h2 {
-      font-size: 18px;
-      margin: 0 0 10px;
+    .video-title {
+      margin: 12px 0 8px;
+      font-size: 17px;
+      line-height: 1.5;
       overflow-wrap: anywhere;
     }
 
     .video-class {
-      color: #555;
-      font-size: 14px;
-      margin-bottom: 10px;
+      display: inline-block;
+      padding: 4px 8px;
+      margin-bottom: 8px;
+      background: #e8e8e8;
+      border-radius: 4px;
+      font-size: 12px;
     }
 
     .tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 5px;
+      margin: 4px 0 12px;
     }
 
     .tag {
-      background: #e8eef8;
-      color: #244d85;
-      padding: 4px 8px;
-      border-radius: 5px;
+      padding: 4px 7px;
+      background: #eaf2ff;
+      color: #2454a6;
+      border-radius: 4px;
       font-size: 12px;
     }
 
-    .no-results {
-      padding: 24px;
-      background: white;
-      border-radius: 8px;
-      text-align: center;
-      color: #666;
+    .play-button {
+      width: 100%;
+      padding: 10px;
+      color: white;
+      background: #d92727;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 15px;
     }
 
-    footer {
-      text-align: center;
-      padding: 30px 12px;
-      color: #666;
+    .play-button:hover {
+      background: #ad1d1d;
+    }
+
+    .player {
+      width: 100%;
+      margin-top: 10px;
+      aspect-ratio: 16 / 9;
+      background: #111;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .player iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .pagination {
+      max-width: 1200px;
+      margin: 24px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .pagination button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 5px;
+      background: #333;
+      color: white;
+      cursor: pointer;
+    }
+
+    .pagination button:disabled {
+      background: #bbb;
+      cursor: not-allowed;
+    }
+
+    #page-info {
+      font-weight: bold;
+    }
+
+    .message {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 16px;
+      background: white;
+      border-radius: 8px;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 12px;
+      }
+
+      .search-panel {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 
 <body>
   <header>
-    <h1>動画カタログ</h1>
+    <h1>YouTube動画カタログ</h1>
+    <p>キーワード・分類・タグから動画を検索できます。</p>
   </header>
 
-  <main>
-    <div class="search-panel">
-      <input
-        type="search"
-        id="keyword"
-        placeholder="タイトル・分類・タグで検索"
-        aria-label="キーワード検索"
-      >
+  <section class="search-panel">
+    <input
+      id="keyword"
+      type="search"
+      placeholder="タイトル・分類・タグで検索"
+      aria-label="キーワード検索"
+    >
 
-      <select id="class-filter" aria-label="分類で絞り込み">
-        <option value="">すべての分類</option>
-      </select>
+    <select id="class-filter" aria-label="分類で絞り込み">
+      <option value="">すべての分類</option>
+    </select>
 
-      <select id="tag-filter" aria-label="タグで絞り込み">
-        <option value="">すべてのタグ</option>
-      </select>
+    <select id="tag-filter" aria-label="タグで絞り込み">
+      <option value="">すべてのタグ</option>
+    </select>
 
-      <button id="reset-search" type="button">
-        検索条件をリセット
-      </button>
-    </div>
+    <button id="reset-search" type="button">
+      検索条件をリセット
+    </button>
+  </section>
 
-    <p id="video-count"></p>
-    <div id="video-list" class="video-list"></div>
-  </main>
+  <div id="status" role="status" aria-live="polite">
+    動画データを読み込んでいます……
+  </div>
 
-  <footer>動画カタログ</footer>
+  <div id="video-list" class="video-list"></div>
+
+  <nav class="pagination" aria-label="ページ移動">
+    <button id="prev-page" type="button" disabled>
+      前のページ
+    </button>
+
+    <span id="page-info">ページ 0 / 0</span>
+
+    <button id="next-page" type="button" disabled>
+      次のページ
+    </button>
+  </nav>
+
+  <!-- CSV解析ライブラリ -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
 
   <script>
-    // =====================================
-    // 動画データ
-    // class は動画の分類です
-    // id は YouTube の動画IDです
-    // =====================================
+    "use strict";
 
-    const videos = [
-      {
-        title: "サンプル動画1",
-        class: "攻略動画",
-        tags: ["攻略", "実況"],
-        id: "M7lc1UVf-VE"
-      },
-      {
-        title: "サンプル動画2",
-        class: "解説動画",
-        tags: ["解説"],
-        id: "M7lc1UVf-VE"
-      },
-      {
-        title: "サンプル動画3",
-        class: "攻略動画",
-        tags: ["プレイ動画", "検証"],
-        id: "M7lc1UVf-VE"
-      }
-    ];
+    // ===== 設定 =====
 
-    // =====================================
-    // HTML要素の取得
-    // =====================================
+    const CSV_FILE = "./videos.csv";
+    const ITEMS_PER_PAGE = 50;
 
-    const list = document.getElementById("video-list");
-    const count = document.getElementById("video-count");
-    const keyword = document.getElementById("keyword");
+    // CSVから読み込んだ動画データを格納する
+    let videos = [];
+    let currentPage = 1;
+    let loadError = false;
+
+    // ===== HTML要素 =====
+
+    const keywordInput = document.getElementById("keyword");
     const classFilter = document.getElementById("class-filter");
     const tagFilter = document.getElementById("tag-filter");
     const resetButton = document.getElementById("reset-search");
 
-    // =====================================
-    // 分類・タグの選択肢を自動作成
-    // =====================================
+    const videoList = document.getElementById("video-list");
+    const status = document.getElementById("status");
+    const pageInfo = document.getElementById("page-info");
+    const prevButton = document.getElementById("prev-page");
+    const nextButton = document.getElementById("next-page");
 
-    const classes = [
-      ...new Set(videos.map(video => video.class).filter(Boolean))
-    ].sort((a, b) => a.localeCompare(b, "ja"));
+    // ===== YouTube動画IDの取得 =====
 
-    const tags = [
-      ...new Set(videos.flatMap(video => video.tags || []))
-    ].sort((a, b) => a.localeCompare(b, "ja"));
+    function normalizeVideoId(value) {
+      const input = String(value || "").trim();
 
-    classes.forEach(className => {
-      const option = document.createElement("option");
-      option.value = className;
-      option.textContent = className;
-      classFilter.appendChild(option);
-    });
+      // YouTubeのURLが入力されていた場合にも対応
+      try {
+        const url = new URL(input);
 
-    tags.forEach(tagName => {
-      const option = document.createElement("option");
-      option.value = tagName;
-      option.textContent = tagName;
-      tagFilter.appendChild(option);
-    });
+        if (
+          url.hostname === "youtu.be" ||
+          url.hostname.endsWith(".youtu.be")
+        ) {
+          return url.pathname.split("/").filter(Boolean)[0] || "";
+        }
 
-    // =====================================
-    // 検索・一覧表示
-    // =====================================
+        if (
+          url.hostname === "youtube.com" ||
+          url.hostname.endsWith(".youtube.com") ||
+          url.hostname === "youtube-nocookie.com" ||
+          url.hostname.endsWith(".youtube-nocookie.com")
+        ) {
+          if (url.pathname === "/watch") {
+            return url.searchParams.get("v") || "";
+          }
 
-    function renderVideos() {
-      const query = keyword.value.trim().toLocaleLowerCase();
+          const match = url.pathname.match(
+            /^\/(?:embed|shorts|live)\/([^/?]+)/
+          );
+
+          if (match) {
+            return match[1];
+          }
+        }
+      } catch (_) {
+        // URL形式でなければ、動画IDとして扱う
+      }
+
+      return input;
+    }
+
+    // ===== CSV読み込み =====
+
+    async function loadVideos() {
+      status.textContent = "動画データを読み込んでいます……";
+
+      try {
+        if (typeof Papa === "undefined") {
+          throw new Error(
+            "CSV解析ライブラリを読み込めませんでした。"
+          );
+        }
+
+        const response = await fetch(CSV_FILE, {
+          cache: "no-cache"
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            "videos.csv を取得できませんでした。HTTP " +
+            response.status
+          );
+        }
+
+        const csvText = await response.text();
+
+        const result = Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: "greedy",
+          transformHeader: header => header.trim()
+        });
+
+        // 列名の確認
+        const fields = result.meta.fields || [];
+        const requiredFields = ["title", "class", "tags", "id"];
+
+        const missingFields = requiredFields.filter(
+          field => !fields.includes(field)
+        );
+
+        if (missingFields.length > 0) {
+          throw new Error(
+            "CSVの項目名が不足しています: " +
+            missingFields.join(", ") +
+            "。1行目を確認してください。"
+          );
+        }
+
+        videos = result.data
+          .map(row => {
+            const title = String(row.title || "").trim();
+            const videoId = normalizeVideoId(row.id);
+
+            const tags = String(row.tags || "")
+              .split("|")
+              .map(tag => tag.trim())
+              .filter(Boolean);
+
+            return {
+              title,
+              class: String(row.class || "").trim(),
+              tags,
+              id: videoId
+            };
+          })
+          .filter(video => video.title && video.id);
+
+        if (result.errors.length > 0) {
+          console.warn(
+            "CSV解析時の警告:",
+            result.errors
+          );
+        }
+
+        if (videos.length === 0) {
+          throw new Error(
+            "有効な動画データがありません。CSVの内容を確認してください。"
+          );
+        }
+
+        loadError = false;
+
+        // 分類・タグの選択肢を作成
+        buildFilters();
+
+        // 動画一覧を表示
+        renderVideos();
+
+      } catch (error) {
+        console.error(error);
+
+        loadError = true;
+        videos = [];
+        videoList.replaceChildren();
+
+        status.textContent =
+          "動画データを読み込めませんでした。";
+
+        const message = document.createElement("div");
+        message.className = "message";
+        message.textContent =
+          error.message +
+          " GitHubに videos.csv があり、index.html と同じ階層にあるか確認してください。";
+
+        videoList.appendChild(message);
+
+        updatePagination(0, 0);
+      }
+    }
+
+    // ===== 分類・タグの選択肢を作成 =====
+
+    function buildFilters() {
+      const classes = [...new Set(
+        videos
+          .map(video => video.class)
+          .filter(Boolean)
+      )].sort((a, b) => a.localeCompare(b, "ja"));
+
+      const tags = [...new Set(
+        videos.flatMap(video => video.tags)
+      )].sort((a, b) => a.localeCompare(b, "ja"));
+
+      classFilter.replaceChildren();
+      tagFilter.replaceChildren();
+
+      const allClasses = document.createElement("option");
+      allClasses.value = "";
+      allClasses.textContent = "すべての分類";
+      classFilter.appendChild(allClasses);
+
+      classes.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        classFilter.appendChild(option);
+      });
+
+      const allTags = document.createElement("option");
+      allTags.value = "";
+      allTags.textContent = "すべてのタグ";
+      tagFilter.appendChild(allTags);
+
+      tags.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        tagFilter.appendChild(option);
+      });
+    }
+
+    // ===== 検索・絞り込み =====
+
+    function getFilteredVideos() {
+      const keyword = keywordInput.value
+        .trim()
+        .toLocaleLowerCase("ja");
+
       const selectedClass = classFilter.value;
       const selectedTag = tagFilter.value;
 
-      const filtered = videos.filter(video => {
+      return videos.filter(video => {
         const searchableText = [
           video.title,
           video.class,
-          ...(video.tags || [])
+          ...video.tags,
+          video.id
         ]
-          .filter(Boolean)
           .join(" ")
-          .toLocaleLowerCase();
+          .toLocaleLowerCase("ja");
 
         const matchesKeyword =
-          searchableText.includes(query);
+          !keyword || searchableText.includes(keyword);
 
         const matchesClass =
           !selectedClass || video.class === selectedClass;
 
         const matchesTag =
-          !selectedTag ||
-          (video.tags || []).includes(selectedTag);
+          !selectedTag || video.tags.includes(selectedTag);
 
-        return matchesKeyword && matchesClass && matchesTag;
-      });
-
-      count.textContent =
-        `表示件数：${filtered.length}件 / 全${videos.length}件`;
-
-      list.replaceChildren();
-
-      if (filtered.length === 0) {
-        const message = document.createElement("p");
-        message.className = "no-results";
-        message.textContent = "該当する動画がありません。";
-        list.appendChild(message);
-        return;
-      }
-
-      filtered.forEach(video => {
-        const card = document.createElement("article");
-        card.className = "video-card";
-
-        // 動画プレイヤー部分
-        const player = document.createElement("div");
-        player.className = "player";
-
-        const thumbnail = document.createElement("img");
-        thumbnail.src =
-          `https://i.ytimg.com/vi/${encodeURIComponent(video.id)}/hqdefault.jpg`;
-        thumbnail.alt = `${video.title}のサムネイル`;
-        thumbnail.loading = "lazy";
-
-        const button = document.createElement("button");
-        button.className = "play-button";
-        button.type = "button";
-        button.textContent = "▶ 再生";
-        button.setAttribute(
-          "aria-label",
-          `${video.title}を再生`
+        return (
+          matchesKeyword &&
+          matchesClass &&
+          matchesTag
         );
-
-        button.addEventListener("click", () => {
-          const iframe = document.createElement("iframe");
-
-          iframe.src =
-            `https://www.youtube-nocookie.com/embed/${encodeURIComponent(video.id)}?autoplay=1`;
-
-          iframe.title = video.title;
-          iframe.allow =
-            "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-          iframe.allowFullscreen = true;
-
-          player.replaceChildren(iframe);
-        });
-
-        player.append(thumbnail, button);
-
-        // 動画情報部分
-        const info = document.createElement("div");
-        info.className = "video-info";
-
-        const title = document.createElement("h2");
-        title.textContent = video.title;
-
-        const classElement = document.createElement("div");
-        classElement.className = "video-class";
-        classElement.textContent =
-          `分類：${video.class || "未分類"}`;
-
-        const tagContainer = document.createElement("div");
-        tagContainer.className = "tags";
-
-        (video.tags || []).forEach(tagName => {
-          const tag = document.createElement("span");
-          tag.className = "tag";
-          tag.textContent = tagName;
-          tagContainer.appendChild(tag);
-        });
-
-        info.append(title, classElement, tagContainer);
-        card.append(player, info);
-        list.appendChild(card);
       });
     }
 
-    // =====================================
-    // 検索条件の変更イベント
-    // =====================================
+    // ===== 動画カード作成 =====
 
-    keyword.addEventListener("input", renderVideos);
+    function createVideoCard(video) {
+      const card = document.createElement("article");
+      card.className = "video-card";
 
-    classFilter.addEventListener("change", renderVideos);
+      // サムネイル
+      const thumbnail = document.createElement("img");
+      thumbnail.className = "thumbnail";
+      thumbnail.src =
+        "https://i.ytimg.com/vi/" +
+        encodeURIComponent(video.id) +
+        "/hqdefault.jpg";
+      thumbnail.alt = video.title;
+      thumbnail.loading = "lazy";
+      thumbnail.decoding = "async";
 
-    tagFilter.addEventListener("change", renderVideos);
+      thumbnail.addEventListener("error", () => {
+        thumbnail.style.display = "none";
+      }, { once: true });
 
-    resetButton.addEventListener("click", () => {
-      keyword.value = "";
-      classFilter.value = "";
-      tagFilter.value = "";
+      card.appendChild(thumbnail);
 
+      // タイトル
+      const title = document.createElement("h2");
+      title.className = "video-title";
+      title.textContent = video.title;
+      card.appendChild(title);
+
+      // 分類
+      if (video.class) {
+        const classLabel = document.createElement("span");
+        classLabel.className = "video-class";
+        classLabel.textContent = video.class;
+        card.appendChild(classLabel);
+      }
+
+      // タグ
+      if (video.tags.length > 0) {
+        const tagsContainer = document.createElement("div");
+        tagsContainer.className = "tags";
+
+        video.tags.forEach(tag => {
+          const tagElement = document.createElement("span");
+          tagElement.className = "tag";
+          tagElement.textContent = tag;
+          tagsContainer.appendChild(tagElement);
+        });
+
+        card.appendChild(tagsContainer);
+      }
+
+      // 再生ボタン
+      const playButton = document.createElement("button");
+      playButton.className = "play-button";
+      playButton.type = "button";
+      playButton.textContent = "▶ 再生";
+
+      // プレイヤーはクリックされるまで読み込まない
+      const player = document.createElement("div");
+      player.className = "player";
+      player.hidden = true;
+
+      playButton.addEventListener("click", () => {
+        if (player.dataset.loaded === "true") {
+          player.hidden = !player.hidden;
+          playButton.textContent = player.hidden
+            ? "▶ 再生"
+            : "プレイヤーを隠す";
+          return;
+        }
+
+        const iframe = document.createElement("iframe");
+
+        iframe.src =
+          "https://www.youtube-nocookie.com/embed/" +
+          encodeURIComponent(video.id) +
+          "?autoplay=1";
+
+        iframe.title = video.title;
+        iframe.loading = "lazy";
+        iframe.allow =
+          "accelerometer; autoplay; clipboard-write; " +
+          "encrypted-media; gyroscope; picture-in-picture; web-share";
+        iframe.allowFullscreen = true;
+        iframe.referrerPolicy = "strict-origin-when-cross-origin";
+
+        player.appendChild(iframe);
+        player.dataset.loaded = "true";
+        player.hidden = false;
+
+        playButton.textContent = "プレイヤーを隠す";
+      });
+
+      card.appendChild(playButton);
+      card.appendChild(player);
+
+      return card;
+    }
+
+    // ===== ページネーション =====
+
+    function updatePagination(totalItems, totalPages) {
+      pageInfo.textContent =
+        "ページ " + (totalPages === 0 ? 0 : currentPage) +
+        " / " + totalPages;
+
+      prevButton.disabled =
+        loadError || currentPage <= 1;
+
+      nextButton.disabled =
+        loadError ||
+        totalPages === 0 ||
+        currentPage >= totalPages;
+    }
+
+    // ===== 一覧表示 =====
+
+    function renderVideos() {
+      if (loadError) {
+        return;
+      }
+
+      const filteredVideos = getFilteredVideos();
+      const totalItems = filteredVideos.length;
+      const totalPages = Math.ceil(
+        totalItems / ITEMS_PER_PAGE
+      );
+
+      if (totalPages === 0) {
+        currentPage = 1;
+      } else {
+        currentPage = Math.min(currentPage, totalPages);
+        currentPage = Math.max(currentPage, 1);
+      }
+
+      const startIndex =
+        (currentPage - 1) * ITEMS_PER_PAGE;
+
+      const pageVideos = filteredVideos.slice(
+        startIndex,
+        startIndex + ITEMS_PER_PAGE
+      );
+
+      videoList.replaceChildren();
+
+      pageVideos.forEach(video => {
+        videoList.appendChild(createVideoCard(video));
+      });
+
+      status.textContent =
+        "登録動画: " + videos.length.toLocaleString("ja-JP") +
+        "件 ／ 検索結果: " +
+        totalItems.toLocaleString("ja-JP") +
+        "件";
+
+      if (totalItems === 0) {
+        const message = document.createElement("div");
+        message.className = "message";
+        message.textContent =
+          "該当する動画がありません。検索条件を変更してください。";
+        videoList.appendChild(message);
+      }
+
+      updatePagination(totalItems, totalPages);
+    }
+
+    // ===== イベント設定 =====
+
+    keywordInput.addEventListener("input", () => {
+      currentPage = 1;
       renderVideos();
     });
 
-    // 初期表示
-    renderVideos();
+    classFilter.addEventListener("change", () => {
+      currentPage = 1;
+      renderVideos();
+    });
+
+    tagFilter.addEventListener("change", () => {
+      currentPage = 1;
+      renderVideos();
+    });
+
+    resetButton.addEventListener("click", () => {
+      keywordInput.value = "";
+      classFilter.value = "";
+      tagFilter.value = "";
+      currentPage = 1;
+      renderVideos();
+    });
+
+    prevButton.addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderVideos();
+
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+      }
+    });
+
+    nextButton.addEventListener("click", () => {
+      const totalPages = Math.ceil(
+        getFilteredVideos().length / ITEMS_PER_PAGE
+      );
+
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderVideos();
+
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+      }
+    });
+
+    // ===== 起動 =====
+
+    loadVideos();
   </script>
 </body>
 </html>
