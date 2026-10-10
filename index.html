@@ -82,8 +82,6 @@
       border-radius: 8px;
       background: #fff;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-
-      /* カード内を縦方向に配置 */
       display: flex;
       flex-direction: column;
     }
@@ -123,6 +121,13 @@
       color: #333;
       font-size: 13px;
       flex-shrink: 0;
+    }
+
+    .video-game {
+      margin: 0 0 8px;
+      color: #555;
+      font-size: 13px;
+      overflow-wrap: anywhere;
     }
 
     .tags {
@@ -228,6 +233,10 @@
       <option value="">すべての分類</option>
     </select>
 
+    <select id="game-filter">
+      <option value="">すべてのゲーム</option>
+    </select>
+
     <select id="tag-filter">
       <option value="">すべてのタグ</option>
     </select>
@@ -258,6 +267,7 @@
   <script>
     const keywordInput = document.getElementById("keyword");
     const classFilter = document.getElementById("class-filter");
+    const gameFilter = document.getElementById("game-filter");
     const tagFilter = document.getElementById("tag-filter");
     const resetButton = document.getElementById("reset-search");
     const statusElement = document.getElementById("status");
@@ -329,12 +339,10 @@
         .filter(Boolean);
     }
 
-    // 分類候補を作成
+    // 分類・ゲームの選択肢を作成
     function buildFilters() {
       const classes = [...new Set(
-        videos
-          .map(video => video.class)
-          .filter(Boolean)
+        videos.map(video => video.class).filter(Boolean)
       )].sort((a, b) => a.localeCompare(b, "ja"));
 
       classFilter.innerHTML =
@@ -345,6 +353,20 @@
         option.value = name;
         option.textContent = name;
         classFilter.appendChild(option);
+      });
+
+      const games = [...new Set(
+        videos.map(video => video.game).filter(Boolean)
+      )].sort((a, b) => a.localeCompare(b, "ja"));
+
+      gameFilter.innerHTML =
+        '<option value="">すべてのゲーム</option>';
+
+      games.forEach(name => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        gameFilter.appendChild(option);
       });
 
       updateTagFilter();
@@ -381,16 +403,19 @@
     }
 
     // 検索条件に合う動画を取得
-    // キーワード検索の対象はタイトル・分類・タグのみ
+    // キーワード検索の対象はタイトル・分類・ゲーム・タグ
+    // 動画IDは検索対象外
     function getFilteredVideos() {
       const keyword = keywordInput.value.trim().toLocaleLowerCase();
       const selectedClass = classFilter.value;
+      const selectedGame = gameFilter.value;
       const selectedTag = tagFilter.value;
 
       return videos.filter(video => {
         const searchableText = [
           video.title,
           video.class,
+          video.game,
           video.tags
         ].join(" ").toLocaleLowerCase();
 
@@ -400,10 +425,18 @@
         const matchesClass =
           !selectedClass || video.class === selectedClass;
 
+        const matchesGame =
+          !selectedGame || video.game === selectedGame;
+
         const matchesTag =
           !selectedTag || getVideoTags(video).includes(selectedTag);
 
-        return matchesKeyword && matchesClass && matchesTag;
+        return (
+          matchesKeyword &&
+          matchesClass &&
+          matchesGame &&
+          matchesTag
+        );
       });
     }
 
@@ -462,6 +495,28 @@
         });
 
         card.appendChild(classButton);
+      }
+
+      // ゲーム名。クリックするとゲームで絞り込む
+      if (video.game) {
+        const gameButton = document.createElement("button");
+        gameButton.type = "button";
+        gameButton.className = "video-game";
+        gameButton.textContent = video.game;
+        gameButton.title = `ゲーム「${video.game}」で絞り込む`;
+
+        gameButton.addEventListener("click", () => {
+          gameFilter.value = video.game;
+          currentPage = 1;
+          renderVideos();
+
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+        });
+
+        card.appendChild(gameButton);
       }
 
       // タグボタン
@@ -612,7 +667,14 @@
           console.warn("CSV読み込み時の警告:", result.errors);
         }
 
-        const requiredColumns = ["title", "class", "tags", "id"];
+        const requiredColumns = [
+          "title",
+          "class",
+          "game",
+          "tags",
+          "id"
+        ];
+
         const headers = result.meta.fields || [];
 
         const missingColumns = requiredColumns.filter(
@@ -630,6 +692,7 @@
           .map(row => ({
             title: cleanValue(row.title),
             class: cleanValue(row.class),
+            game: cleanValue(row.game),
             tags: cleanValue(row.tags),
             id: normalizeVideoId(row.id)
           }))
@@ -652,9 +715,15 @@
       renderVideos();
     });
 
-    // 分類を変更したらタグ候補も更新
+    // 分類変更時はタグ候補も更新
     classFilter.addEventListener("change", () => {
       updateTagFilter();
+      currentPage = 1;
+      renderVideos();
+    });
+
+    // ゲーム検索
+    gameFilter.addEventListener("change", () => {
       currentPage = 1;
       renderVideos();
     });
@@ -669,6 +738,7 @@
     resetButton.addEventListener("click", () => {
       keywordInput.value = "";
       classFilter.value = "";
+      gameFilter.value = "";
       updateTagFilter();
       tagFilter.value = "";
       currentPage = 1;
