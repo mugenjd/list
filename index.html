@@ -219,6 +219,7 @@
       padding: 20px;
       background: #fff;
       border-radius: 8px;
+      overflow-wrap: anywhere;
     }
 
     @media (max-width: 600px) {
@@ -242,7 +243,7 @@
       <input
         type="search"
         id="keyword"
-        placeholder="タイトル・分類・タグなど"
+        placeholder="タイトル・カテゴリー・class・タグ"
       >
     </div>
 
@@ -254,16 +255,16 @@
     </div>
 
     <div class="search-item">
-      <label for="class-filter">分類</label>
+      <label for="class-filter">class</label>
       <select id="class-filter">
-        <option value="">すべての分類</option>
+        <option value="">すべてのclass</option>
       </select>
     </div>
 
     <div class="search-item">
-      <label for="tag-filter">タグ</label>
+      <label for="tag-filter">tag</label>
       <select id="tag-filter">
-        <option value="">すべてのタグ</option>
+        <option value="">すべてのtag</option>
       </select>
     </div>
 
@@ -273,9 +274,7 @@
   </div>
 
   <div id="status">CSVを読み込んでいます...</div>
-
   <div id="video-list"></div>
-
   <div id="pagination"></div>
 
   <script>
@@ -295,6 +294,7 @@
     let videos = [];
     let currentPage = 1;
 
+    // YouTubeのURLまたは動画IDから動画IDを取得
     function normalizeVideoId(value) {
       const input = String(value ?? "").trim();
 
@@ -302,7 +302,6 @@
         return "";
       }
 
-      // URLではなく動画IDが入力されている場合
       if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
         return input;
       }
@@ -312,8 +311,10 @@
           input.startsWith("http") ? input : "https://" + input
         );
 
-        if (url.hostname === "youtu.be" ||
-            url.hostname.endsWith(".youtu.be")) {
+        if (
+          url.hostname === "youtu.be" ||
+          url.hostname.endsWith(".youtu.be")
+        ) {
           return url.pathname.split("/").filter(Boolean)[0] || "";
         }
 
@@ -337,12 +338,13 @@
           }
         }
       } catch (error) {
-        // URLとして解析できない値は無効とする
+        // 不正なURLは無効とする
       }
 
       return "";
     }
 
+    // 重複を除去して日本語順で並べる
     function uniqueSorted(values) {
       return [...new Set(
         values
@@ -351,6 +353,7 @@
       )].sort((a, b) => a.localeCompare(b, "ja"));
     }
 
+    // 複数タグを配列にする。区切り文字は ; , 、 ，
     function splitTags(value) {
       return String(value ?? "")
         .split(/[;,、，]/)
@@ -358,6 +361,7 @@
         .filter(Boolean);
     }
 
+    // HTMLエスケープ
     function escapeHtml(value) {
       return String(value ?? "").replace(/[&<>"']/g, char => ({
         "&": "&amp;",
@@ -368,6 +372,7 @@
       })[char]);
     }
 
+    // プルダウンの選択肢を更新
     function addOptions(selectElement, values, defaultLabel) {
       selectElement.replaceChildren();
 
@@ -384,13 +389,10 @@
       });
     }
 
+    // カテゴリーの選択肢を作成
     function buildFilters() {
       const categories = uniqueSorted(
         videos.map(video => video.category)
-      );
-
-      const classes = uniqueSorted(
-        videos.map(video => video.class)
       );
 
       addOptions(
@@ -399,15 +401,38 @@
         "すべてのカテゴリー"
       );
 
+      updateClassFilter();
+    }
+
+    // カテゴリーに該当するclassだけを表示
+    function updateClassFilter() {
+      const selectedCategory = categoryFilter.value;
+      const previousClass = classFilter.value;
+
+      const relevantVideos = videos.filter(video =>
+        !selectedCategory || video.category === selectedCategory
+      );
+
+      const classes = uniqueSorted(
+        relevantVideos.map(video => video.class)
+      );
+
       addOptions(
         classFilter,
         classes,
-        "すべての分類"
+        "すべてのclass"
       );
 
+      // 現在のカテゴリーに存在するclassだけを維持
+      if (classes.includes(previousClass)) {
+        classFilter.value = previousClass;
+      }
+
+      // classを更新したらtagも更新
       updateTagFilter();
     }
 
+    // カテゴリーとclassに該当するtagだけを表示
     function updateTagFilter() {
       const selectedCategory = categoryFilter.value;
       const selectedClass = classFilter.value;
@@ -427,15 +452,24 @@
         relevantVideos.flatMap(video => video.tags)
       );
 
-      addOptions(tagFilter, tags, "すべてのタグ");
+      addOptions(
+        tagFilter,
+        tags,
+        "すべてのtag"
+      );
 
+      // 現在の条件に存在するtagだけを維持
       if (tags.includes(previousTag)) {
         tagFilter.value = previousTag;
       }
     }
 
+    // 現在の検索条件に一致する動画を取得
     function getFilteredVideos() {
-      const keyword = keywordInput.value.trim().toLocaleLowerCase();
+      const keyword = keywordInput.value
+        .trim()
+        .toLocaleLowerCase();
+
       const selectedCategory = categoryFilter.value;
       const selectedClass = classFilter.value;
       const selectedTag = tagFilter.value;
@@ -470,10 +504,12 @@
       });
     }
 
+    // 動画カードを作成
     function createVideoCard(video) {
       const card = document.createElement("article");
       card.className = "video-card";
 
+      // サムネイル
       const thumbnailLink = document.createElement("a");
       thumbnailLink.className = "thumbnail-link";
       thumbnailLink.href =
@@ -496,11 +532,13 @@
       thumbnailLink.appendChild(thumbnail);
       card.appendChild(thumbnailLink);
 
+      // タイトル
       const title = document.createElement("h2");
       title.className = "video-title";
       title.textContent = video.title || "タイトルなし";
       card.appendChild(title);
 
+      // カテゴリーとclass
       const meta = document.createElement("div");
       meta.className = "video-meta";
 
@@ -514,7 +552,7 @@
 
         categoryButton.addEventListener("click", () => {
           categoryFilter.value = video.category;
-          updateTagFilter();
+          updateClassFilter();
           currentPage = 1;
           renderVideos();
         });
@@ -527,10 +565,32 @@
         classButton.type = "button";
         classButton.className = "video-class";
         classButton.textContent = video.class;
-        classButton.title = `分類「${video.class}」で絞り込む`;
+        classButton.title = `class「${video.class}」で絞り込む`;
 
         classButton.addEventListener("click", () => {
-          classFilter.value = video.class;
+          // そのclassを含むカテゴリーが複数ある場合は、
+          // 現在のカテゴリーを優先する
+          const currentCategory = categoryFilter.value;
+
+          const matchingVideos = videos.filter(item =>
+            item.class === video.class &&
+            (!currentCategory || item.category === currentCategory)
+          );
+
+          if (matchingVideos.length === 0) {
+            categoryFilter.value = "";
+          }
+
+          updateClassFilter();
+
+          if (
+            [...classFilter.options].some(
+              option => option.value === video.class
+            )
+          ) {
+            classFilter.value = video.class;
+          }
+
           updateTagFilter();
           currentPage = 1;
           renderVideos();
@@ -541,6 +601,7 @@
 
       card.appendChild(meta);
 
+      // タグ
       if (video.tags.length > 0) {
         const tagList = document.createElement("div");
         tagList.className = "tag-list";
@@ -550,7 +611,7 @@
           tagButton.type = "button";
           tagButton.className = "tag";
           tagButton.textContent = "#" + tag;
-          tagButton.title = `タグ「${tag}」で絞り込む`;
+          tagButton.title = `tag「${tag}」で絞り込む`;
 
           tagButton.addEventListener("click", () => {
             const category = categoryFilter.value;
@@ -562,12 +623,10 @@
               item.tags.includes(tag)
             );
 
-            // 現在のカテゴリー・分類に存在しないタグなら、
-            // その条件を解除してタグを選択する
             if (!tagExistsInCurrentSelection) {
               categoryFilter.value = "";
               classFilter.value = "";
-              updateTagFilter();
+              updateClassFilter();
             }
 
             tagFilter.value = tag;
@@ -581,6 +640,7 @@
         card.appendChild(tagList);
       }
 
+      // ページ内プレイヤー
       const playerContainer = document.createElement("div");
       playerContainer.className = "player-container";
       playerContainer.hidden = true;
@@ -623,6 +683,7 @@
       return card;
     }
 
+    // ページネーションを作成
     function renderPagination(totalPages) {
       paginationElement.replaceChildren();
 
@@ -630,7 +691,12 @@
         return;
       }
 
-      function addPageButton(label, page, disabled = false, current = false) {
+      function addPageButton(
+        label,
+        page,
+        disabled = false,
+        current = false
+      ) {
         const button = document.createElement("button");
         button.type = "button";
         button.textContent = label;
@@ -700,6 +766,7 @@
       );
     }
 
+    // 動画一覧を描画
     function renderVideos() {
       const filteredVideos = getFilteredVideos();
       const totalVideos = filteredVideos.length;
@@ -708,7 +775,10 @@
       if (totalPages === 0) {
         currentPage = 1;
       } else {
-        currentPage = Math.min(Math.max(1, currentPage), totalPages);
+        currentPage = Math.min(
+          Math.max(1, currentPage),
+          totalPages
+        );
       }
 
       const startIndex = (currentPage - 1) * PAGE_SIZE;
@@ -744,6 +814,7 @@
       renderPagination(totalPages);
     }
 
+    // CSVを読み込む
     async function loadVideos() {
       try {
         const response = await fetch("./videos.csv", {
@@ -779,13 +850,17 @@
 
         if (missingColumns.length > 0) {
           throw new Error(
-            "CSVに必要な列がありません：" + missingColumns.join(", ") +
+            "CSVに必要な列がありません：" +
+            missingColumns.join(", ") +
             "。ヘッダーを確認してください。"
           );
         }
 
         if (result.errors.length > 0) {
-          console.warn("CSVの読み込み時に警告があります：", result.errors);
+          console.warn(
+            "CSVの読み込み時に警告があります：",
+            result.errors
+          );
         }
 
         videos = result.data
@@ -807,7 +882,8 @@
       } catch (error) {
         console.error(error);
 
-        statusElement.textContent = "動画データの読み込みに失敗しました。";
+        statusElement.textContent =
+          "動画データの読み込みに失敗しました。";
 
         videoListElement.replaceChildren();
 
@@ -821,35 +897,40 @@
       }
     }
 
+    // キーワード検索
     keywordInput.addEventListener("input", () => {
       currentPage = 1;
       renderVideos();
     });
 
+    // カテゴリー変更時、classとtagを連動して更新
     categoryFilter.addEventListener("change", () => {
-      updateTagFilter();
+      updateClassFilter();
       currentPage = 1;
       renderVideos();
     });
 
+    // class変更時、tagを連動して更新
     classFilter.addEventListener("change", () => {
       updateTagFilter();
       currentPage = 1;
       renderVideos();
     });
 
+    // tag変更
     tagFilter.addEventListener("change", () => {
       currentPage = 1;
       renderVideos();
     });
 
+    // 検索条件をリセット
     resetButton.addEventListener("click", () => {
       keywordInput.value = "";
       categoryFilter.value = "";
       classFilter.value = "";
       tagFilter.value = "";
 
-      updateTagFilter();
+      updateClassFilter();
 
       currentPage = 1;
       renderVideos();
