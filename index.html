@@ -72,14 +72,20 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 20px;
+      align-items: stretch;
     }
 
     .video-card {
       min-width: 0;
+      height: 100%;
       padding: 12px;
       border-radius: 8px;
       background: #fff;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+
+      /* カード内を縦方向に配置 */
+      display: flex;
+      flex-direction: column;
     }
 
     .thumbnail-link {
@@ -87,6 +93,7 @@
       overflow: hidden;
       border-radius: 5px;
       background: #eee;
+      flex-shrink: 0;
     }
 
     .thumbnail {
@@ -109,11 +116,13 @@
     }
 
     .video-class {
+      align-self: flex-start;
       margin: 0 0 8px;
       padding: 5px 9px;
       background: #e5e5e5;
       color: #333;
       font-size: 13px;
+      flex-shrink: 0;
     }
 
     .tags {
@@ -124,6 +133,8 @@
     }
 
     .tag {
+      width: auto;
+      max-width: 100%;
       padding: 5px 8px;
       border-radius: 15px;
       background: #e8f1ff;
@@ -134,8 +145,10 @@
 
     .play-button {
       width: 100%;
+      margin-top: auto;
       background: #d92323;
       color: #fff;
+      flex-shrink: 0;
     }
 
     .player {
@@ -258,12 +271,11 @@
     let videos = [];
     let currentPage = 1;
 
-    // CSVの値を文字列に統一する
     function cleanValue(value) {
       return String(value ?? "").trim();
     }
 
-    // YouTubeのURLまたは動画IDから動画IDを取得する
+    // YouTubeのURLまたは動画IDから動画IDを取得
     function normalizeVideoId(value) {
       const text = cleanValue(value);
 
@@ -271,7 +283,6 @@
         return "";
       }
 
-      // URLではなく動画IDが直接入力されている場合
       if (!text.includes("://")) {
         return text;
       }
@@ -310,7 +321,7 @@
       }
     }
 
-    // タグ欄を配列にする。複数タグは | 区切り
+    // タグを配列に変換。複数タグは | 区切り
     function getVideoTags(video) {
       return cleanValue(video.tags)
         .split("|")
@@ -318,7 +329,7 @@
         .filter(Boolean);
     }
 
-    // 分類とタグの選択肢を作成する
+    // 分類候補を作成
     function buildFilters() {
       const classes = [...new Set(
         videos
@@ -326,7 +337,8 @@
           .filter(Boolean)
       )].sort((a, b) => a.localeCompare(b, "ja"));
 
-      classFilter.innerHTML = '<option value="">すべての分類</option>';
+      classFilter.innerHTML =
+        '<option value="">すべての分類</option>';
 
       classes.forEach(name => {
         const option = document.createElement("option");
@@ -351,7 +363,8 @@
         relevantVideos.flatMap(video => getVideoTags(video))
       )].sort((a, b) => a.localeCompare(b, "ja"));
 
-      tagFilter.innerHTML = '<option value="">すべてのタグ</option>';
+      tagFilter.innerHTML =
+        '<option value="">すべてのタグ</option>';
 
       tags.forEach(tag => {
         const option = document.createElement("option");
@@ -360,7 +373,6 @@
         tagFilter.appendChild(option);
       });
 
-      // 選択中のタグが引き続き有効なら維持する
       if (tags.includes(previousTag)) {
         tagFilter.value = previousTag;
       } else {
@@ -368,7 +380,8 @@
       }
     }
 
-    // 現在の検索条件に合う動画を取得する
+    // 検索条件に合う動画を取得
+    // キーワード検索の対象はタイトル・分類・タグのみ
     function getFilteredVideos() {
       const keyword = keywordInput.value.trim().toLocaleLowerCase();
       const selectedClass = classFilter.value;
@@ -378,7 +391,7 @@
         const searchableText = [
           video.title,
           video.class,
-          video.tags,
+          video.tags
         ].join(" ").toLocaleLowerCase();
 
         const matchesKeyword =
@@ -394,12 +407,12 @@
       });
     }
 
-    // 動画カードを作成する
+    // 動画カードを作成
     function createVideoCard(video) {
       const card = document.createElement("article");
       card.className = "video-card";
 
-      // サムネイルをYouTube動画へのリンクにする
+      // サムネイルをクリックするとYouTubeの動画ページを開く
       const thumbnailLink = document.createElement("a");
       thumbnailLink.className = "thumbnail-link";
       thumbnailLink.href =
@@ -422,7 +435,7 @@
       thumbnailLink.appendChild(thumbnail);
       card.appendChild(thumbnailLink);
 
-      // 動画タイトル
+      // タイトル
       const title = document.createElement("h2");
       title.className = "video-title";
       title.textContent = video.title || "タイトル未設定";
@@ -467,7 +480,6 @@
             ...tagFilter.options
           ].map(option => option.value);
 
-          // 選択中の分類にタグがない場合は全分類に戻す
           if (!availableTags.includes(tag)) {
             classFilter.value = "";
             updateTagFilter();
@@ -488,7 +500,7 @@
 
       card.appendChild(tagsContainer);
 
-      // ページ内での埋め込み再生ボタン
+      // ページ内で再生するプレーヤー
       const playButton = document.createElement("button");
       playButton.type = "button";
       playButton.className = "play-button";
@@ -531,7 +543,7 @@
       return card;
     }
 
-    // 検索結果を描画する
+    // 検索結果を表示
     function renderVideos() {
       const filteredVideos = getFilteredVideos();
       const totalVideos = filteredVideos.length;
@@ -540,7 +552,6 @@
         Math.ceil(totalVideos / PAGE_SIZE)
       );
 
-      // 検索条件の変更などでページ数を超えた場合に調整
       currentPage = Math.min(currentPage, totalPages);
 
       const startIndex = (currentPage - 1) * PAGE_SIZE;
@@ -641,7 +652,7 @@
       renderVideos();
     });
 
-    // 分類変更時はタグ候補も更新する
+    // 分類を変更したらタグ候補も更新
     classFilter.addEventListener("change", () => {
       updateTagFilter();
       currentPage = 1;
@@ -654,7 +665,7 @@
       renderVideos();
     });
 
-    // 検索条件のリセット
+    // 検索条件をリセット
     resetButton.addEventListener("click", () => {
       keywordInput.value = "";
       classFilter.value = "";
@@ -664,7 +675,7 @@
       renderVideos();
     });
 
-    // ページ移動
+    // 前のページ
     prevButton.addEventListener("click", () => {
       if (currentPage > 1) {
         currentPage--;
@@ -673,6 +684,7 @@
       }
     });
 
+    // 次のページ
     nextButton.addEventListener("click", () => {
       const totalPages = Math.max(
         1,
