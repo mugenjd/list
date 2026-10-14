@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>一覧ページ</title>
+
   <style>
     body {
       font-family: sans-serif;
@@ -57,6 +58,14 @@
       margin-bottom: 10px;
     }
 
+    .card a.image-link {
+      display: block;
+    }
+
+    .card a.image-link:hover img {
+      opacity: 0.8;
+    }
+
     .card h2 {
       font-size: 18px;
       margin: 8px 0;
@@ -70,8 +79,15 @@
     .card a {
       overflow-wrap: anywhere;
     }
+
+    .card small {
+      display: block;
+      margin-top: 10px;
+      color: #666;
+    }
   </style>
 </head>
+
 <body>
   <h1>一覧ページ</h1>
 
@@ -88,17 +104,21 @@
   <script>
     // CSVを読み込む
     async function loadCSV() {
-      const response = await fetch("oromizudaisuki-data.csv");
+      const response = await fetch("data.csv");
+
       if (!response.ok) {
-        throw new Error("data.csv を読み込めませんでした。");
+        throw new Error(
+          "data.csv を読み込めませんでした。ファイル名と配置を確認してください。"
+        );
       }
 
       // UTF-8 BOMがある場合も処理する
       const csv = (await response.text()).replace(/^\uFEFF/, "");
+
       return parseCSV(csv);
     }
 
-    // カンマ、引用符、改行を含むCSVに対応
+    // CSV解析：カンマ、引用符、セル内の改行に対応
     function parseCSV(text) {
       const rows = [];
       let row = [];
@@ -125,9 +145,16 @@
           row.push(cell);
           cell = "";
         } else if (ch === "\n" || ch === "\r") {
-          if (ch === "\r" && text[i + 1] === "\n") i++;
+          if (ch === "\r" && text[i + 1] === "\n") {
+            i++;
+          }
+
           row.push(cell);
-          if (row.some(value => value.trim() !== "")) rows.push(row);
+
+          if (row.some(value => value.trim() !== "")) {
+            rows.push(row);
+          }
+
           row = [];
           cell = "";
         } else {
@@ -135,31 +162,46 @@
         }
       }
 
+      // 最終行を処理
       row.push(cell);
-      if (row.some(value => value.trim() !== "")) rows.push(row);
 
-      if (rows.length === 0) return [];
+      if (row.some(value => value.trim() !== "")) {
+        rows.push(row);
+      }
+
+      if (rows.length === 0) {
+        return [];
+      }
 
       const headers = rows.shift().map(value => value.trim());
 
       return rows.map(values => {
         const item = {};
+
         headers.forEach((header, i) => {
           item[header] = (values[i] || "").trim();
         });
+
         return item;
       });
     }
 
+    // HTTP / HTTPS のURLだけをリンクとして使用する
     function safeURL(value) {
       try {
         const url = new URL(value);
-        return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+
+        if (url.protocol === "http:" || url.protocol === "https:") {
+          return url.href;
+        }
+
+        return "";
       } catch {
         return "";
       }
     }
 
+    // 一覧を表示する
     function renderItems(data) {
       const container = document.getElementById("items");
       const keyword = document.getElementById("search").value
@@ -168,8 +210,11 @@
 
       container.replaceChildren();
 
+      // 名前だけを検索対象にする
       const filtered = data.filter(item =>
-        (item["名前"] || "").toLocaleLowerCase().includes(keyword)
+        (item["名前"] || "")
+          .toLocaleLowerCase()
+          .includes(keyword)
       );
 
       document.getElementById("status").textContent =
@@ -179,38 +224,75 @@
         const card = document.createElement("article");
         card.className = "card";
 
-        // 画像ファイルは images フォルダから読み込む
+        // 公開リンク
+        const linkURL = safeURL(item["公開リンク"] || "");
+
+        // 画像ファイル名
         const filename = (item["画像"] || "").split(/[\\/]/).pop();
 
+        // 画像を表示し、公開リンクがあれば画像自体をリンクにする
         if (filename) {
           const img = document.createElement("img");
+
           img.src = "images/" + encodeURIComponent(filename);
           img.alt = item["名前"] || "";
           img.loading = "lazy";
-          img.onerror = () => img.remove();
-          card.appendChild(img);
+
+          // 画像が見つからない場合は画像だけ非表示にする
+          img.onerror = () => {
+            const parent = img.parentElement;
+
+            if (parent && parent.tagName === "A") {
+              parent.remove();
+            } else {
+              img.remove();
+            }
+          };
+
+          if (linkURL) {
+            const imageLink = document.createElement("a");
+
+            imageLink.className = "image-link";
+            imageLink.href = linkURL;
+            imageLink.target = "_blank";
+            imageLink.rel = "noopener noreferrer";
+            imageLink.setAttribute(
+              "aria-label",
+              (item["名前"] || "画像") + " のリンクを開く"
+            );
+
+            imageLink.appendChild(img);
+            card.appendChild(imageLink);
+          } else {
+            card.appendChild(img);
+          }
         }
 
+        // 名前
         const title = document.createElement("h2");
         title.textContent = item["名前"] || "名前なし";
         card.appendChild(title);
 
-        const linkURL = safeURL(item["公開リンク"] || "");
+        // 文字リンクも表示する
         if (linkURL) {
           const link = document.createElement("a");
+
           link.href = linkURL;
           link.textContent = "公開リンクを開く";
           link.target = "_blank";
           link.rel = "noopener noreferrer";
+
           card.appendChild(link);
         }
 
+        // 備考
         if (item["備考"]) {
           const note = document.createElement("p");
           note.textContent = item["備考"];
           card.appendChild(note);
         }
 
+        // 更新日時
         if (item["更新日時"]) {
           const date = document.createElement("small");
           date.textContent = "更新日時：" + item["更新日時"];
@@ -221,14 +303,17 @@
       });
     }
 
+    // 初期化
     async function init() {
       try {
         const data = await loadCSV();
+
         renderItems(data);
 
-        document.getElementById("search").addEventListener("input", () => {
-          renderItems(data);
-        });
+        document.getElementById("search").addEventListener(
+          "input",
+          () => renderItems(data)
+        );
       } catch (error) {
         document.getElementById("status").textContent =
           "読み込みエラー：" + error.message;
