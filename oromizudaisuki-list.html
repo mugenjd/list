@@ -71,12 +71,17 @@
       margin: 8px 0;
     }
 
-    .card p {
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
+    .card h2 a {
+      color: inherit;
+      text-decoration: none;
     }
 
-    .card a {
+    .card h2 a:hover {
+      text-decoration: underline;
+    }
+
+    .card p {
+      white-space: pre-wrap;
       overflow-wrap: anywhere;
     }
 
@@ -104,7 +109,7 @@
   <script>
     // CSVを読み込む
     async function loadCSV() {
-      const response = await fetch("oromizudaisuki-data.csv");
+      const response = await fetch("data.csv");
 
       if (!response.ok) {
         throw new Error(
@@ -186,12 +191,15 @@
       });
     }
 
-    // HTTP / HTTPS のURLだけをリンクとして使用する
+    // HTTP / HTTPS のURLだけをリンクとして使用
     function safeURL(value) {
       try {
         const url = new URL(value);
 
-        if (url.protocol === "http:" || url.protocol === "https:") {
+        if (
+          url.protocol === "http:" ||
+          url.protocol === "https:"
+        ) {
           return url.href;
         }
 
@@ -201,7 +209,12 @@
       }
     }
 
-    // 一覧を表示する
+    // 画像ファイルのパスを作成
+    function imagePath(filename) {
+      return "images/" + encodeURIComponent(filename);
+    }
+
+    // 一覧を表示
     function renderItems(data) {
       const container = document.getElementById("items");
       const keyword = document.getElementById("search").value
@@ -227,18 +240,17 @@
         // 公開リンク
         const linkURL = safeURL(item["公開リンク"] || "");
 
-        // 画像ファイル名
+        // 画像
         const filename = (item["画像"] || "").split(/[\\/]/).pop();
 
-        // 画像を表示し、公開リンクがあれば画像自体をリンクにする
         if (filename) {
           const img = document.createElement("img");
 
-          img.src = "images/" + encodeURIComponent(filename);
+          img.src = imagePath(filename);
           img.alt = item["名前"] || "";
           img.loading = "lazy";
 
-          // 画像が見つからない場合は画像だけ非表示にする
+          // 画像が見つからない場合は画像だけ非表示
           img.onerror = () => {
             const parent = img.parentElement;
 
@@ -249,6 +261,7 @@
             }
           };
 
+          // 公開リンクがある場合、画像をクリック可能にする
           if (linkURL) {
             const imageLink = document.createElement("a");
 
@@ -268,24 +281,23 @@
           }
         }
 
-
-        // 名前（公開リンクがあれば名前自体をリンクにする）
-        const linkURL = safeURL(item["公開リンク"] || "");
+        // 名前：公開リンクがあれば名前自体をリンクにする
         const title = document.createElement("h2");
 
         if (linkURL) {
           const titleLink = document.createElement("a");
+
           titleLink.href = linkURL;
           titleLink.textContent = item["名前"] || "名前なし";
           titleLink.target = "_blank";
           titleLink.rel = "noopener noreferrer";
+
           title.appendChild(titleLink);
         } else {
           title.textContent = item["名前"] || "名前なし";
         }
 
         card.appendChild(title);
-
 
         // 備考
         if (item["備考"]) {
