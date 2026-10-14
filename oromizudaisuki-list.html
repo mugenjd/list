@@ -268,22 +268,24 @@
           }
         }
 
-        // 名前
+
+        // 名前（公開リンクがあれば名前自体をリンクにする）
+        const linkURL = safeURL(item["公開リンク"] || "");
         const title = document.createElement("h2");
-        title.textContent = item["名前"] || "名前なし";
+
+        if (linkURL) {
+          const titleLink = document.createElement("a");
+          titleLink.href = linkURL;
+          titleLink.textContent = item["名前"] || "名前なし";
+          titleLink.target = "_blank";
+          titleLink.rel = "noopener noreferrer";
+          title.appendChild(titleLink);
+        } else {
+          title.textContent = item["名前"] || "名前なし";
+        }
+
         card.appendChild(title);
 
-        // 文字リンクも表示する
-        if (linkURL) {
-          const link = document.createElement("a");
-
-          link.href = linkURL;
-          link.textContent = "公開リンクを開く";
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-
-          card.appendChild(link);
-        }
 
         // 備考
         if (item["備考"]) {
