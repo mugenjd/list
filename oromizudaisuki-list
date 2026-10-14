@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>一覧ページ</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    #search {
+      display: block;
+      width: 100%;
+      max-width: 600px;
+      box-sizing: border-box;
+      margin: 20px auto;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    #status {
+      text-align: center;
+      margin: 20px;
+    }
+
+    #items {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 2px 6px #0001;
+      overflow-wrap: anywhere;
+    }
+
+    .card img {
+      display: block;
+      width: 100%;
+      height: 180px;
+      object-fit: contain;
+      background: #eee;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin: 8px 0;
+    }
+
+    .card p {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .card a {
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+<body>
+  <h1>一覧ページ</h1>
+
+  <input
+    id="search"
+    type="search"
+    placeholder="名前で検索..."
+    aria-label="名前で検索"
+  >
+
+  <p id="status">データを読み込み中...</p>
+  <main id="items"></main>
+
+  <script>
+    // CSVを読み込む
+    async function loadCSV() {
+      const response = await fetch("data.csv");
+      if (!response.ok) {
+        throw new Error("data.csv を読み込めませんでした。");
+      }
+
+      // UTF-8 BOMがある場合も処理する
+      const csv = (await response.text()).replace(/^\uFEFF/, "");
+      return parseCSV(csv);
+    }
+
+    // カンマ、引用符、改行を含むCSVに対応
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let quoted = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+
+        if (quoted) {
+          if (ch === '"') {
+            if (text[i + 1] === '"') {
+              cell += '"';
+              i++;
+            } else {
+              quoted = false;
+            }
+          } else {
+            cell += ch;
+          }
+        } else if (ch === '"' && cell === "") {
+          quoted = true;
+        } else if (ch === ",") {
+          row.push(cell);
+          cell = "";
+        } else if (ch === "\n" || ch === "\r") {
+          if (ch === "\r" && text[i + 1] === "\n") i++;
+          row.push(cell);
+          if (row.some(value => value.trim() !== "")) rows.push(row);
+          row = [];
+          cell = "";
+        } else {
+          cell += ch;
+        }
+      }
+
+      row.push(cell);
+      if (row.some(value => value.trim() !== "")) rows.push(row);
+
+      if (rows.length === 0) return [];
+
+      const headers = rows.shift().map(value => value.trim());
+
+      return rows.map(values => {
+        const item = {};
+        headers.forEach((header, i) => {
+          item[header] = (values[i] || "").trim();
+        });
+        return item;
+      });
+    }
+
+    function safeURL(value) {
+      try {
+        const url = new URL(value);
+        return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+      } catch {
+        return "";
+      }
+    }
+
+    function renderItems(data) {
+      const container = document.getElementById("items");
+      const keyword = document.getElementById("search").value
+        .trim()
+        .toLocaleLowerCase();
+
+      container.replaceChildren();
+
+      const filtered = data.filter(item =>
+        (item["名前"] || "").toLocaleLowerCase().includes(keyword)
+      );
+
+      document.getElementById("status").textContent =
+        `${filtered.length} 件表示`;
+
+      filtered.forEach(item => {
+        const card = document.createElement("article");
+        card.className = "card";
+
+        // 画像ファイルは images フォルダから読み込む
+        const filename = (item["画像"] || "").split(/[\\/]/).pop();
+
+        if (filename) {
+          const img = document.createElement("img");
+          img.src = "images/" + encodeURIComponent(filename);
+          img.alt = item["名前"] || "";
+          img.loading = "lazy";
+          img.onerror = () => img.remove();
+          card.appendChild(img);
+        }
+
+        const title = document.createElement("h2");
+        title.textContent = item["名前"] || "名前なし";
+        card.appendChild(title);
+
+        const linkURL = safeURL(item["公開リンク"] || "");
+        if (linkURL) {
+          const link = document.createElement("a");
+          link.href = linkURL;
+          link.textContent = "公開リンクを開く";
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          card.appendChild(link);
+        }
+
+        if (item["備考"]) {
+          const note = document.createElement("p");
+          note.textContent = item["備考"];
+          card.appendChild(note);
+        }
+
+        if (item["更新日時"]) {
+          const date = document.createElement("small");
+          date.textContent = "更新日時：" + item["更新日時"];
+          card.appendChild(date);
+        }
+
+        container.appendChild(card);
+      });
+    }
+
+    async function init() {
+      try {
+        const data = await loadCSV();
+        renderItems(data);
+
+        document.getElementById("search").addEventListener("input", () => {
+          renderItems(data);
+        });
+      } catch (error) {
+        document.getElementById("status").textContent =
+          "読み込みエラー：" + error.message;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
