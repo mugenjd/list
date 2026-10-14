@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ターゲット倉庫 ファイル一覧</title>
+<style>
+:root { color-scheme: light dark; --line: #8885; --panel: #8881; --link: #3984e8; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.6; }
+main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; }
+h1 { font-size: clamp(1.5rem, 4vw, 2rem); margin: 0 0 8px; }
+.note { color: #888; font-size: .92rem; margin: 0 0 20px; }
+.controls { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+input, select, button { font: inherit; padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; background: transparent; }
+input { flex: 1 1 280px; min-width: 0; }
+#count { color: #888; font-size: .9rem; margin: 10px 0; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+table { width: 100%; border-collapse: collapse; min-width: 620px; }
+th, td { padding: 11px 13px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: var(--panel); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: var(--panel); }
+a { color: var(--link); overflow-wrap: anywhere; }
+td.date { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.empty { padding: 24px; text-align: center; color: #888; }
+footer { margin-top: 18px; color: #888; font-size: .85rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>ターゲット倉庫 ファイル一覧</h1>
+  <p class="note">オリジナルのダウンロードページへのリンク・日時・コメントを表示します。</p>
+  <div class="controls">
+    <input id="search" type="search" placeholder="ファイル名・日時・コメントで検索">
+    <select id="sort" aria-label="並び順">
+      <option value="new">日時（新しい順）</option>
+      <option value="old">日時（古い順）</option>
+      <option value="name">ファイル名順</option>
+    </select>
+  </div>
+  <div id="count" aria-live="polite"></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>オリジナル</th><th>日時</th><th>コメント</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <footer>
+    <p>この一覧は提供されたHTMLから抽出したデータです。元サイトの更新は自動反映されません。</p>
+    <p><a href="https://uu.getuploader.com/mugen_target/">元のアップローダーを開く</a></p>
+  </footer>
+</main>
+<script>
+const files = [
+  {
+    "original": "kars.zip",
+    "url": "https://uu.getuploader.com/mugen_target/download/119",
+    "date": "26/02/03 05:21",
+    "comment": "究極の生命体カーズ"
+  },
+  {
+    "original": "abomb_defeatable.zip",
+    "url": "https://uu.getuploader.com/mugen_target/download/118",
+    "date": "26/01/25 22:23",
+    "comment": "defeatable版abomb"
+  },
+  {
+    "original": "HellFlamer.zip",
+    "url": "https://uu.getuploader.com/mugen_target/download/117",
+    "date": "25/11/16 20:33",
+    "comment": "無眠氏　ヘルフレイマー..."
+  },
+  {
+    "original": "yukkurieleven.zip",
+    "url": "https://uu.getuploader.com/mugen_target/download/111",
+    "date": "25/04/06 12:41",
+    "comment": "ゆっくりイレヴン"
+  },
+  {
+    "original": "miniremiBN.zip",
+    "url": "https://uu.getuploader.com/mugen_target/download/110",
+    "date": "25/04/06 12:33",
+    "comment": "みにれみボーナス"
+  },
+  {
+    "original": "レヴィアタンをリバイアサンにするパッチver0.2.zip",
+    "url": "https://uu.getuploader.com/mugen_target/download/109",
+    "date": "25/04/06 12:32",
+    "comment": "影縫氏のレヴィアタン強化パッチ..."
+  },
+  {
+    "original": "MARX_SOUL_AN.Ver1.050.7z",
+    "url": "https://uu.getuploader.com/mugen_target/download/108",
+    "date": "25/03/20 17:34",
+    "comment": "最新版だと思う"
+  },
+  {
+    "original": "Red Mizuchi Arremer.zip",
+    "url": "https://uu.getuploader.com/mugen_target/download/107",
+    "date": "25/03/11 21:24",
+    "comment": ""
+  },
+  {
+    "original": "12pRonald.zip",
+    "url": "https://uu.getuploader.com/mugen_target/download/106",
+    "date": "25/03/09 23:19",
+    "comment": ""
+  },
+  {
+    "original": "数学kfm詰め合わせパック.zip",
+    "url": "https://uu.getuploader.com/mugen_target/download/105",
+    "date": "25/03/07 19:51",
+    "comment": "いる？"
+  },
+  {
+    "original": "The Evil Emperor DIO_old.zip",
+    "url": "https://uu.getuploader.com/mugen_target/download/104",
+    "date": "25/02/25 20:26",
+    "comment": "邪悪なる帝王DIO(即死した頃のver)..."
+  },
+  {
+    "original": "phantom killer nanaya EX.zip",
+    "url": "https://uu.getuploader.com/mugen_target/download/103",
+    "date": "25/02/22 15:15",
+    "comment": "通り魔七夜EX"
+  },
+  {
+    "original": "rumine.zip",
+    "url": "https://uu.getuploader.com/mugen_target/download/101",
+    "date": "25/02/18 20:45",
+    "comment": ""
+  },
+  {
+    "original": "Ash zako.zip",
+    "url": "https://uu.getuploader.com/mugen_target/download/99",
+    "date": "25/01/08 21:57",
+    "comment": "Ash zako"
+  },
+  {
+    "original": "FBColonel.zip",
+    "url": "https://uu.getuploader.com/mugen_target/download/98",
+    "date": "25/01/08 21:56",
+    "comment": "Final Blood Colonel"
+  }
+];
+const search = document.getElementById('search');
+const sort = document.getElementById('sort');
+const rows = document.getElementById('rows');
+const count = document.getElementById('count');
+
+function dateKey(s) {
+  const [d, t] = s.split(' ');
+  const [yy, mm, dd] = d.split('/').map(Number);
+  return new Date(2000 + yy, mm - 1, dd, ...(t || '00:00').split(':').map(Number)).getTime();
+}
+function render() {
+  const q = search.value.trim().toLocaleLowerCase();
+  let list = files.filter(f => [f.original, f.date, f.comment].join(' ').toLocaleLowerCase().includes(q));
+  if (sort.value === 'new') list.sort((a,b) => dateKey(b.date)-dateKey(a.date));
+  if (sort.value === 'old') list.sort((a,b) => dateKey(a.date)-dateKey(b.date));
+  if (sort.value === 'name') list.sort((a,b) => a.original.localeCompare(b.original, 'ja'));
+  rows.replaceChildren();
+  for (const f of list) {
+    const tr = document.createElement('tr');
+    const nameCell = document.createElement('td');
+    const link = document.createElement('a');
+    link.href = f.url; link.textContent = f.original;
+    link.target = '_blank'; link.rel = 'noopener noreferrer';
+    nameCell.append(link);
+    const dateCell = document.createElement('td');
+    dateCell.className = 'date'; dateCell.textContent = f.date;
+    const commentCell = document.createElement('td');
+    commentCell.textContent = f.comment || '—';
+    tr.append(nameCell, dateCell, commentCell);
+    rows.append(tr);
+  }
+  count.textContent = `${list.length} 件 / 全 ${files.length} 件`;
+  if (!list.length) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 3; td.className = 'empty'; td.textContent = '該当する項目がありません。';
+    tr.append(td); rows.append(tr);
+  }
+}
+search.addEventListener('input', render);
+sort.addEventListener('change', render);
+render();
+</script>
+</body>
+</html>
