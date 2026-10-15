@@ -19,7 +19,8 @@ ROOT = Path(__file__).resolve().parent
 SITES_FILE = ROOT / "sites.txt"
 OUTPUT_FILE = ROOT / "articles.json"
 LOG_FILE = ROOT / "fetch-log.txt"
-MAX_PER_SITE = 20
+MAX_PER_SITE = 5
+MAX_SCAN_PER_SITE = 100
 TIMEOUT = 18
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; MugenBlogArticleIndex/1.0; +https://github.com/)"
@@ -55,6 +56,18 @@ def parse_date(value):
             return dt.astimezone(timezone.utc).isoformat()
         except Exception:
             return ""
+
+def is_future_date(value, now=None):
+    """Return True only when a parseable publication date is later than now (UTC)."""
+    if not value:
+        return False
+    try:
+        dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc) > (now or datetime.now(timezone.utc))
+    except (TypeError, ValueError):
+        return False
 
 def fetch(url):
     try:
@@ -105,7 +118,13 @@ def feed_candidates(site_url, homepage_html=None):
     if "livedoor.blog" in host or host == "blog.livedoor.jp":
         candidates += [origin + "/index.rdf", origin + "/atom.xml", origin + "/rss"]
     if "seesaa.net" in host:
-        candidates += [origin + "/index.rdf", origin + "/atom.xml", origin + "/rss"]
+        # Seesaa documents index.rdf (RSS/RDF) and index20.rdf (RSS 2.0).
+        candidates += [
+            origin + "/index20.rdf",
+            origin + "/index.rdf",
+            origin + "/atom.xml",
+            origin + "/rss",
+        ]
     if "ameblo.jp" in host:
         candidates += [origin + "/rss.html", origin + "/atom.xml"]
 
@@ -121,13 +140,15 @@ def parse_feed(feed_url, site_url):
         return []
     blog_name = parsed.feed.get("title") or get_site_name(site_url)
     out = []
-    for entry in parsed.entries[:MAX_PER_SITE]:
+    for entry in parsed.entries[:MAX_SCAN_PER_SITE]:
         link = entry.get("link")
         title = (entry.get("title") or "").strip()
         if not link or not title:
             continue
         date = parse_date(entry.get("published_parsed") or entry.get("updated_parsed")
                           or entry.get("published") or entry.get("updated"))
+        if is_future_date(date):
+            continue
         out.append({
             "title": BeautifulSoup(title, "html.parser").get_text(" ", strip=True),
             "url": urljoin(feed_url, link),
@@ -180,7 +201,11 @@ def parse_homepage(site_url):
     if not anchors:
         anchors = soup.find_all("a", href=True)
 
+    scanned = 0
     for a in anchors:
+        scanned += 1
+        if scanned > MAX_SCAN_PER_SITE:
+            break
         title = a.get_text(" ", strip=True)
         href = urljoin(actual_home, a.get("href", ""))
         href = normalize_url(href)
@@ -208,6 +233,9 @@ def parse_homepage(site_url):
                     except ValueError:
                         pass
 
+        if is_future_date(published):
+            continue
+
         out.append({
             "title": title,
             "url": href,
@@ -216,8 +244,6 @@ def parse_homepage(site_url):
             "published": published,
             "source": "HTML",
         })
-        if len(out) >= MAX_PER_SITE:
-            break
     return out
 
 def stable_id(item):
@@ -267,9 +293,23 @@ def main():
         print(f"[{i}/{len(sites)}] {site}: {len(articles)} articles")
         time.sleep(0.25)  # be polite to the sites
 
+    # Exclude future-dated entries and retain at most five articles per blog.
+    now = datetime.now(timezone.utc)
+    per_site = {}
+    for item in all_articles:
+        if is_future_date(item.get("published"), now):
+            continue
+        per_site.setdefault(item.get("site_url") or item.get("site") or "", []).append(item)
+
+    limited_articles = []
+    for site_items in per_site.values():
+        # Known publication dates first, newest first; undated items follow.
+        site_items.sort(key=lambda x: (bool(x.get("published")), x.get("published") or ""), reverse=True)
+        limited_articles.extend(site_items[:MAX_PER_SITE])
+
     # Deduplicate by canonical URL.
     deduped = {}
-    for item in all_articles:
+    for item in limited_articles:
         item["id"] = stable_id(item)
         key = normalize_url(item["url"])
         if key not in deduped:
