@@ -1,0 +1,42 @@
+name: Update blog articles
+
+on:
+  schedule:
+    - cron: "17 16 * * *" # 毎日 01:17 JST (UTC 16:17)
+  workflow_dispatch:
+  push:
+    paths:
+      - "sites.txt"
+      - "fetch_articles.py"
+      - "requirements.txt"
+      - ".github/workflows/update.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-blog-articles
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Fetch articles
+        run: python fetch_articles.py
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add articles.json fetch-log.txt
+          git diff --cached --quiet || git commit -m "Update blog articles"
+          git push
