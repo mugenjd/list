@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MUGENブログ新着記事一覧</title>
+<style>
+:root{color-scheme:light dark;--border: #8885;--muted:#777}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6}
+header{padding:24px 16px;background:#202b3b;color:white}header .wrap,main{max-width:1000px;margin:auto}
+h1{font-size:1.65rem;margin:0 0 4px}.sub{opacity:.8;font-size:.92rem}
+main{padding:18px 14px 40px}.controls{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 18px}
+input,select,button{font:inherit;padding:10px;border:1px solid var(--border);border-radius:8px;background:transparent}
+input{flex:1;min-width:220px}.count{color:var(--muted);font-size:.9rem}
+article{border:1px solid var(--border);border-radius:10px;padding:14px;margin:10px 0}
+article h2{font-size:1.05rem;line-height:1.45;margin:0 0 7px}
+article h2 a{text-decoration:none}article h2 a:hover{text-decoration:underline}
+.meta{font-size:.84rem;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
+.badge{border:1px solid var(--border);border-radius:999px;padding:1px 8px}
+#status{padding:14px;color:var(--muted)}.empty{padding:30px;text-align:center;color:var(--muted)}
+footer{padding:20px;text-align:center;color:var(--muted);font-size:.8rem}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>MUGENブログ新着記事一覧</h1>
+  <div class="sub">登録ブログのRSS・記事一覧ページから新着情報を集約</div>
+</div></header>
+<main>
+  <div id="status">記事データを読み込んでいます…</div>
+  <div class="controls">
+    <input id="search" type="search" placeholder="記事タイトル・ブログ名で検索">
+    <select id="siteFilter"><option value="">すべてのブログ</option></select>
+    <select id="sort"><option value="new">新しい順</option><option value="old">古い順</option></select>
+  </div>
+  <div id="summary" class="count"></div>
+  <section id="articles"></section>
+  <div id="empty" class="empty" hidden>該当する記事がありません。</div>
+</main>
+<footer>記事の著作権は各ブログの運営者に帰属します。タイトルをクリックすると元記事へ移動します。</footer>
+<script>
+const $ = s => document.querySelector(s);
+let all = [];
+function dateText(value) {
+  if (!value) return "日時不明";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "日時不明";
+  return new Intl.DateTimeFormat("ja-JP",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",timeZone:"Asia/Tokyo"}).format(d);
+}
+function render() {
+  const q = $("#search").value.trim().toLocaleLowerCase();
+  const site = $("#siteFilter").value;
+  const direction = $("#sort").value === "old" ? 1 : -1;
+  const rows = all.filter(a => (!site || a.site === site) &&
+      (!q || (a.title+" "+a.site).toLocaleLowerCase().includes(q)));
+  rows.sort((a,b) => {
+    const da = a.published ? Date.parse(a.published) : 0;
+    const db = b.published ? Date.parse(b.published) : 0;
+    return (da-db)*direction;
+  });
+  $("#summary").textContent = `${rows.length.toLocaleString()}件 / 全${all.length.toLocaleString()}件`;
+  $("#articles").replaceChildren();
+  $("#empty").hidden = rows.length !== 0;
+  const frag = document.createDocumentFragment();
+  for (const a of rows) {
+    const card = document.createElement("article");
+    const h = document.createElement("h2");
+    const link = document.createElement("a");
+    link.href = a.url; link.target = "_blank"; link.rel = "noopener noreferrer";
+    link.textContent = a.title || "(タイトルなし)";
+    h.append(link);
+    const meta = document.createElement("div"); meta.className = "meta";
+    const blog = document.createElement("span"); blog.textContent = a.site || "ブログ名不明";
+    const date = document.createElement("span"); date.textContent = dateText(a.published);
+    const source = document.createElement("span"); source.className = "badge"; source.textContent = a.source || "取得";
+    meta.append(blog,date,source); card.append(h,meta); frag.append(card);
+  }
+  $("#articles").append(frag);
+}
+async function start() {
+  try {
+    const res = await fetch("./articles.json?ts="+Date.now());
+    if (!res.ok) throw new Error("articles.json を取得できませんでした");
+    const data = await res.json();
+    all = Array.isArray(data.articles) ? data.articles : [];
+    const sites = [...new Set(all.map(a=>a.site).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"ja"));
+    for (const s of sites) {
+      const o = document.createElement("option"); o.value=s; o.textContent=s; $("#siteFilter").append(o);
+    }
+    $("#status").textContent = `最終更新：${dateText(data.updated_at)}（JST）／登録サイト ${data.site_count ?? "?"}件`;
+    render();
+  } catch(e) {
+    $("#status").textContent = "記事データを読み込めませんでした。GitHub Actions の実行結果と articles.json を確認してください。";
+    console.error(e);
+  }
+}
+$("#search").addEventListener("input",render);
+$("#siteFilter").addEventListener("change",render);
+$("#sort").addEventListener("change",render);
+start();
+</script>
+</body>
+</html>
