@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>オロミズ大好き氏キャラ一覧</title>
+  <title>一覧ページ</title>
 
   <style>
     body {
@@ -18,16 +18,10 @@
     h1 {
       text-align: center;
     }
-/* 名前欄の幅を調整 */
-th:nth-child(2),
-td:nth-child(2) {
-  width: 140px;
-  max-width: 140px;
-  overflow-wrap: anywhere;
-}
+
     #search {
       display: block;
-      width: 100%;
+      width: 90%;
       max-width: 600px;
       box-sizing: border-box;
       margin: 20px auto;
@@ -36,12 +30,17 @@ td:nth-child(2) {
     }
 
     #status {
-      margin: 12px 0;
+      width: 90%;
+      max-width: 1200px;
+      margin: 12px auto;
       color: #555;
+      font-size: 15px;
     }
 
     .table-container {
-      width: 100%;
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
       overflow-x: auto;
       background: white;
       border-radius: 6px;
@@ -49,22 +48,23 @@ td:nth-child(2) {
 
     table {
       width: 100%;
-      border-collapse: collapse;
       min-width: 650px;
+      table-layout: fixed;
+      border-collapse: collapse;
     }
 
-th, td {
-  padding: 6px;
-  border: 1px solid #ddd;
-  text-align: left;
-  vertical-align: middle;
-  overflow-wrap: anywhere;
-  font-size: 13px;
-}
+    th,
+    td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+      vertical-align: middle;
+      overflow-wrap: anywhere;
+      font-size: 15px;
+    }
 
     th {
       background: #eaeaea;
-      white-space: nowrap;
     }
 
     th button {
@@ -81,42 +81,72 @@ th, td {
       text-decoration: underline;
     }
 
-    td.image-cell {
-      width: 100px;
-      text-align: center;
+    /* 画像欄 */
+    th:nth-child(1),
+    td:nth-child(1) {
+      width: 130px;
     }
 
-.item-image {
-  width: 140px;
-  height: 140px;
-  object-fit: contain;
-  background: #f0f0f0;
-  border-radius: 4px;
-}
+    /* 名前欄：広め */
+    th:nth-child(2),
+    td:nth-child(2) {
+      width: 35%;
+      min-width: 200px;
+      overflow-wrap: anywhere;
+    }
 
-    a {
-      color: #0645ad;
+    /* 備考欄：狭め */
+    th:nth-child(3),
+    td:nth-child(3) {
+      width: 20%;
+      max-width: 220px;
+    }
+
+    /* 更新日時欄：狭め */
+    th:nth-child(4),
+    td:nth-child(4) {
+      width: 130px;
+    }
+
+    .item-image {
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+      background: #f0f0f0;
+      border-radius: 4px;
+    }
+
+    .image-cell {
+      text-align: center;
     }
 
     .name-link {
       font-weight: bold;
     }
 
-.notes {
-  white-space: pre-wrap;
-  min-width: 80px;
-  max-width: 200px;
-}
+    .notes {
+      white-space: pre-wrap;
+    }
 
     .date-cell {
-      white-space: nowrap;
-      min-width: 120px;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+
+      .table-container,
+      #status {
+        width: 100%;
+      }
     }
   </style>
 </head>
 
 <body>
-  <h1>オロミズ大好き氏キャラ一覧</h1>
+  <h1>一覧ページ</h1>
 
   <input
     id="search"
@@ -151,6 +181,8 @@ th, td {
 
   <script>
     let allItems = [];
+
+    // 初期表示：更新日時の降順
     let sortKey = "更新日時";
     let sortDirection = -1;
 
@@ -255,10 +287,7 @@ th, td {
 
     // 画像ファイルのパスを作成
     function imagePath(filename) {
-      return "images/" + filename
-        .split("/")
-        .map(part => encodeURIComponent(part))
-        .join("/");
+      return "images/" + encodeURIComponent(filename);
     }
 
     // 日付を比較用の数値に変換
@@ -267,7 +296,6 @@ th, td {
         return null;
       }
 
-      // YYYY/MM/DD、YYYY-MM-DD、YYYY.MM.DD に対応
       const match = value.match(
         /^(\d{4})[\/.-](\d{1,2})[\/.-](\d{1,2})$/
       );
@@ -309,16 +337,20 @@ th, td {
           const dateA = parseDate(a["更新日時"]);
           const dateB = parseDate(b["更新日時"]);
 
-          // 日付がないデータは常に最後に表示
+          // 日付がないデータは常に最後
           if (dateA === null && dateB === null) {
-            result = 0;
-          } else if (dateA === null) {
-            return 1;
-          } else if (dateB === null) {
-            return -1;
-          } else {
-            result = dateA - dateB;
+            return 0;
           }
+
+          if (dateA === null) {
+            return 1;
+          }
+
+          if (dateB === null) {
+            return -1;
+          }
+
+          result = dateA - dateB;
         }
 
         return result * sortDirection;
@@ -334,6 +366,7 @@ th, td {
 
       container.replaceChildren();
 
+      // 名前だけで検索
       const filtered = allItems.filter(item =>
         (item["名前"] || "")
           .toLocaleLowerCase()
@@ -375,6 +408,7 @@ th, td {
 
           if (linkURL) {
             const imageLink = document.createElement("a");
+
             imageLink.href = linkURL;
             imageLink.target = "_blank";
             imageLink.rel = "noopener noreferrer";
@@ -427,7 +461,7 @@ th, td {
         container.appendChild(tr);
       });
 
-      // 現在の並べ替え方向を表示
+      // 並べ替えボタンの表示
       document.getElementById("sort-name").textContent =
         "名前 " +
         (sortKey === "名前"
@@ -441,7 +475,7 @@ th, td {
           : "↕");
     }
 
-    // 名前の並べ替えボタン
+    // 名前の並べ替え
     document.getElementById("sort-name").addEventListener(
       "click",
       () => {
@@ -456,7 +490,7 @@ th, td {
       }
     );
 
-    // 更新日時の並べ替えボタン
+    // 更新日時の並べ替え
     document.getElementById("sort-date").addEventListener(
       "click",
       () => {
