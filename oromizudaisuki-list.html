@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -29,65 +30,79 @@
     }
 
     #status {
-      text-align: center;
-      margin: 20px;
+      margin: 12px 0;
+      color: #555;
     }
 
-    #items {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
-    }
-
-    .card {
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
       background: white;
-      border-radius: 8px;
-      padding: 12px;
-      box-shadow: 0 2px 6px #0001;
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 650px;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+      vertical-align: middle;
       overflow-wrap: anywhere;
     }
 
-    .card img {
-      display: block;
-      width: 100%;
-      height: 180px;
-      object-fit: contain;
-      background: #eee;
-      border-radius: 4px;
-      margin-bottom: 10px;
+    th {
+      background: #eaeaea;
+      white-space: nowrap;
     }
 
-    .card a.image-link {
-      display: block;
+    th button {
+      border: none;
+      background: none;
+      color: #222;
+      font: inherit;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 0;
     }
 
-    .card a.image-link:hover img {
-      opacity: 0.8;
-    }
-
-    .card h2 {
-      font-size: 18px;
-      margin: 8px 0;
-    }
-
-    .card h2 a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .card h2 a:hover {
+    th button:hover {
       text-decoration: underline;
     }
 
-    .card p {
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
+    td.image-cell {
+      width: 100px;
+      text-align: center;
     }
 
-    .card small {
-      display: block;
-      margin-top: 10px;
-      color: #666;
+    .item-image {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+      background: #f0f0f0;
+      border-radius: 4px;
+    }
+
+    a {
+      color: #0645ad;
+    }
+
+    .name-link {
+      font-weight: bold;
+    }
+
+    .notes {
+      white-space: pre-wrap;
+      min-width: 150px;
+    }
+
+    .date-cell {
+      white-space: nowrap;
+      min-width: 120px;
     }
   </style>
 </head>
@@ -103,26 +118,49 @@
   >
 
   <p id="status">データを読み込み中...</p>
-  <main id="items"></main>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>画像</th>
+          <th>
+            <button id="sort-name" type="button">
+              名前 ↕
+            </button>
+          </th>
+          <th>備考</th>
+          <th>
+            <button id="sort-date" type="button">
+              更新日時 ↕
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="items"></tbody>
+    </table>
+  </div>
 
   <script>
+    let allItems = [];
+    let sortKey = "名前";
+    let sortDirection = 1;
+
     // CSVを読み込む
     async function loadCSV() {
       const response = await fetch("oromizudaisuki-data.csv");
 
       if (!response.ok) {
         throw new Error(
-          "data.csv を読み込めませんでした。ファイル名と配置を確認してください。"
+          "csv を読み込めません。ファイル名と配置を確認してください。"
         );
       }
 
-      // UTF-8 BOMがある場合も処理する
       const csv = (await response.text()).replace(/^\uFEFF/, "");
-
       return parseCSV(csv);
     }
 
-    // CSV解析：カンマ、引用符、セル内の改行に対応
+    // CSV解析：カンマ、引用符、セル内改行に対応
     function parseCSV(text) {
       const rows = [];
       let row = [];
@@ -166,7 +204,6 @@
         }
       }
 
-      // 最終行を処理
       row.push(cell);
 
       if (row.some(value => value.trim() !== "")) {
@@ -190,7 +227,7 @@
       });
     }
 
-    // HTTP / HTTPS のURLだけをリンクとして使用
+    // HTTP / HTTPS のURLだけを許可
     function safeURL(value) {
       try {
         const url = new URL(value);
@@ -210,11 +247,78 @@
 
     // 画像ファイルのパスを作成
     function imagePath(filename) {
-      return "images/" + encodeURIComponent(filename);
+      return "images/" + filename
+        .split("/")
+        .map(part => encodeURIComponent(part))
+        .join("/");
+    }
+
+    // 日付を比較用の数値に変換
+    function parseDate(value) {
+      if (!value) {
+        return null;
+      }
+
+      // YYYY/MM/DD、YYYY-MM-DD、YYYY.MM.DD に対応
+      const match = value.match(
+        /^(\d{4})[\/.-](\d{1,2})[\/.-](\d{1,2})$/
+      );
+
+      if (match) {
+        const year = Number(match[1]);
+        const month = Number(match[2]);
+        const day = Number(match[3]);
+
+        const date = new Date(year, month - 1, day);
+
+        if (
+          date.getFullYear() === year &&
+          date.getMonth() === month - 1 &&
+          date.getDate() === day
+        ) {
+          return date.getTime();
+        }
+
+        return null;
+      }
+
+      const timestamp = Date.parse(value);
+      return Number.isNaN(timestamp) ? null : timestamp;
+    }
+
+    // 並べ替え
+    function sortItems(items) {
+      return [...items].sort((a, b) => {
+        let result = 0;
+
+        if (sortKey === "名前") {
+          result = (a["名前"] || "").localeCompare(
+            b["名前"] || "",
+            "ja",
+            { numeric: true, sensitivity: "base" }
+          );
+        } else {
+          const dateA = parseDate(a["更新日時"]);
+          const dateB = parseDate(b["更新日時"]);
+
+          // 日付がないデータは常に最後に表示
+          if (dateA === null && dateB === null) {
+            result = 0;
+          } else if (dateA === null) {
+            return 1;
+          } else if (dateB === null) {
+            return -1;
+          } else {
+            result = dateA - dateB;
+          }
+        }
+
+        return result * sortDirection;
+      });
     }
 
     // 一覧を表示
-    function renderItems(data) {
+    function renderItems() {
       const container = document.getElementById("items");
       const keyword = document.getElementById("search").value
         .trim()
@@ -222,34 +326,35 @@
 
       container.replaceChildren();
 
-      // 名前だけを検索対象にする
-      const filtered = data.filter(item =>
+      const filtered = allItems.filter(item =>
         (item["名前"] || "")
           .toLocaleLowerCase()
           .includes(keyword)
       );
 
+      const sorted = sortItems(filtered);
+
       document.getElementById("status").textContent =
-        `${filtered.length} 件表示`;
+        `${sorted.length} 件表示`;
 
-      filtered.forEach(item => {
-        const card = document.createElement("article");
-        card.className = "card";
-
-        // 公開リンク
+      sorted.forEach(item => {
+        const tr = document.createElement("tr");
         const linkURL = safeURL(item["公開リンク"] || "");
 
         // 画像
+        const imageCell = document.createElement("td");
+        imageCell.className = "image-cell";
+
         const filename = (item["画像"] || "").split(/[\\/]/).pop();
 
         if (filename) {
           const img = document.createElement("img");
 
+          img.className = "item-image";
           img.src = imagePath(filename);
           img.alt = item["名前"] || "";
           img.loading = "lazy";
 
-          // 画像が見つからない場合は画像だけ非表示
           img.onerror = () => {
             const parent = img.parentElement;
 
@@ -260,11 +365,8 @@
             }
           };
 
-          // 公開リンクがある場合、画像をクリック可能にする
           if (linkURL) {
             const imageLink = document.createElement("a");
-
-            imageLink.className = "image-link";
             imageLink.href = linkURL;
             imageLink.target = "_blank";
             imageLink.rel = "noopener noreferrer";
@@ -274,59 +376,104 @@
             );
 
             imageLink.appendChild(img);
-            card.appendChild(imageLink);
+            imageCell.appendChild(imageLink);
           } else {
-            card.appendChild(img);
+            imageCell.appendChild(img);
           }
         }
 
-        // 名前：公開リンクがあれば名前自体をリンクにする
-        const title = document.createElement("h2");
+        tr.appendChild(imageCell);
+
+        // 名前：クリックすると公開リンクを開く
+        const nameCell = document.createElement("td");
+        const name = item["名前"] || "名前なし";
 
         if (linkURL) {
-          const titleLink = document.createElement("a");
+          const nameLink = document.createElement("a");
 
-          titleLink.href = linkURL;
-          titleLink.textContent = item["名前"] || "名前なし";
-          titleLink.target = "_blank";
-          titleLink.rel = "noopener noreferrer";
+          nameLink.className = "name-link";
+          nameLink.href = linkURL;
+          nameLink.textContent = name;
+          nameLink.target = "_blank";
+          nameLink.rel = "noopener noreferrer";
 
-          title.appendChild(titleLink);
+          nameCell.appendChild(nameLink);
         } else {
-          title.textContent = item["名前"] || "名前なし";
+          nameCell.textContent = name;
         }
 
-        card.appendChild(title);
+        tr.appendChild(nameCell);
 
         // 備考
-        if (item["備考"]) {
-          const note = document.createElement("p");
-          note.textContent = item["備考"];
-          card.appendChild(note);
-        }
+        const notesCell = document.createElement("td");
+        notesCell.className = "notes";
+        notesCell.textContent = item["備考"] || "";
+        tr.appendChild(notesCell);
 
         // 更新日時
-        if (item["更新日時"]) {
-          const date = document.createElement("small");
-          date.textContent = "更新日時：" + item["更新日時"];
-          card.appendChild(date);
+        const dateCell = document.createElement("td");
+        dateCell.className = "date-cell";
+        dateCell.textContent = item["更新日時"] || "";
+        tr.appendChild(dateCell);
+
+        container.appendChild(tr);
+      });
+
+      // 現在の並べ替え方向を表示
+      document.getElementById("sort-name").textContent =
+        "名前 " +
+        (sortKey === "名前"
+          ? (sortDirection === 1 ? "↑" : "↓")
+          : "↕");
+
+      document.getElementById("sort-date").textContent =
+        "更新日時 " +
+        (sortKey === "更新日時"
+          ? (sortDirection === 1 ? "↑" : "↓")
+          : "↕");
+    }
+
+    // 名前の並べ替えボタン
+    document.getElementById("sort-name").addEventListener(
+      "click",
+      () => {
+        if (sortKey === "名前") {
+          sortDirection *= -1;
+        } else {
+          sortKey = "名前";
+          sortDirection = 1;
         }
 
-        container.appendChild(card);
-      });
-    }
+        renderItems();
+      }
+    );
+
+    // 更新日時の並べ替えボタン
+    document.getElementById("sort-date").addEventListener(
+      "click",
+      () => {
+        if (sortKey === "更新日時") {
+          sortDirection *= -1;
+        } else {
+          sortKey = "更新日時";
+          sortDirection = 1;
+        }
+
+        renderItems();
+      }
+    );
 
     // 初期化
     async function init() {
       try {
-        const data = await loadCSV();
-
-        renderItems(data);
+        allItems = await loadCSV();
 
         document.getElementById("search").addEventListener(
           "input",
-          () => renderItems(data)
+          renderItems
         );
+
+        renderItems();
       } catch (error) {
         document.getElementById("status").textContent =
           "読み込みエラー：" + error.message;
