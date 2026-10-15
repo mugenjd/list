@@ -5,6 +5,7 @@ OK RSS	https://bubbleisland.hatenablog.com	https://bubbleisland.hatenablog.com/f
 OK RSS	https://unitokagaming8528.fc2.net	https://unitokagaming8528.fc2.net/?xml	5
 OK RSS	https://ameblo.jp/emeruda/atom.xml	https://ameblo.jp/emeruda/atom.xml	10
 OK RSS	https://optica.livedoor.blog	https://optica.livedoor.blog/index.rdf	9
+OK RSS	https://oromizudaisuki.hatenablog.com	https://oromizudaisuki.hatenablog.com/feed	7
 OK RSS	https://momoma.hatenablog.com	https://momoma.hatenablog.com/feed	28
 OK RSS	https://oromizudaisuki.blog.fc2.com	https://oromizudaisuki.blog.fc2.com/?xml	5
 OK RSS	https://monsoon08.livedoor.blog	https://monsoon08.livedoor.blog/index.rdf	8
@@ -108,7 +109,6 @@ OK RSS	http://kyouti.blog17.fc2.com	http://kyouti.blog17.fc2.com/?xml	5
 OK RSS	https://kontonnokotowari.blog.jp	https://kontonnokotowari.blog.jp/index.rdf	8
 OK RSS	http://celesta162.blog38.fc2.com	http://celesta162.blog38.fc2.com/?xml	5
 OK RSS	http://whiteredmoon2.blog.fc2.com	http://whiteredmoon2.blog.fc2.com/?xml	5
-FAIL	http://blog.livedoor.jp/reddosukato/	No RSS entries or article links found
 OK RSS	http://minormugen.blog.fc2.com	http://minormugen.blog.fc2.com/?xml	5
 OK RSS	http://mojackmugen.blog.fc2.com	http://mojackmugen.blog.fc2.com/?xml	5
 OK RSS	http://regmugen.blog.fc2.com	http://regmugen.blog.fc2.com/?xml	5
@@ -131,7 +131,6 @@ OK RSS	https://xboxaruhuraito.hatenadiary.com	https://xboxaruhuraito.hatenadiary
 OK RSS	http://zetzetzetzet.blog.fc2blog.us	http://zetzetzetzet.blog.fc2blog.us/?xml	5
 OK RSS	http://tmtonantoka.blog.fc2.com	http://tmtonantoka.blog.fc2.com/?xml	5
 OK RSS	http://ltpgp.blog.fc2.com	http://ltpgp.blog.fc2.com/?xml	5
-FAIL	https://s-e-t-o.blog.jp	No RSS entries or article links found
 OK RSS	http://skeleton12.blog.fc2.com	http://skeleton12.blog.fc2.com/?xml	5
 OK RSS	https://sinomugen.fc2.net	https://sinomugen.fc2.net/?xml	5
 OK RSS	http://siegfried8823.blog59.fc2.com	http://siegfried8823.blog59.fc2.com/?xml	3
