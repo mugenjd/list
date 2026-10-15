@@ -1,103 +1,953 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MUGENブログ新着記事一覧</title>
-<style>
-:root{color-scheme:light dark;--border: #8885;--muted:#777}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6}
-header{padding:24px 16px;background:#202b3b;color:white}header .wrap,main{max-width:1000px;margin:auto}
-h1{font-size:1.65rem;margin:0 0 4px}.sub{opacity:.8;font-size:.92rem}
-main{padding:18px 14px 40px}.controls{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 18px}
-input,select,button{font:inherit;padding:10px;border:1px solid var(--border);border-radius:8px;background:transparent}
-input{flex:1;min-width:220px}.count{color:var(--muted);font-size:.9rem}
-article{border:1px solid var(--border);border-radius:10px;padding:14px;margin:10px 0}
-article h2{font-size:1.05rem;line-height:1.45;margin:0 0 7px}
-article h2 a{text-decoration:none}article h2 a:hover{text-decoration:underline}
-.meta{font-size:.84rem;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
-.badge{border:1px solid var(--border);border-radius:999px;padding:1px 8px}
-#status{padding:14px;color:var(--muted)}.empty{padding:30px;text-align:center;color:var(--muted)}
-footer{padding:20px;text-align:center;color:var(--muted);font-size:.8rem}
-</style>
-</head>
-<body>
-<header><div class="wrap">
-  <h1>MUGENブログ新着記事一覧</h1>
-  <div class="sub">登録ブログのRSS・記事一覧ページから新着情報を集約</div>
-</div></header>
-<main>
-  <div id="status">記事データを読み込んでいます…</div>
-  <div class="controls">
-    <input id="search" type="search" placeholder="記事タイトル・ブログ名で検索">
-    <select id="siteFilter"><option value="">すべてのブログ</option></select>
-    <select id="sort"><option value="new">新しい順</option><option value="old">古い順</option></select>
-  </div>
-  <div id="summary" class="count"></div>
-  <section id="articles"></section>
-  <div id="empty" class="empty" hidden>該当する記事がありません。</div>
-</main>
-<footer>記事の著作権は各ブログの運営者に帰属します。タイトルをクリックすると元記事へ移動します。</footer>
-<script>
-const $ = s => document.querySelector(s);
-let all = [];
-function dateText(value) {
-  if (!value) return "日時不明";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "日時不明";
-  return new Intl.DateTimeFormat("ja-JP",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",timeZone:"Asia/Tokyo"}).format(d);
-}
-function render() {
-  const q = $("#search").value.trim().toLocaleLowerCase();
-  const site = $("#siteFilter").value;
-  const direction = $("#sort").value === "old" ? 1 : -1;
-  const rows = all.filter(a => (!site || a.site === site) &&
-      (!q || (a.title+" "+a.site).toLocaleLowerCase().includes(q)));
-  rows.sort((a,b) => {
-    const da = a.published ? Date.parse(a.published) : 0;
-    const db = b.published ? Date.parse(b.published) : 0;
-    return (da-db)*direction;
-  });
-  $("#summary").textContent = `${rows.length.toLocaleString()}件 / 全${all.length.toLocaleString()}件`;
-  $("#articles").replaceChildren();
-  $("#empty").hidden = rows.length !== 0;
-  const frag = document.createDocumentFragment();
-  for (const a of rows) {
-    const card = document.createElement("article");
-    const h = document.createElement("h2");
-    const link = document.createElement("a");
-    link.href = a.url; link.target = "_blank"; link.rel = "noopener noreferrer";
-    link.textContent = a.title || "(タイトルなし)";
-    h.append(link);
-    const meta = document.createElement("div"); meta.className = "meta";
-    const blog = document.createElement("span"); blog.textContent = a.site || "ブログ名不明";
-    const date = document.createElement("span"); date.textContent = dateText(a.published);
-    const source = document.createElement("span"); source.className = "badge"; source.textContent = a.source || "取得";
-    meta.append(blog,date,source); card.append(h,meta); frag.append(card);
-  }
-  $("#articles").append(frag);
-}
-async function start() {
-  try {
-    const res = await fetch("./articles.json?ts="+Date.now());
-    if (!res.ok) throw new Error("articles.json を取得できませんでした");
-    const data = await res.json();
-    all = Array.isArray(data.articles) ? data.articles : [];
-    const sites = [...new Set(all.map(a=>a.site).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"ja"));
-    for (const s of sites) {
-      const o = document.createElement("option"); o.value=s; o.textContent=s; $("#siteFilter").append(o);
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube動画検索</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
     }
-    $("#status").textContent = `最終更新：${dateText(data.updated_at)}（JST）／登録サイト ${data.site_count ?? "?"}件`;
-    render();
-  } catch(e) {
-    $("#status").textContent = "記事データを読み込めませんでした。GitHub Actions の実行結果と articles.json を確認してください。";
-    console.error(e);
-  }
-}
-$("#search").addEventListener("input",render);
-$("#siteFilter").addEventListener("change",render);
-$("#sort").addEventListener("change",render);
-start();
-</script>
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: sans-serif;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    .search-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #fff;
+      border-radius: 8px;
+    }
+
+    .search-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    input,
+    select,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 40px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: #fff;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .reset-button {
+      align-self: end;
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 0;
+      border-radius: 5px;
+      background: #333;
+      color: #fff;
+    }
+
+    #status {
+      margin: 16px 0;
+      color: #555;
+    }
+
+    #video-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .video-card {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      height: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 1px 4px #00000012;
+    }
+
+    .thumbnail-link {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .thumbnail {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border-radius: 5px;
+      background: #ddd;
+    }
+
+    .video-title {
+      margin: 0 0 10px;
+      font-size: 16px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .video-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .video-category,
+    .video-class,
+    .tag {
+      padding: 5px 8px;
+      border: 0;
+      border-radius: 4px;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .video-category {
+      background: #e3edff;
+      color: #174ea6;
+    }
+
+    .video-class {
+      background: #e5f5e9;
+      color: #176534;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin: 0 0 12px;
+    }
+
+    .tag {
+      background: #eee;
+      color: #333;
+    }
+
+    .video-category:hover,
+    .video-class:hover,
+    .tag:hover {
+      filter: brightness(0.94);
+    }
+
+    .player-container {
+      margin-bottom: 10px;
+    }
+
+    .player-container iframe {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border: 0;
+      border-radius: 5px;
+    }
+
+    .play-button {
+      width: 100%;
+      margin-top: auto;
+      padding: 10px;
+      border: 0;
+      border-radius: 5px;
+      background: #c00;
+      color: #fff;
+    }
+
+    .play-button:hover {
+      background: #a00;
+    }
+
+    #pagination {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin: 24px 0;
+    }
+
+    #pagination button {
+      min-width: 40px;
+      min-height: 38px;
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: #fff;
+    }
+
+    #pagination button:disabled {
+      cursor: default;
+      opacity: 0.45;
+    }
+
+    #pagination button.current-page {
+      background: #333;
+      color: #fff;
+      border-color: #333;
+    }
+
+    .message {
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 12px;
+      }
+
+      #video-list {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>YouTube動画検索</h1>
+
+  <div class="search-panel">
+    <div class="search-item">
+      <label for="keyword">キーワード検索</label>
+      <input
+        type="search"
+        id="keyword"
+        placeholder="タイトル・カテゴリー・分類・タグ"
+      >
+    </div>
+
+    <div class="search-item">
+      <label for="category-filter">カテゴリー</label>
+      <select id="category-filter">
+        <option value="">すべてのカテゴリー</option>
+      </select>
+    </div>
+
+    <div class="search-item">
+      <label for="class-filter">分類</label>
+      <select id="class-filter">
+        <option value="">すべての分類</option>
+      </select>
+    </div>
+
+    <div class="search-item">
+      <label for="tag-filter">タグ</label>
+      <select id="tag-filter">
+        <option value="">すべてのタグ</option>
+      </select>
+    </div>
+
+    <button type="button" id="reset-search" class="reset-button">
+      検索条件をリセット
+    </button>
+  </div>
+
+  <div id="status">CSVを読み込んでいます...</div>
+  <div id="video-list"></div>
+  <div id="pagination"></div>
+
+  <script>
+    "use strict";
+
+    const PAGE_SIZE = 50;
+
+    const keywordInput = document.getElementById("keyword");
+    const categoryFilter = document.getElementById("category-filter");
+    const classFilter = document.getElementById("class-filter");
+    const tagFilter = document.getElementById("tag-filter");
+    const resetButton = document.getElementById("reset-search");
+    const statusElement = document.getElementById("status");
+    const videoListElement = document.getElementById("video-list");
+    const paginationElement = document.getElementById("pagination");
+
+    let videos = [];
+    let currentPage = 1;
+
+    // YouTubeのURLまたは動画IDから動画IDを取得
+    function normalizeVideoId(value) {
+      const input = String(value ?? "").trim();
+
+      if (!input) {
+        return "";
+      }
+
+      if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
+        return input;
+      }
+
+      try {
+        const url = new URL(
+          input.startsWith("http") ? input : "https://" + input
+        );
+
+        if (
+          url.hostname === "youtu.be" ||
+          url.hostname.endsWith(".youtu.be")
+        ) {
+          return url.pathname.split("/").filter(Boolean)[0] || "";
+        }
+
+        if (
+          url.hostname.includes("youtube.com") ||
+          url.hostname.includes("youtube-nocookie.com")
+        ) {
+          const queryId = url.searchParams.get("v");
+
+          if (queryId) {
+            return queryId;
+          }
+
+          const parts = url.pathname.split("/").filter(Boolean);
+          const markerIndex = parts.findIndex(part =>
+            ["embed", "shorts", "live"].includes(part)
+          );
+
+          if (markerIndex !== -1 && parts[markerIndex + 1]) {
+            return parts[markerIndex + 1];
+          }
+        }
+      } catch (error) {
+        // 不正なURLは無効とする
+      }
+
+      return "";
+    }
+
+    // 重複を除去して日本語順で並べる
+    function uniqueSorted(values) {
+      return [...new Set(
+        values
+          .map(value => String(value ?? "").trim())
+          .filter(Boolean)
+      )].sort((a, b) => a.localeCompare(b, "ja"));
+    }
+
+    // 複数タグを配列にする
+    function splitTags(value) {
+      return String(value ?? "")
+        .split(/[;,、，]/)
+        .map(tag => tag.trim())
+        .filter(Boolean);
+    }
+
+    // プルダウンの選択肢を更新
+    function addOptions(selectElement, values, defaultLabel) {
+      selectElement.replaceChildren();
+
+      const defaultOption = document.createElement("option");
+      defaultOption.value = "";
+      defaultOption.textContent = defaultLabel;
+      selectElement.appendChild(defaultOption);
+
+      values.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        selectElement.appendChild(option);
+      });
+    }
+
+    // カテゴリーの選択肢を作成
+    function buildFilters() {
+      const categories = uniqueSorted(
+        videos.map(video => video.category)
+      );
+
+      addOptions(
+        categoryFilter,
+        categories,
+        "すべてのカテゴリー"
+      );
+
+      updateClassFilter();
+    }
+
+    // 選択したカテゴリーに該当するclassだけを表示
+    function updateClassFilter() {
+      const selectedCategory = categoryFilter.value;
+      const previousClass = classFilter.value;
+
+      const relevantVideos = videos.filter(video =>
+        !selectedCategory || video.category === selectedCategory
+      );
+
+      const classes = uniqueSorted(
+        relevantVideos.map(video => video.class)
+      );
+
+      addOptions(
+        classFilter,
+        classes,
+        "すべての分類"
+      );
+
+      if (classes.includes(previousClass)) {
+        classFilter.value = previousClass;
+      }
+
+      updateTagFilter();
+    }
+
+    // 選択したカテゴリーとclassに該当するtagだけを表示
+    function updateTagFilter() {
+      const selectedCategory = categoryFilter.value;
+      const selectedClass = classFilter.value;
+      const previousTag = tagFilter.value;
+
+      const relevantVideos = videos.filter(video => {
+        const matchesCategory =
+          !selectedCategory || video.category === selectedCategory;
+
+        const matchesClass =
+          !selectedClass || video.class === selectedClass;
+
+        return matchesCategory && matchesClass;
+      });
+
+      const tags = uniqueSorted(
+        relevantVideos.flatMap(video => video.tags)
+      );
+
+      addOptions(
+        tagFilter,
+        tags,
+        "すべてのタグ"
+      );
+
+      if (tags.includes(previousTag)) {
+        tagFilter.value = previousTag;
+      }
+    }
+
+    // 現在の検索条件に一致する動画を取得
+    function getFilteredVideos() {
+      const keyword = keywordInput.value
+        .trim()
+        .toLocaleLowerCase();
+
+      const selectedCategory = categoryFilter.value;
+      const selectedClass = classFilter.value;
+      const selectedTag = tagFilter.value;
+
+      return videos.filter(video => {
+        const matchesKeyword =
+          !keyword ||
+          [
+            video.title,
+            video.category,
+            video.class,
+            ...video.tags
+          ].some(value =>
+            String(value).toLocaleLowerCase().includes(keyword)
+          );
+
+        const matchesCategory =
+          !selectedCategory || video.category === selectedCategory;
+
+        const matchesClass =
+          !selectedClass || video.class === selectedClass;
+
+        const matchesTag =
+          !selectedTag || video.tags.includes(selectedTag);
+
+        return (
+          matchesKeyword &&
+          matchesCategory &&
+          matchesClass &&
+          matchesTag
+        );
+      });
+    }
+
+    // 動画カードを作成
+    function createVideoCard(video) {
+      const card = document.createElement("article");
+      card.className = "video-card";
+
+      // サムネイル
+      const thumbnailLink = document.createElement("a");
+      thumbnailLink.className = "thumbnail-link";
+      thumbnailLink.href =
+        "https://www.youtube.com/watch?v=" +
+        encodeURIComponent(video.id);
+      thumbnailLink.target = "_blank";
+      thumbnailLink.rel = "noopener noreferrer";
+      thumbnailLink.setAttribute("aria-label", video.title);
+
+      const thumbnail = document.createElement("img");
+      thumbnail.className = "thumbnail";
+      thumbnail.src =
+        "https://i.ytimg.com/vi/" +
+        encodeURIComponent(video.id) +
+        "/hqdefault.jpg";
+      thumbnail.alt = video.title;
+      thumbnail.loading = "lazy";
+      thumbnail.referrerPolicy = "strict-origin-when-cross-origin";
+
+      thumbnailLink.appendChild(thumbnail);
+      card.appendChild(thumbnailLink);
+
+      // タイトル
+      const title = document.createElement("h2");
+      title.className = "video-title";
+      title.textContent = video.title || "タイトルなし";
+      card.appendChild(title);
+
+      // カテゴリーとclass
+      const meta = document.createElement("div");
+      meta.className = "video-meta";
+
+      if (video.category) {
+        const categoryButton = document.createElement("button");
+        categoryButton.type = "button";
+        categoryButton.className = "video-category";
+        categoryButton.textContent = video.category;
+        categoryButton.title =
+          `カテゴリー「${video.category}」で絞り込む`;
+
+        categoryButton.addEventListener("click", () => {
+          // カテゴリーを選択
+          categoryFilter.value = video.category;
+
+          // classとtagをリセット
+          classFilter.value = "";
+          tagFilter.value = "";
+
+          // 新しいカテゴリーに合わせて選択肢を更新
+          updateClassFilter();
+
+          currentPage = 1;
+          renderVideos();
+        });
+
+        meta.appendChild(categoryButton);
+      }
+
+      if (video.class) {
+        const classButton = document.createElement("button");
+        classButton.type = "button";
+        classButton.className = "video-class";
+        classButton.textContent = video.class;
+        classButton.title = `class「${video.class}」で絞り込む`;
+
+        classButton.addEventListener("click", () => {
+          // 現在のカテゴリーに対象classが存在するか確認
+          const matchingVideos = videos.filter(item =>
+            item.category === categoryFilter.value &&
+            item.class === video.class
+          );
+
+          // カテゴリー未選択時は、全カテゴリーからclassを探す
+          const matchingAnyCategory = videos.some(item =>
+            item.class === video.class
+          );
+
+          // 選択中のカテゴリーに対象classがなければカテゴリーを解除
+          if (
+            categoryFilter.value &&
+            matchingVideos.length === 0
+          ) {
+            categoryFilter.value = "";
+          }
+
+          // classの候補を更新
+          updateClassFilter();
+
+          // classを選択
+          if (
+            [...classFilter.options].some(
+              option => option.value === video.class
+            )
+          ) {
+            classFilter.value = video.class;
+          } else if (matchingAnyCategory) {
+            // 念のため全カテゴリーから候補を再構築
+            categoryFilter.value = "";
+            updateClassFilter();
+            classFilter.value = video.class;
+          }
+
+          // tagをリセットし、選択したclassに合わせて更新
+          tagFilter.value = "";
+          updateTagFilter();
+
+          currentPage = 1;
+          renderVideos();
+        });
+
+        meta.appendChild(classButton);
+      }
+
+      card.appendChild(meta);
+
+      // タグ
+      if (video.tags.length > 0) {
+        const tagList = document.createElement("div");
+        tagList.className = "tag-list";
+
+        video.tags.forEach(tag => {
+          const tagButton = document.createElement("button");
+          tagButton.type = "button";
+          tagButton.className = "tag";
+          tagButton.textContent = "#" + tag;
+          tagButton.title = `tag「${tag}」で絞り込む`;
+
+          tagButton.addEventListener("click", () => {
+            const category = categoryFilter.value;
+            const selectedClass = classFilter.value;
+
+            const tagExistsInCurrentSelection = videos.some(item =>
+              (!category || item.category === category) &&
+              (!selectedClass || item.class === selectedClass) &&
+              item.tags.includes(tag)
+            );
+
+            // 現在の条件にないtagなら、上位の条件を解除
+            if (!tagExistsInCurrentSelection) {
+              categoryFilter.value = "";
+              classFilter.value = "";
+              updateClassFilter();
+            }
+
+            tagFilter.value = tag;
+            currentPage = 1;
+            renderVideos();
+          });
+
+          tagList.appendChild(tagButton);
+        });
+
+        card.appendChild(tagList);
+      }
+
+      // ページ内プレイヤー
+      const playerContainer = document.createElement("div");
+      playerContainer.className = "player-container";
+      playerContainer.hidden = true;
+      card.appendChild(playerContainer);
+
+      const playButton = document.createElement("button");
+      playButton.type = "button";
+      playButton.className = "play-button";
+      playButton.textContent = "ページ内で再生";
+
+      playButton.addEventListener("click", () => {
+        if (playerContainer.hidden) {
+          const iframe = document.createElement("iframe");
+
+          iframe.src =
+            "https://www.youtube-nocookie.com/embed/" +
+            encodeURIComponent(video.id) +
+            "?autoplay=1";
+
+          iframe.title = video.title || "YouTube動画";
+          iframe.loading = "lazy";
+          iframe.allow =
+            "accelerometer; autoplay; clipboard-write; encrypted-media; " +
+            "gyroscope; picture-in-picture; web-share";
+          iframe.referrerPolicy = "strict-origin-when-cross-origin";
+          iframe.allowFullscreen = true;
+
+          playerContainer.replaceChildren(iframe);
+          playerContainer.hidden = false;
+          playButton.textContent = "再生を閉じる";
+        } else {
+          playerContainer.replaceChildren();
+          playerContainer.hidden = true;
+          playButton.textContent = "ページ内で再生";
+        }
+      });
+
+      card.appendChild(playButton);
+
+      return card;
+    }
+
+    // ページネーションを作成
+    function renderPagination(totalPages) {
+      paginationElement.replaceChildren();
+
+      if (totalPages <= 1) {
+        return;
+      }
+
+      function addPageButton(
+        label,
+        page,
+        disabled = false,
+        current = false
+      ) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = label;
+        button.disabled = disabled;
+
+        if (current) {
+          button.className = "current-page";
+          button.setAttribute("aria-current", "page");
+        }
+
+        button.addEventListener("click", () => {
+          currentPage = page;
+          renderVideos();
+
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+        });
+
+        paginationElement.appendChild(button);
+      }
+
+      addPageButton("前へ", currentPage - 1, currentPage === 1);
+
+      const startPage = Math.max(1, currentPage - 2);
+      const endPage = Math.min(totalPages, currentPage + 2);
+
+      if (startPage > 1) {
+        addPageButton("1", 1, false, currentPage === 1);
+
+        if (startPage > 2) {
+          const dots = document.createElement("span");
+          dots.textContent = "…";
+          paginationElement.appendChild(dots);
+        }
+      }
+
+      for (let page = startPage; page <= endPage; page++) {
+        addPageButton(
+          String(page),
+          page,
+          false,
+          page === currentPage
+        );
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          const dots = document.createElement("span");
+          dots.textContent = "…";
+          paginationElement.appendChild(dots);
+        }
+
+        addPageButton(
+          String(totalPages),
+          totalPages,
+          false,
+          currentPage === totalPages
+        );
+      }
+
+      addPageButton(
+        "次へ",
+        currentPage + 1,
+        currentPage === totalPages
+      );
+    }
+
+    // 動画一覧を描画
+    function renderVideos() {
+      const filteredVideos = getFilteredVideos();
+      const totalVideos = filteredVideos.length;
+      const totalPages = Math.ceil(totalVideos / PAGE_SIZE);
+
+      if (totalPages === 0) {
+        currentPage = 1;
+      } else {
+        currentPage = Math.min(
+          Math.max(1, currentPage),
+          totalPages
+        );
+      }
+
+      const startIndex = (currentPage - 1) * PAGE_SIZE;
+      const pageVideos = filteredVideos.slice(
+        startIndex,
+        startIndex + PAGE_SIZE
+      );
+
+      videoListElement.replaceChildren();
+
+      if (pageVideos.length === 0) {
+        const message = document.createElement("div");
+        message.className = "message";
+        message.textContent = "該当する動画がありません。";
+        videoListElement.appendChild(message);
+      } else {
+        const fragment = document.createDocumentFragment();
+
+        pageVideos.forEach(video => {
+          fragment.appendChild(createVideoCard(video));
+        });
+
+        videoListElement.appendChild(fragment);
+      }
+
+      statusElement.textContent =
+        `登録動画数：${videos.length.toLocaleString()}件 / ` +
+        `検索結果：${totalVideos.toLocaleString()}件` +
+        (totalPages > 0
+          ? ` / ${currentPage}ページ目（全${totalPages}ページ）`
+          : "");
+
+      renderPagination(totalPages);
+    }
+
+    // CSVを読み込む
+    async function loadVideos() {
+      try {
+        const response = await fetch("./videos.csv", {
+          cache: "no-cache"
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `videos.csvの読み込みに失敗しました（HTTP ${response.status}）`
+          );
+        }
+
+        const csvText = await response.text();
+
+        const result = Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: "greedy",
+          transformHeader: header => header.trim()
+        });
+
+        const requiredColumns = [
+          "title",
+          "category",
+          "class",
+          "tags",
+          "id"
+        ];
+
+        const columns = result.meta.fields || [];
+        const missingColumns = requiredColumns.filter(
+          column => !columns.includes(column)
+        );
+
+        if (missingColumns.length > 0) {
+          throw new Error(
+            "CSVに必要な列がありません：" +
+            missingColumns.join(", ") +
+            "。ヘッダーを確認してください。"
+          );
+        }
+
+        if (result.errors.length > 0) {
+          console.warn(
+            "CSVの読み込み時に警告があります：",
+            result.errors
+          );
+        }
+
+        videos = result.data
+          .map(row => {
+            const id = normalizeVideoId(row.id);
+
+            return {
+              title: String(row.title ?? "").trim(),
+              category: String(row.category ?? "").trim(),
+              class: String(row.class ?? "").trim(),
+              tags: splitTags(row.tags),
+              id
+            };
+          })
+          .filter(video => video.id);
+
+        buildFilters();
+        renderVideos();
+      } catch (error) {
+        console.error(error);
+
+        statusElement.textContent =
+          "動画データの読み込みに失敗しました。";
+
+        videoListElement.replaceChildren();
+
+        const message = document.createElement("div");
+        message.className = "message";
+        message.textContent =
+          error.message +
+          " videos.csvの場所と列名を確認してください。";
+
+        videoListElement.appendChild(message);
+      }
+    }
+
+    // キーワード検索
+    keywordInput.addEventListener("input", () => {
+      currentPage = 1;
+      renderVideos();
+    });
+
+    // カテゴリー変更時、classとtagを連動して更新
+    categoryFilter.addEventListener("change", () => {
+      updateClassFilter();
+      currentPage = 1;
+      renderVideos();
+    });
+
+    // class変更時、tagを連動して更新
+    classFilter.addEventListener("change", () => {
+      updateTagFilter();
+      currentPage = 1;
+      renderVideos();
+    });
+
+    // tag変更
+    tagFilter.addEventListener("change", () => {
+      currentPage = 1;
+      renderVideos();
+    });
+
+    // 検索条件をリセット
+    resetButton.addEventListener("click", () => {
+      keywordInput.value = "";
+      categoryFilter.value = "";
+      classFilter.value = "";
+      tagFilter.value = "";
+
+      updateClassFilter();
+
+      currentPage = 1;
+      renderVideos();
+    });
+
+    loadVideos();
+  </script>
 </body>
 </html>
