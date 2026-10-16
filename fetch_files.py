@@ -13,18 +13,18 @@ import requests
 SHEETS = [
     {
         "group": "むげん代理公開場",
-        "spreadsheet_id": "ここに1つ目のスプレッドシートID",
+        "spreadsheet_id": "1VH9nkUrtnHwZmnUsU_Bg5AkgQ6LFTEw_nT7tPoZfUtY",
         "gid": "0",
     },
     {
         "group": "凶悪キャラスレアップローダ",
-        "spreadsheet_id": "ここに2つ目のスプレッドシートID",
-        "gid": "0",
+        "spreadsheet_id": "1VH9nkUrtnHwZmnUsU_Bg5AkgQ6LFTEw_nT7tPoZfUtY",
+        "gid": "239931589",
     },
     {
         "group": "ターゲット倉庫",
-        "spreadsheet_id": "ここに3つ目のスプレッドシートID",
-        "gid": "0",
+        "spreadsheet_id": "1VH9nkUrtnHwZmnUsU_Bg5AkgQ6LFTEw_nT7tPoZfUtY",
+        "gid": "1931694445",
     },
 ]
 
