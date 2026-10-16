@@ -1,6 +1,6 @@
-OK SHEETS	https://mugenrick.seesaa.net	5 rows
-FAIL SHEETS	http://zaf112.seesaa.net	0 rows
-OK SHEETS	http://orochigrade3.seesaa.net	4 rows
+FAIL SHEETS	https://mugenrick.seesaa.net	HTTP 400
+FAIL SHEETS	http://zaf112.seesaa.net	HTTP 400
+FAIL SHEETS	http://orochigrade3.seesaa.net	HTTP 400
 OK RSS	https://bubbleisland.hatenablog.com	https://bubbleisland.hatenablog.com/feed	29
 OK RSS	https://unitokagaming8528.fc2.net	https://unitokagaming8528.fc2.net/?xml	5
 OK RSS	https://ameblo.jp/emeruda/atom.xml	https://ameblo.jp/emeruda/atom.xml	10
