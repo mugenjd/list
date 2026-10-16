@@ -148,35 +148,59 @@ function updatePages() {
   const selectedGroup = group.value;
   const previousPage = page.value;
 
+
+  const groupOrder = [
+    "凶悪キャラスレアップローダ",
+    "ターゲット倉庫",
+    "むげん代理公開場"
+  ];
+
+  function getPageNumber(name) {
+    const match = name.match(/(\d+)\s*(?:\||$)/);
+    if (match) return Number(match[1]);
+
+    const fallback = name.match(/(\d+)/);
+    return fallback ? Number(fallback[1]) : null;
+  }
+
+  function comparePages(a, b) {
+    const numA = getPageNumber(a);
+    const numB = getPageNumber(b);
+
+    if (numA === null && numB !== null) return -1;
+    if (numA !== null && numB === null) return 1;
+
+    if (numA !== null && numB !== null && numA !== numB) {
+      return numA - numB;
+    }
+
+    return a.localeCompare(b, "ja");
+  }
+
   const pages = [...new Set(
     allItems
       .filter(x => !selectedGroup || x.group === selectedGroup)
       .map(x => x.page || "")
       .filter(Boolean)
   )].sort((a, b) => {
-    // ページ名から番号を取得
-    function getPageNumber(name) {
-      const match = name.match(/(\d+)\s*(?:\||$)/);
-      if (match) return Number(match[1]);
+    // 「すべての一覧」のときだけ一覧の優先順を適用
+    if (!selectedGroup) {
+      const groupA = groupOrder.findIndex(g =>
+        allItems.some(x => x.group === g && x.page === a)
+      );
+      const groupB = groupOrder.findIndex(g =>
+        allItems.some(x => x.group === g && x.page === b)
+      );
 
-      const fallback = name.match(/(\d+)/);
-      return fallback ? Number(fallback[1]) : null;
+      if (groupA !== groupB) {
+        return (groupA === -1 ? Infinity : groupA) -
+               (groupB === -1 ? Infinity : groupB);
+      }
     }
 
-    const numA = getPageNumber(a);
-    const numB = getPageNumber(b);
-
-    // 無印を先頭にする
-    if (numA === null && numB !== null) return -1;
-    if (numA !== null && numB === null) return 1;
-
-    // 番号がある場合は数値の小さい順
-    if (numA !== null && numB !== null && numA !== numB) {
-      return numA - numB;
-    }
-
-    return a.localeCompare(b, "ja");
+    return comparePages(a, b);
   });
+
 
   page.replaceChildren();
 
