@@ -1,1 +1,153 @@
-初回のGitHub Actions実行後に取得ログが記録されます。
+OK SHEETS	https://mugenrick.seesaa.net	5 rows
+OK SHEETS	http://zaf112.seesaa.net	5 rows
+OK SHEETS	http://orochigrade3.seesaa.net	4 rows
+OK RSS	https://bubbleisland.hatenablog.com	https://bubbleisland.hatenablog.com/feed	29
+FAIL	https://unitokagaming8528.fc2.net	No RSS entries or article links found
+OK RSS	https://ameblo.jp/emeruda/atom.xml	https://ameblo.jp/emeruda/atom.xml	10
+OK RSS	https://optica.livedoor.blog	https://optica.livedoor.blog/index.rdf	9
+OK RSS	https://oromizudaisuki.hatenablog.com	https://oromizudaisuki.hatenablog.com/feed	7
+OK RSS	https://momoma.hatenablog.com	https://momoma.hatenablog.com/feed	28
+FAIL	https://oromizudaisuki.blog.fc2.com	No RSS entries or article links found
+OK RSS	https://monsoon08.livedoor.blog	https://monsoon08.livedoor.blog/index.rdf	8
+FAIL	https://mugenluppi.blog.fc2.com	No RSS entries or article links found
+FAIL	http://compressionbox.blog.fc2.com	No RSS entries or article links found
+FAIL	http://choon429.blog.fc2.com	No RSS entries or article links found
+FAIL	http://mugen744.blog.fc2.com	No RSS entries or article links found
+FAIL	http://kamasetoyobanaide.blog24.fc2.com	No RSS entries or article links found
+FAIL	http://stgfullpower.blog.fc2.com	No RSS entries or article links found
+FAIL	http://mumugenroom.blog.fc2.com	No RSS entries or article links found
+FAIL	https://0saft.blog.fc2.com	No RSS entries or article links found
+OK RSS	https://egretnomugen.livedoor.blog	https://egretnomugen.livedoor.blog/index.rdf	7
+OK RSS	https://unknown37564.blog.jp	https://unknown37564.blog.jp/index.rdf	9
+FAIL	https://mugenmk.fc2.net	No RSS entries or article links found
+OK RSS	http://blog.livedoor.jp/cjj_like/	http://blog.livedoor.jp/cjj_like/index.rdf	7
+OK RSS	https://seki-rou.hateblo.jp	https://seki-rou.hateblo.jp/feed	30
+FAIL	http://kannatsuki0514.blog.fc2.com	No RSS entries or article links found
+OK RSS	https://project-ktilde.blog.jp	https://project-ktilde.blog.jp/index.rdf	8
+FAIL	http://mario193281.blog.fc2.com	No RSS entries or article links found
+FAIL	https://uj1or4mugen.blog.fc2.com	No RSS entries or article links found
+FAIL	http://iillness.blog.fc2.com	No RSS entries or article links found
+FAIL	http://daraxari.blog.fc2.com	No RSS entries or article links found
+OK RSS	https://beshimajinari39.livedoor.blog	https://beshimajinari39.livedoor.blog/index.rdf	7
+FAIL	http://normalfox.blog.fc2.com	No RSS entries or article links found
+FAIL	https://0seu9qmq909x.blog.fc2.com	No RSS entries or article links found
+FAIL	http://underling339.blog.fc2.com	No RSS entries or article links found
+FAIL	https://nightofglory.blog.fc2.com	No RSS entries or article links found
+FAIL	http://44100waguna.blog.fc2.com	No RSS entries or article links found
+OK RSS	https://omega039.livedoor.blog	https://omega039.livedoor.blog/index.rdf	3
+FAIL	https://sakisukebekkan.blog.fc2.com	No RSS entries or article links found
+FAIL	http://mugen1gondwana.blog.fc2.com	No RSS entries or article links found
+OK RSS	https://kousamugen.livedoor.blog	https://kousamugen.livedoor.blog/index.rdf	7
+FAIL	http://red971.blog.fc2.com	No RSS entries or article links found
+OK RSS	https://yoheimugen.blog.jp	https://yoheimugen.blog.jp/index.rdf	9
+FAIL	https://cirno193mugen.blog.fc2.com	No RSS entries or article links found
+FAIL	http://csowokataru.blog.fc2.com	No RSS entries or article links found
+OK RSS	http://blog.livedoor.jp/mg_maguro753/	http://blog.livedoor.jp/mg_maguro753/index.rdf	9
+FAIL	http://moona153.blog.fc2.com	No RSS entries or article links found
+OK RSS	https://yukkuri-fie.hatenablog.com	https://yukkuri-fie.hatenablog.com/feed	30
+FAIL	http://bloodend.blog.fc2.com	No RSS entries or article links found
+OK RSS	http://blog.livedoor.jp/dotzone/	http://blog.livedoor.jp/dotzone/index.rdf	9
+FAIL	http://samsara01.blog.fc2.com	No RSS entries or article links found
+FAIL	https://orhm5150jchanblog.blog.fc2.com	No RSS entries or article links found
+FAIL	https://hrotehualphvirt.fc2.net	No RSS entries or article links found
+FAIL	https://iderona.blog.fc2.com	No RSS entries or article links found
+FAIL	https://programfarm.fc2.net	No RSS entries or article links found
+FAIL	https://parent-forgery.fc2.net	No RSS entries or article links found
+OK RSS	https://karmam.livedoor.blog	https://karmam.livedoor.blog/index.rdf	15
+FAIL	https://moyashimugen.fc2.net	No RSS entries or article links found
+FAIL	http://aaamugen.blog.fc2.com	No RSS entries or article links found
+OK RSS	http://blog.livedoor.jp/awino	http://blog.livedoor.jp/awino/index.rdf	10
+FAIL	https://mugeneinzbern.blog.fc2.com	No RSS entries or article links found
+FAIL	https://halkaze.fc2.net	No RSS entries or article links found
+FAIL	http://gustab.blog.fc2blog.us	No RSS entries or article links found
+OK RSS	http://blog.livedoor.jp/kinomiya778100/	http://blog.livedoor.jp/kinomiya778100/index.rdf	10
+FAIL	http://mugenauthor3104.blog.fc2.com	No RSS entries or article links found
+FAIL	http://endofmumin.blog.fc2.com	No RSS entries or article links found
+FAIL	http://piyosroom.blog53.fc2.com	No RSS entries or article links found
+FAIL	http://reliable1105.blog.fc2.com	No RSS entries or article links found
+FAIL	http://yonreimukaityo.blog95.fc2.com	No RSS entries or article links found
+OK RSS	http://blog.livedoor.jp/mapelao/	http://blog.livedoor.jp/mapelao/index.rdf	10
+FAIL	http://badfactory2621.blog.fc2.com	No RSS entries or article links found
+FAIL	https://mediocrity123.blog.fc2.com	No RSS entries or article links found
+FAIL	http://noacenohero.blog91.fc2.com	No RSS entries or article links found
+FAIL	http://elemental0t.blog.fc2.com	No RSS entries or article links found
+FAIL	https://kaibutsuofbakushi.blog.fc2.com	No RSS entries or article links found
+FAIL	http://myon8phantasm6kari.blog.fc2.com	No RSS entries or article links found
+OK RSS	https://ujyoumugen.blog.jp	https://ujyoumugen.blog.jp/index.rdf	9
+FAIL	http://tokkouningyou.blog129.fc2.com	No RSS entries or article links found
+FAIL	http://awmm.blog3.fc2.com	No RSS entries or article links found
+FAIL	http://nasuteienn.blog.fc2.com	No RSS entries or article links found
+FAIL	http://monoai.blog84.fc2.com	No RSS entries or article links found
+FAIL	http://hacriel.blog12.fc2.com	No RSS entries or article links found
+FAIL	http://mosamosatomy.blog94.fc2.com	No RSS entries or article links found
+FAIL	http://31kei.blog88.fc2.com	No RSS entries or article links found
+FAIL	http://kuonkobo.blog82.fc2.com	No RSS entries or article links found
+FAIL	http://oki6761.blog23.fc2.com	No RSS entries or article links found
+FAIL	http://lunatic284.blog90.fc2.com	No RSS entries or article links found
+FAIL	http://nameless311.blog.fc2.com	No RSS entries or article links found
+FAIL	http://nankotsucurry.blog71.fc2.com	No RSS entries or article links found
+FAIL	http://kozuenokakurega.blog.fc2.com	No RSS entries or article links found
+FAIL	http://thunderbird63.blog.fc2.com	No RSS entries or article links found
+FAIL	http://yurusanae.blog98.fc2.com	No RSS entries or article links found
+FAIL	http://drabs.blog40.fc2.com	No RSS entries or article links found
+FAIL	http://nyanpasumugen.blog.fc2.com	No RSS entries or article links found
+OK RSS	http://blog.livedoor.jp/autumn_mugen/	http://blog.livedoor.jp/autumn_mugen/index.rdf	1
+FAIL	http://racowadatsumi.blog.fc2.com	No RSS entries or article links found
+FAIL	http://mugeneternal.blog.fc2.com	No RSS entries or article links found
+FAIL	http://tsukuyomimuen.blog.fc2.com	No RSS entries or article links found
+FAIL	https://mugenhighway.blog.fc2.com	No RSS entries or article links found
+OK RSS	http://blog.livedoor.jp/yanmar195/	http://blog.livedoor.jp/yanmar195/index.rdf	9
+FAIL	http://oracle333.blog.fc2.com	No RSS entries or article links found
+FAIL	http://srwryusei.blog136.fc2.com	No RSS entries or article links found
+FAIL	http://spaceshipsilverstar.blog.fc2.com	No RSS entries or article links found
+FAIL	http://michaelarmaros.blog.fc2.com	No RSS entries or article links found
+OK RSS	https://linkl.hatenablog.com	https://linkl.hatenablog.com/feed	9
+FAIL	http://blackcurl.blog.fc2.com	No RSS entries or article links found
+FAIL	https://aya0yukichi.fc2.net	No RSS entries or article links found
+FAIL	http://aroi422.blog.fc2.com	No RSS entries or article links found
+FAIL	http://kyouti.blog17.fc2.com	No RSS entries or article links found
+OK RSS	https://kontonnokotowari.blog.jp	https://kontonnokotowari.blog.jp/index.rdf	8
+FAIL	http://celesta162.blog38.fc2.com	No RSS entries or article links found
+FAIL	http://whiteredmoon2.blog.fc2.com	No RSS entries or article links found
+FAIL	http://minormugen.blog.fc2.com	No RSS entries or article links found
+FAIL	http://mojackmugen.blog.fc2.com	No RSS entries or article links found
+FAIL	http://regmugen.blog.fc2.com	No RSS entries or article links found
+FAIL	http://dryicemugen.blog.fc2.com	No RSS entries or article links found
+OK RSS	http://blog.livedoor.jp/mugen_watasi/	http://blog.livedoor.jp/mugen_watasi/index.rdf	10
+FAIL	https://mivxpse4sw5p.blog.fc2.com	No RSS entries or article links found
+OK RSS	https://sakura5656539.livedoor.blog	https://sakura5656539.livedoor.blog/index.rdf	5
+FAIL	http://nuwqsbocc.blog.fc2.com	No RSS entries or article links found
+FAIL	http://humihumi654.blog.fc2.com	No RSS entries or article links found
+FAIL	http://blueeyes37.blog.fc2.com	No RSS entries or article links found
+FAIL	http://gokuraku1147.blog41.fc2.com	No RSS entries or article links found
+FAIL	http://pororomaker.blog.fc2.com	No RSS entries or article links found
+FAIL	http://sailsblog.blog.fc2.com	No RSS entries or article links found
+FAIL	http://ais124.blog29.fc2.com	No RSS entries or article links found
+FAIL	http://dormir999.blog.fc2.com	No RSS entries or article links found
+FAIL	http://kamaboko318.blog.fc2.com	No RSS entries or article links found
+FAIL	http://ariarienlol.blog55.fc2.com	No RSS entries or article links found
+FAIL	http://amaiba.blog.fc2.com	No RSS entries or article links found
+OK RSS	https://xboxaruhuraito.hatenadiary.com	https://xboxaruhuraito.hatenadiary.com/feed	29
+FAIL	http://zetzetzetzet.blog.fc2blog.us	No RSS entries or article links found
+FAIL	http://tmtonantoka.blog.fc2.com	No RSS entries or article links found
+FAIL	http://ltpgp.blog.fc2.com	No RSS entries or article links found
+FAIL	http://skeleton12.blog.fc2.com	No RSS entries or article links found
+FAIL	https://sinomugen.fc2.net	No RSS entries or article links found
+FAIL	http://siegfried8823.blog59.fc2.com	No RSS entries or article links found
+OK RSS	http://blog.livedoor.jp/bus_mugen/	http://blog.livedoor.jp/bus_mugen/index.rdf	4
+OK RSS	http://blog.livedoor.jp/mugen_ryu/	http://blog.livedoor.jp/mugen_ryu/index.rdf	8
+FAIL	http://sudara13.blog55.fc2.com	No RSS entries or article links found
+FAIL	http://karin54341.blog.fc2.com	No RSS entries or article links found
+FAIL	http://imatukutta.blog97.fc2.com	No RSS entries or article links found
+FAIL	http://seilai.blog.fc2blog.us	No RSS entries or article links found
+FAIL	http://halu76.blog89.fc2.com	No RSS entries or article links found
+FAIL	http://sixcyclenine2.blog.fc2.com	No RSS entries or article links found
+FAIL	http://enterbrainmugenplan.blog.fc2.com	No RSS entries or article links found
+OK RSS	https://ankorone.livedoor.blog	https://ankorone.livedoor.blog/index.rdf	6
+OK RSS	https://axois-mugen.blog.jp	https://axois-mugen.blog.jp/index.rdf	9
+OK RSS	https://runaofflower.hatenablog.com	https://runaofflower.hatenablog.com/feed	27
+OK RSS	https://yaoyorozu-bomb-800.hatenablog.com	https://yaoyorozu-bomb-800.hatenablog.com/feed	29
+OK RSS	https://kiwimugen3000.blog.jp	https://kiwimugen3000.blog.jp/index.rdf	9
+OK RSS	https://grgrpcontrol.livedoor.blog	https://grgrpcontrol.livedoor.blog/index.rdf	8
+FAIL	http://skywalker54.blog.fc2.com	No RSS entries or article links found
+OK RSS	https://gamehandsouls.blog.jp	https://gamehandsouls.blog.jp/index.rdf	9
