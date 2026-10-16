@@ -1,6 +1,6 @@
 # Google Sheetsの「ウェブに公開」で発行したCSV URLを貼り付けます。
 # 形式: ブログURL<TAB>公開CSV URL
 # 下の3行の PASTE_PUBLISHED_CSV_URL_HERE を、それぞれのCSV URLに置き換えてください。
-https://mugenrick.seesaa.net	https://docs.google.com/spreadsheets/d/e/2PACX-1vTr93NnQK3kd7VKxxdEz4D4x_yIsmlyaijU4WQMX3ZC5nKmEFXbyiTbWkhvZhiAVaGSlW7bZPoPXPjH/pub?gid=0&single=true&output=csv　虹格な海底宝物庫
-http://zaf112.seesaa.net	https://docs.google.com/spreadsheets/d/e/2PACX-1vTr93NnQK3kd7VKxxdEz4D4x_yIsmlyaijU4WQMX3ZC5nKmEFXbyiTbWkhvZhiAVaGSlW7bZPoPXPjH/pub?gid=868034200&single=true&output=csv ZAFのブログ
-http://orochigrade3.seesaa.net	https://docs.google.com/spreadsheets/d/e/2PACX-1vTr93NnQK3kd7VKxxdEz4D4x_yIsmlyaijU4WQMX3ZC5nKmEFXbyiTbWkhvZhiAVaGSlW7bZPoPXPjH/pub?gid=1478460504&single=true&output=csv GGGのブログ
+https://mugenrick.seesaa.net	https://docs.google.com/spreadsheets/d/e/2PACX-1vTr93NnQK3kd7VKxxdEz4D4x_yIsmlyaijU4WQMX3ZC5nKmEFXbyiTbWkhvZhiAVaGSlW7bZPoPXPjH/pub?gid=0&single=true&output=csv  虹格な海底宝物庫
+http://zaf112.seesaa.net	https://docs.google.com/spreadsheets/d/e/2PACX-1vTr93NnQK3kd7VKxxdEz4D4x_yIsmlyaijU4WQMX3ZC5nKmEFXbyiTbWkhvZhiAVaGSlW7bZPoPXPjH/pub?gid=868034200&single=true&output=csv  ZAFのブログ
+http://orochigrade3.seesaa.net	https://docs.google.com/spreadsheets/d/e/2PACX-1vTr93NnQK3kd7VKxxdEz4D4x_yIsmlyaijU4WQMX3ZC5nKmEFXbyiTbWkhvZhiAVaGSlW7bZPoPXPjH/pub?gid=1478460504&single=true&output=csv  GGGのブログ
