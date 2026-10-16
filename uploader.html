@@ -1,0 +1,262 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>アップローダー一覧</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 30px 20px;
+      color: #333;
+      background: #f5f6f8;
+      font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Noto Sans JP", sans-serif;
+      font-size: 15px;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      margin: 0 0 20px;
+      font-size: 26px;
+    }
+
+    .status {
+      margin-bottom: 16px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    th,
+    td {
+      padding: 12px 14px;
+      border: 1px solid #ddd;
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.6;
+    }
+
+    th {
+      background: #f0f2f5;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    tbody tr:hover {
+      background: #f0f7ff;
+    }
+
+    th:first-child,
+    td:first-child {
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    th:last-child,
+    td:last-child {
+      white-space: nowrap;
+    }
+
+    a {
+      color: #0969da;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .download-link {
+      display: inline-block;
+      padding: 5px 10px;
+      border: 1px solid #0969da;
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+
+    .download-link:hover {
+      color: #fff;
+      background: #0969da;
+      text-decoration: none;
+    }
+
+    .empty {
+      padding: 24px;
+      color: #777;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 12px;
+      }
+
+      main {
+        padding: 14px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+
+      th,
+      td {
+        padding: 9px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>アップローダー一覧</h1>
+
+    <div id="status" class="status">
+      データを読み込んでいます……
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>ダウンロードリンク</th>
+            <th>ファイル名</th>
+            <th>コメント</th>
+            <th>日時</th>
+          </tr>
+        </thead>
+
+        <tbody id="file-list">
+          <tr>
+            <td colspan="4" class="empty">
+              読み込み中……
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    async function loadFiles() {
+      const status = document.getElementById("status");
+      const tbody = document.getElementById("file-list");
+
+      try {
+        const response = await fetch("./data.json", {
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          throw new Error("data.json を取得できませんでした。");
+        }
+
+        const files = await response.json();
+
+        if (!Array.isArray(files) || files.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="4" class="empty">
+                表示できるファイルがありません。
+              </td>
+            </tr>
+          `;
+
+          status.textContent = "登録件数：0件";
+          return;
+        }
+
+        tbody.replaceChildren();
+
+        for (const file of files) {
+          const tr = document.createElement("tr");
+
+          // ダウンロードリンク
+          const downloadCell = document.createElement("td");
+          const downloadLink = document.createElement("a");
+
+          downloadLink.href = file.url;
+          downloadLink.textContent = "ダウンロード";
+          downloadLink.target = "_blank";
+          downloadLink.rel = "noopener noreferrer";
+          downloadLink.className = "download-link";
+
+          downloadCell.appendChild(downloadLink);
+
+          // ファイル名
+          const nameCell = document.createElement("td");
+          nameCell.textContent = file.name || "";
+
+          // コメント
+          const commentCell = document.createElement("td");
+          commentCell.textContent = file.comment || "";
+
+          // 日時
+          const dateCell = document.createElement("td");
+          dateCell.textContent = file.date || "";
+
+          tr.append(
+            downloadCell,
+            nameCell,
+            commentCell,
+            dateCell
+          );
+
+          tbody.appendChild(tr);
+        }
+
+        status.textContent = `登録件数：${files.length}件`;
+
+      } catch (error) {
+        console.error(error);
+
+        tbody.replaceChildren();
+
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+
+        td.colSpan = 4;
+        td.className = "empty";
+        td.textContent =
+          "一覧を読み込めませんでした。data.json と公開設定を確認してください。";
+
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+
+        status.textContent = "読み込みエラー";
+      }
+    }
+
+    loadFiles();
+  </script>
+</body>
+</html>
