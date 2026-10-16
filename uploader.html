@@ -153,7 +153,30 @@ function updatePages() {
       .filter(x => !selectedGroup || x.group === selectedGroup)
       .map(x => x.page || "")
       .filter(Boolean)
-  )].sort((a, b) => a.localeCompare(b, "ja"));
+  )].sort((a, b) => {
+    // ページ名から番号を取得
+    function getPageNumber(name) {
+      const match = name.match(/(\d+)\s*(?:\||$)/);
+      if (match) return Number(match[1]);
+
+      const fallback = name.match(/(\d+)/);
+      return fallback ? Number(fallback[1]) : null;
+    }
+
+    const numA = getPageNumber(a);
+    const numB = getPageNumber(b);
+
+    // 無印を先頭にする
+    if (numA === null && numB !== null) return -1;
+    if (numA !== null && numB === null) return 1;
+
+    // 番号がある場合は数値の小さい順
+    if (numA !== null && numB !== null && numA !== numB) {
+      return numA - numB;
+    }
+
+    return a.localeCompare(b, "ja");
+  });
 
   page.replaceChildren();
 
@@ -278,4 +301,3 @@ fetch("data.json")
 </script>
 </body>
 </html>
-```
