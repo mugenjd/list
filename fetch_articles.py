@@ -27,6 +27,11 @@ HEADERS = {
 }
 SESSION = requests.Session()
 SESSION.headers.update(HEADERS)
+CURRENT_DIAGNOSTICS = []
+
+def diagnose(message):
+    """Collect concise diagnostics for the current site; written only on failures."""
+    CURRENT_DIAGNOSTICS.append(message)
 
 def normalize_url(url: str) -> str:
     url = urldefrag(url.strip())[0]
@@ -72,11 +77,13 @@ def is_future_date(value, now=None):
 def fetch(url):
     try:
         r = SESSION.get(url, timeout=TIMEOUT, allow_redirects=True)
+        diagnose(f"HTTP {r.status_code} {url} -> {r.url} type={r.headers.get('Content-Type', '')} bytes={len(r.content)}")
         if r.status_code >= 400:
             return None
         r.encoding = r.apparent_encoding or r.encoding
         return r
-    except requests.RequestException:
+    except requests.RequestException as exc:
+        diagnose(f"REQUEST ERROR {url}: {type(exc).__name__}: {exc}")
         return None
 
 def feed_candidates(site_url, homepage_html=None):
@@ -138,6 +145,7 @@ def parse_feed(feed_url, site_url):
     parsed = feedparser.parse(response.content)
     blog_name = parsed.feed.get("title") or get_site_name(site_url)
     out = []
+    diagnose(f"PARSE {feed_url}: feedparser_entries={len(parsed.entries)} bozo={getattr(parsed, 'bozo', False)} version={parsed.version!r}")
 
     # First use feedparser. If an RDF/RSS variant is not recognized, fall back
     # to extracting item fields directly from the XML-like response.
@@ -177,6 +185,7 @@ def parse_feed(feed_url, site_url):
         return ""
 
     items = [tag for tag in soup.find_all(True) if local_name(tag) == "item"]
+    diagnose(f"FALLBACK {feed_url}: item_tags={len(items)} response_start={response.content[:100]!r}")
     for item in items[:MAX_SCAN_PER_SITE]:
         title = child_text(item, {"title"})
         link = child_text(item, {"link"})
@@ -293,6 +302,7 @@ def main():
              if line.strip() and not line.strip().startswith("#")]
     all_articles, log_lines = [], []
     for i, site in enumerate(sites, 1):
+        CURRENT_DIAGNOSTICS.clear()
         site = site.strip()
         if not site.startswith(("http://", "https://")):
             site = "https://" + site
@@ -326,7 +336,8 @@ def main():
             if articles:
                 log_lines.append(f"OK HTML\t{site}\t{len(articles)}")
             else:
-                log_lines.append(f"FAIL\t{site}\tNo RSS entries or article links found")
+                detail = " || ".join(CURRENT_DIAGNOSTICS[-18:])
+                log_lines.append(f"FAIL\t{site}\tNo RSS entries or article links found\t{detail or 'No diagnostic details captured'}")
 
         all_articles.extend(articles)
         print(f"[{i}/{len(sites)}] {site}: {len(articles)} articles")
