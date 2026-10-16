@@ -251,7 +251,11 @@ def parse_homepage(site_url):
     return out
 
 def load_spreadsheet_feeds():
-    """Load public Google Sheets CSV URLs: site URL<TAB>published CSV URL."""
+    """Load rows as: site URL, published CSV URL, optional display name.
+
+    Accept tabs or ordinary spaces between the first two URL fields and the
+    display name. URLs themselves must not contain spaces.
+    """
     feeds = {}
     if not SHEETS_FEEDS_FILE.exists():
         return feeds
@@ -259,12 +263,12 @@ def load_spreadsheet_feeds():
         line = line.strip()
         if not line or line.startswith("#"):
             continue
-        parts = line.split("\t")
-        if len(parts) < 2:
+        match = re.match(r"^(https?://\S+)\s+(https?://\S+)(?:\s+(.*?))?\s*$", line)
+        if not match:
             continue
-        site_url = parts[0].strip()
-        csv_url = parts[1].strip()
-        display_name = parts[2].strip() if len(parts) >= 3 else ""
+        site_url = match.group(1).strip()
+        csv_url = match.group(2).strip()
+        display_name = (match.group(3) or "").strip()
         if not site_url or not csv_url or "PASTE_PUBLISHED_CSV_URL_HERE" in csv_url:
             continue
         feeds[normalize_url(site_url)] = {"csv_url": csv_url, "display_name": display_name}
@@ -276,7 +280,8 @@ def parse_spreadsheet_csv(site_url, csv_url, display_name=""):
     try:
         response = SESSION.get(csv_url, timeout=TIMEOUT, allow_redirects=True)
         if response.status_code >= 400:
-            return [], f"HTTP {response.status_code}"
+            body_hint = re.sub(r"\s+", " ", response.text[:180]).strip()
+            return [], f"HTTP {response.status_code} {response.url} body={body_hint}"
         response.encoding = "utf-8-sig"
         rows = list(csv.reader(io.StringIO(response.text)))
         if not rows:
