@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import html
 import re
 import time
 import hashlib
@@ -411,6 +412,11 @@ def main():
             deduped[key] = item
 
     items = list(deduped.values())
+    # Decode HTML entities in visible text, e.g. &#039; -> apostrophe and &amp; -> &.
+    for item in items:
+        for field in ("title", "site"):
+            if item.get(field):
+                item[field] = html.unescape(str(item[field]))
     items.sort(key=lambda x: x.get("published") or "", reverse=True)
     payload = {
         "updated_at": datetime.now(timezone.utc).isoformat(),
