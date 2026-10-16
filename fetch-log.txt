@@ -1,5 +1,5 @@
 OK SHEETS	https://mugenrick.seesaa.net	5 rows
-OK SHEETS	http://zaf112.seesaa.net	5 rows
+FAIL SHEETS	http://zaf112.seesaa.net	0 rows
 OK SHEETS	http://orochigrade3.seesaa.net	4 rows
 OK RSS	https://bubbleisland.hatenablog.com	https://bubbleisland.hatenablog.com/feed	29
 OK RSS	https://unitokagaming8528.fc2.net	https://unitokagaming8528.fc2.net/?xml	5
