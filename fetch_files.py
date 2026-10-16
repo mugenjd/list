@@ -23,7 +23,11 @@ def fetch_files():
         headers=headers,
         timeout=30,
     )
-    response.raise_for_status()
+    print("HTTP status:", response.status_code)
+print("Response URL:", response.url)
+print("Response body:", response.text[:1000])
+
+response.raise_for_status()
     response.encoding = response.apparent_encoding
 
     soup = BeautifulSoup(response.text, "html.parser")
