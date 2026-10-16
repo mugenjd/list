@@ -12,11 +12,6 @@ import requests
 # gid: 対象シートのURL末尾にある gid= の数字（通常は 0 など）
 SHEETS = [
     {
-        "group": "むげん代理公開場",
-        "spreadsheet_id": "1VH9nkUrtnHwZmnUsU_Bg5AkgQ6LFTEw_nT7tPoZfUtY",
-        "gid": "1931694445",
-    },
-    {
         "group": "凶悪キャラスレアップローダ",
         "spreadsheet_id": "1VH9nkUrtnHwZmnUsU_Bg5AkgQ6LFTEw_nT7tPoZfUtY",
         "gid": "239931589",
@@ -25,6 +20,11 @@ SHEETS = [
         "group": "ターゲット倉庫",
         "spreadsheet_id": "1VH9nkUrtnHwZmnUsU_Bg5AkgQ6LFTEw_nT7tPoZfUtY",
         "gid": "0",
+    },
+        {
+        "group": "むげん代理公開場",
+        "spreadsheet_id": "1VH9nkUrtnHwZmnUsU_Bg5AkgQ6LFTEw_nT7tPoZfUtY",
+        "gid": "1931694445",
     },
 ]
 
