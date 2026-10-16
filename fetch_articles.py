@@ -6,6 +6,8 @@ import json
 import re
 import time
 import hashlib
+import csv
+import io
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -17,30 +19,17 @@ from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parent
 SITES_FILE = ROOT / "sites.txt"
+SHEETS_FEEDS_FILE = ROOT / "spreadsheet_feeds.txt"
 OUTPUT_FILE = ROOT / "articles.json"
 LOG_FILE = ROOT / "fetch-log.txt"
 MAX_PER_SITE = 5
 MAX_SCAN_PER_SITE = 100
 TIMEOUT = 18
 HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/131.0.0.0 Safari/537.36"
-    ),
-    "Accept": (
-        "text/html,application/xhtml+xml,application/xml;"
-        "q=0.9,application/rss+xml;q=0.9,*/*;q=0.8"
-    ),
-    "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
+    "User-Agent": "Mozilla/5.0 (compatible; MugenBlogArticleIndex/1.0; +https://github.com/)"
 }
 SESSION = requests.Session()
 SESSION.headers.update(HEADERS)
-CURRENT_DIAGNOSTICS = []
-
-def diagnose(message):
-    """Collect concise diagnostics for the current site; written only on failures."""
-    CURRENT_DIAGNOSTICS.append(message)
 
 def normalize_url(url: str) -> str:
     url = urldefrag(url.strip())[0]
@@ -86,13 +75,11 @@ def is_future_date(value, now=None):
 def fetch(url):
     try:
         r = SESSION.get(url, timeout=TIMEOUT, allow_redirects=True)
-        diagnose(f"HTTP {r.status_code} {url} -> {r.url} type={r.headers.get('Content-Type', '')} bytes={len(r.content)}")
         if r.status_code >= 400:
             return None
         r.encoding = r.apparent_encoding or r.encoding
         return r
-    except requests.RequestException as exc:
-        diagnose(f"REQUEST ERROR {url}: {type(exc).__name__}: {exc}")
+    except requests.RequestException:
         return None
 
 def feed_candidates(site_url, homepage_html=None):
@@ -152,58 +139,17 @@ def parse_feed(feed_url, site_url):
     if not response:
         return []
     parsed = feedparser.parse(response.content)
+    if not parsed.entries:
+        return []
     blog_name = parsed.feed.get("title") or get_site_name(site_url)
     out = []
-    diagnose(f"PARSE {feed_url}: feedparser_entries={len(parsed.entries)} bozo={getattr(parsed, 'bozo', False)} version={parsed.version!r}")
-
-    # First use feedparser. If an RDF/RSS variant is not recognized, fall back
-    # to extracting item fields directly from the XML-like response.
-    if parsed.entries:
-        for entry in parsed.entries[:MAX_SCAN_PER_SITE]:
-            link = entry.get("link")
-            title = (entry.get("title") or "").strip()
-            if not link or not title:
-                continue
-            date = parse_date(entry.get("published_parsed") or entry.get("updated_parsed")
-                              or entry.get("published") or entry.get("updated"))
-            if is_future_date(date):
-                continue
-            out.append({
-                "title": BeautifulSoup(title, "html.parser").get_text(" ", strip=True),
-                "url": urljoin(feed_url, link),
-                "site": blog_name,
-                "site_url": site_url,
-                "published": date,
-                "source": "RSS",
-            })
-        if out:
-            return out
-
-    # Fallback supports Seesaa RDF items such as rdf:about + dc:date,
-    # as well as RSS 2.0 items using pubDate.
-    soup = BeautifulSoup(response.content, "html.parser")
-    def local_name(tag):
-        return (tag.name or "").split(":")[-1].lower()
-
-    def child_text(item, names):
-        for child in item.find_all(True, recursive=True):
-            if local_name(child) in names:
-                value = child.get_text(" ", strip=True)
-                if value:
-                    return value
-        return ""
-
-    items = [tag for tag in soup.find_all(True) if local_name(tag) == "item"]
-    diagnose(f"FALLBACK {feed_url}: item_tags={len(items)} response_start={response.content[:100]!r}")
-    for item in items[:MAX_SCAN_PER_SITE]:
-        title = child_text(item, {"title"})
-        link = child_text(item, {"link"})
-        if not link:
-            link = item.get("rdf:about") or item.get("about") or ""
+    for entry in parsed.entries[:MAX_SCAN_PER_SITE]:
+        link = entry.get("link")
+        title = (entry.get("title") or "").strip()
         if not link or not title:
             continue
-        date_raw = child_text(item, {"pubdate", "date", "published", "updated", "issued"})
-        date = parse_date(date_raw)
+        date = parse_date(entry.get("published_parsed") or entry.get("updated_parsed")
+                          or entry.get("published") or entry.get("updated"))
         if is_future_date(date):
             continue
         out.append({
@@ -303,6 +249,78 @@ def parse_homepage(site_url):
         })
     return out
 
+def load_spreadsheet_feeds():
+    """Load public Google Sheets CSV URLs: site URL<TAB>published CSV URL."""
+    feeds = {}
+    if not SHEETS_FEEDS_FILE.exists():
+        return feeds
+    for line in SHEETS_FEEDS_FILE.read_text(encoding="utf-8-sig").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split("\t", 1)
+        if len(parts) != 2:
+            continue
+        site_url, csv_url = (part.strip() for part in parts)
+        if not site_url or not csv_url or "PASTE_PUBLISHED_CSV_URL_HERE" in csv_url:
+            continue
+        feeds[normalize_url(site_url)] = csv_url
+    return feeds
+
+
+def parse_spreadsheet_csv(site_url, csv_url):
+    """Read a published Google Sheets CSV containing IMPORTFEED item rows."""
+    try:
+        response = SESSION.get(csv_url, timeout=TIMEOUT, allow_redirects=True)
+        if response.status_code >= 400:
+            return [], f"HTTP {response.status_code}"
+        response.encoding = "utf-8-sig"
+        rows = list(csv.reader(io.StringIO(response.text)))
+        if not rows:
+            return [], "CSV is empty"
+
+        def norm(value):
+            return re.sub(r"[^a-z0-9ぁ-んァ-ン一-龥]", "", (value or "").strip().lower())
+
+        headers = [norm(value) for value in rows[0]]
+        title_idx = next((i for i, h in enumerate(headers) if h in ("title", "タイトル", "itemtitle")), 0)
+        url_idx = next((i for i, h in enumerate(headers) if h in ("url", "link", "リンク", "記事url", "記事リンク")), 1)
+        date_idx = next((i for i, h in enumerate(headers) if h in ("created", "published", "date", "pubdate", "公開日時", "投稿日", "日付", "更新日時")), 2)
+        # If the first row is not a recognizable header, treat it as data.
+        known_headers = {"title", "タイトル", "url", "link", "created", "published", "date", "pubdate", "author"}
+        has_header = any(h in known_headers for h in headers)
+        data_rows = rows[1:] if has_header else rows
+        if not has_header:
+            title_idx, url_idx, date_idx = 0, 1, 2
+
+        site_name = get_site_name(site_url)
+        articles = []
+        for row in data_rows:
+            if len(row) <= max(title_idx, url_idx):
+                continue
+            title = (row[title_idx] or "").strip()
+            link = (row[url_idx] or "").strip()
+            date_raw = row[date_idx].strip() if len(row) > date_idx else ""
+            if not title or not link or title.lower() in {"title", "タイトル"}:
+                continue
+            if not link.startswith(("http://", "https://")):
+                continue
+            date = parse_date(date_raw)
+            if is_future_date(date):
+                continue
+            articles.append({
+                "title": BeautifulSoup(title, "html.parser").get_text(" ", strip=True),
+                "url": link,
+                "site": site_name,
+                "site_url": site_url,
+                "published": date,
+                "source": "Google Sheets IMPORTFEED",
+            })
+        return articles[:MAX_SCAN_PER_SITE], f"{len(articles)} rows"
+    except Exception as exc:
+        return [], f"{type(exc).__name__}: {exc}"
+
+
 def stable_id(item):
     return hashlib.sha256(item["url"].encode("utf-8")).hexdigest()[:16]
 
@@ -310,11 +328,28 @@ def main():
     sites = [line.strip() for line in SITES_FILE.read_text(encoding="utf-8").splitlines()
              if line.strip() and not line.strip().startswith("#")]
     all_articles, log_lines = [], []
-    for i, site in enumerate(sites, 1):
-        CURRENT_DIAGNOSTICS.clear()
+    spreadsheet_feeds = load_spreadsheet_feeds()
+    normalized_sites = []
+    for site in sites:
         site = site.strip()
         if not site.startswith(("http://", "https://")):
             site = "https://" + site
+        normalized_sites.append(site)
+
+    # Fetch the three Seesaa feeds via public Google Sheets CSV when configured.
+    spreadsheet_site_keys = set(spreadsheet_feeds)
+    for site_url, csv_url in spreadsheet_feeds.items():
+        articles, detail = parse_spreadsheet_csv(site_url, csv_url)
+        if articles:
+            log_lines.append(f"OK SHEETS\t{site_url}\t{detail}")
+            all_articles.extend(articles)
+        else:
+            log_lines.append(f"FAIL SHEETS\t{site_url}\t{detail}")
+
+    for i, site in enumerate(normalized_sites, 1):
+        if normalize_url(site) in spreadsheet_site_keys:
+            print(f"[{i}/{len(normalized_sites)}] {site}: handled via Google Sheets")
+            continue
         # A provided feed URL may be used directly; otherwise fetch homepage and discover feeds.
         homepage = None
         if not any(x in urlparse(site).path.lower() for x in ("atom.xml", "rss", "feed", "index.rdf")):
@@ -345,8 +380,7 @@ def main():
             if articles:
                 log_lines.append(f"OK HTML\t{site}\t{len(articles)}")
             else:
-                detail = " || ".join(CURRENT_DIAGNOSTICS[-18:])
-                log_lines.append(f"FAIL\t{site}\tNo RSS entries or article links found\t{detail or 'No diagnostic details captured'}")
+                log_lines.append(f"FAIL\t{site}\tNo RSS entries or article links found")
 
         all_articles.extend(articles)
         print(f"[{i}/{len(sites)}] {site}: {len(articles)} articles")
@@ -380,7 +414,7 @@ def main():
     items.sort(key=lambda x: x.get("published") or "", reverse=True)
     payload = {
         "updated_at": datetime.now(timezone.utc).isoformat(),
-        "site_count": len(sites),
+        "site_count": len(normalized_sites),
         "article_count": len(items),
         "articles": items,
     }

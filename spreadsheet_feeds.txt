@@ -1,0 +1,6 @@
+# Google Sheetsの「ウェブに公開」で発行したCSV URLを貼り付けます。
+# 形式: ブログURL<TAB>公開CSV URL
+# 下の3行の PASTE_PUBLISHED_CSV_URL_HERE を、それぞれのCSV URLに置き換えてください。
+https://mugenrick.seesaa.net	PASTE_PUBLISHED_CSV_URL_HERE
+http://zaf112.seesaa.net	PASTE_PUBLISHED_CSV_URL_HERE
+http://orochigrade3.seesaa.net	PASTE_PUBLISHED_CSV_URL_HERE
