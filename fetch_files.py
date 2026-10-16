@@ -1,111 +1,127 @@
-
+import csv
+import io
 import json
+import sys
 import time
-from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import quote
 
 import requests
-from bs4 import BeautifulSoup
 
-BASE_URL = "https://uu.getuploader.com/kyouakuchar22/"
-SOURCE_FILE = Path("source.html")
-DATA_FILE = Path("data.json")
+# 3つのスプレッドシートの設定を入力してください。
+# spreadsheet_id: URLの /d/ と /edit の間にある文字列
+# gid: 対象シートのURL末尾にある gid= の数字（通常は 0 など）
+SHEETS = [
+    {
+        "group": "むげん代理公開場",
+        "spreadsheet_id": "ここに1つ目のスプレッドシートID",
+        "gid": "0",
+    },
+    {
+        "group": "凶悪キャラスレアップローダ",
+        "spreadsheet_id": "ここに2つ目のスプレッドシートID",
+        "gid": "0",
+    },
+    {
+        "group": "ターゲット倉庫",
+        "spreadsheet_id": "ここに3つ目のスプレッドシートID",
+        "gid": "0",
+    },
+]
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (compatible; GitHubPagesCatalog/1.0)"
+# スプレッドシートの1行目の見出しに合わせています。
+# 実際の見出しが異なる場合は、ALIASES に候補を追加してください。
+ALIASES = {
+    "page": ["ページタイトル", "ページ名", "サイト名", "ページ"],
+    "url": ["リンクURL", "URL", "リンク", "公開リンク"],
+    "name": ["ファイル名", "名前", "タイトル"],
+    "comment": ["コメント", "備考", "説明"],
 }
 
+OUTPUT = "data.json"
+SESSION = requests.Session()
+SESSION.headers.update({"User-Agent": "GitHubPages-Sheets-Sync/1.0"})
 
-def fetch_source():
-    response = requests.get(
-        BASE_URL,
-        headers=HEADERS,
-        timeout=30,
-    )
+
+def normalize_header(value):
+    return (value or "").strip().replace("\ufeff", "")
+
+
+def pick(row, candidates):
+    normalized = {normalize_header(k): (v or "").strip() for k, v in row.items()}
+    for candidate in candidates:
+        if candidate in normalized:
+            return normalized[candidate]
+    return ""
+
+
+def fetch_sheet(sheet):
+    sid = sheet["spreadsheet_id"].strip()
+    gid = str(sheet["gid"]).strip()
+    if not sid or sid.startswith("ここに"):
+        raise ValueError(f'{sheet["group"]}: spreadsheet_id が未設定です。fetch_sheets.py の SHEETS を編集してください。')
+
+    url = f"https://docs.google.com/spreadsheets/d/{quote(sid, safe='')}/export?format=csv&gid={quote(gid, safe='')}"
+    response = SESSION.get(url, timeout=45)
     response.raise_for_status()
 
-    # 元ページのHTMLを保存
-    SOURCE_FILE.write_bytes(response.content)
+    # 公開設定が正しくない場合、CSVではなくGoogleのHTML画面が返ることがある
+    content_type = response.headers.get("Content-Type", "").lower()
+    body = response.text.lstrip()
+    if "<html" in body[:500].lower() or "<!doctype html" in body[:500].lower():
+        raise RuntimeError(
+            f'{sheet["group"]}: CSVを取得できませんでした。'
+            "シートが「リンクを知っている全員が閲覧できる」設定か、spreadsheet_id と gid を確認してください。"
+        )
 
-    return response.encoding or "utf-8"
+    reader = csv.DictReader(io.StringIO(response.content.decode("utf-8-sig")))
+    if not reader.fieldnames:
+        raise RuntimeError(f'{sheet["group"]}: CSVに見出し行がありません。')
 
+    rows = []
+    for raw in reader:
+        page = pick(raw, ALIASES["page"])
+        url_value = pick(raw, ALIASES["url"])
+        name = pick(raw, ALIASES["name"])
+        comment = pick(raw, ALIASES["comment"])
 
-def extract_files(encoding):
-    html = SOURCE_FILE.read_text(
-        encoding=encoding,
-        errors="replace",
-    )
-    soup = BeautifulSoup(html, "html.parser")
-
-    results = []
-
-    for table in soup.find_all("table"):
-        rows = table.find_all("tr")
-        if not rows:
+        # 完全な空行を除外
+        if not any([page, url_value, name, comment]):
             continue
 
-        headers = [
-            cell.get_text(" ", strip=True)
-            for cell in rows[0].find_all(["th", "td"])
-        ]
+        rows.append({
+            "group": sheet["group"],
+            "page": page,
+            "url": url_value,
+            "name": name,
+            "comment": comment,
+        })
+    return rows
 
-        # ファイル一覧らしいテーブルだけ処理
-        if not any("ファイル" in h for h in headers):
-            continue
 
-        for row in rows[1:]:
-            cells = row.find_all(["td", "th"])
-            if not cells:
-                continue
+def main():
+    all_rows = []
+    errors = []
 
-            values = [
-                cell.get_text(" ", strip=True)
-                for cell in cells
-            ]
+    for sheet in SHEETS:
+        try:
+            rows = fetch_sheet(sheet)
+            all_rows.extend(rows)
+            print(f'OK: {sheet["group"]} - {len(rows)} rows')
+        except Exception as exc:
+            errors.append(f'{sheet["group"]}: {exc}')
+            print(f'ERROR: {sheet["group"]}: {exc}', file=sys.stderr)
 
-            if len(values) != len(headers):
-                continue
+    # 1つでも失敗した場合、部分的な data.json で既存データを上書きしない
+    if errors:
+        print("\n取得に失敗しました。data.json は更新しません。", file=sys.stderr)
+        sys.exit(1)
 
-            item = dict(zip(headers, values))
+    with open(OUTPUT, "w", encoding="utf-8") as f:
+        json.dump(all_rows, f, ensure_ascii=False, indent=2)
+        f.write("\n")
 
-            # ファイル名のリンクを取得
-            link = None
-            for cell in cells:
-                for a in cell.find_all("a", href=True):
-                    text = a.get_text(" ", strip=True)
-                    if text:
-                        link = urljoin(BASE_URL, a["href"])
-                        break
-                if link:
-                    break
-
-            filename = item.get("ファイル", "")
-            if not filename:
-                continue
-
-            results.append({
-                "name": filename,
-                "comment": item.get("コメント", ""),
-                "original": item.get("オリジナル", ""),
-                "size": item.get("容量", ""),
-                "date": item.get("日時", ""),
-                "url": link or BASE_URL,
-            })
-
-        if results:
-            break
-
-    DATA_FILE.write_text(
-        json.dumps(results, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-
-    print(f"取得件数: {len(results)}")
-    print(f"HTML保存: {SOURCE_FILE}")
-    print(f"一覧保存: {DATA_FILE}")
+    print(f"完了: {len(all_rows)} rows -> {OUTPUT}")
 
 
 if __name__ == "__main__":
-    encoding = fetch_source()
-    time.sleep(1)
-    extract_files(encoding)
+    main()
