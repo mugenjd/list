@@ -1,401 +1,101 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>凶悪キャラアップローダー22 ファイル一覧</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 30px auto;
-      padding: 0 16px;
-      max-width: 1100px;
-      color: #222;
-      background: #f7f7f7;
-    }
-    h1 { font-size: 24px; }
-    #search {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 12px;
-      margin: 12px 0;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
-    }
-    .info { color: #666; font-size: 14px; }
-    .table-wrap {
-      overflow-x: auto;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-      overflow-wrap: anywhere;
-    }
-    th { background: #eee; white-space: nowrap; }
-    a { color: #075db5; }
-    tr:last-child td { border-bottom: none; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>アップローダー統合ファイル一覧</title>
+<style>
+:root { color-scheme: light; }
+body { margin: 0; background: #f5f6f8; color: #202124; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 1400px; margin: 0 auto; padding: 28px 20px 48px; }
+h1 { font-size: clamp(23px, 3vw, 32px); margin: 0 0 8px; }
+.description { color: #606770; margin: 0 0 22px; }
+.controls { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(190px, 280px); gap: 10px; margin-bottom: 12px; }
+input, select { width: 100%; box-sizing: border-box; padding: 11px 12px; font: inherit; border: 1px solid #c8ccd0; border-radius: 8px; background: white; }
+.status { color: #5f6368; font-size: 14px; margin: 10px 0; }
+.table-wrap { overflow: auto; border: 1px solid #dadce0; border-radius: 10px; background: white; }
+table { border-collapse: collapse; width: 100%; min-width: 850px; }
+th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid #e8eaed; vertical-align: top; }
+th { position: sticky; top: 0; background: #eef0f3; white-space: nowrap; }
+tbody tr:hover { background: #f8faff; }
+td.name { min-width: 260px; overflow-wrap: anywhere; }
+td.comment { min-width: 300px; white-space: pre-wrap; overflow-wrap: anywhere; }
+td.page { min-width: 190px; }
+a { color: #075db5; text-decoration: none; }
+a:hover { text-decoration: underline; }
+@media (max-width: 650px) { main { padding: 18px 10px 32px; } .controls { grid-template-columns: 1fr; } }
+</style>
 </head>
 <body>
-  <h1>凶悪キャラアップローダー22</h1>
-  <p>
-    <a href="https://uu.getuploader.com/kyouakuchar22/">
-      元のアップローダーを開く
-    </a>
-  </p>
+<main>
+<h1>アップローダー統合ファイル一覧</h1>
+<p class="description">3つの一覧データをまとめて検索できます。ファイル名をクリックすると元のリンクを開きます。</p>
+<div class="controls">
+  <input id="search" type="search" placeholder="ファイル名・コメント・ページ名で検索">
+  <select id="group">
+    <option value="">すべての一覧</option>
+    <option value="むげん代理公開場">むげん代理公開場</option>
+    <option value="凶悪キャラスレアップローダ">凶悪キャラスレアップローダ</option>
+    <option value="ターゲット倉庫">ターゲット倉庫</option>
+  </select>
+</div>
+<div class="status" id="status">読み込み中...</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>一覧</th><th>ページ</th><th>ファイル名</th><th>コメント</th></tr></thead>
+<tbody id="rows"></tbody>
+</table>
+</div>
+</main>
+<script>
+let allItems = [];
+const search = document.getElementById("search");
+const group = document.getElementById("group");
+const statusEl = document.getElementById("status");
+const tbody = document.getElementById("rows");
 
-  <input id="search" type="search" placeholder="ファイル名・コメントで検索">
-  <p class="info" id="status">読み込み中...</p>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>ファイル名</th>
-          <th>コメント</th>
-          <th>容量</th>
-          <th>日時</th>
-        </tr>
-      </thead>
-      <tbody id="files"></tbody>
-    </table>
-  </div>
-
-  <script>
-    let allFiles = [];
-
-    async function loadFiles() {
-      const status = document.getElementById("status");
-      try {
-        const response = await fetch("data.json");
-        if (!response.ok) throw new Error("data.json の取得に失敗");
-
-        allFiles = await response.json();
-        renderFiles();
-
-      } catch (error) {
-        status.textContent =
-          "一覧を読み込めません。GitHub Actionsの実行結果を確認してください。";
-        console.error(error);
-      }
+function render() {
+  const q = search.value.trim().toLocaleLowerCase();
+  const g = group.value;
+  const filtered = allItems.filter(x =>
+    (!g || x.group === g) &&
+    [x.name, x.comment, x.page, x.group].some(v =>
+      (v || "").toLocaleLowerCase().includes(q))
+  );
+  statusEl.textContent = `${filtered.length.toLocaleString()} 件 / 全 ${allItems.length.toLocaleString()} 件`;
+  tbody.replaceChildren();
+  const frag = document.createDocumentFragment();
+  for (const x of filtered) {
+    const tr = document.createElement("tr");
+    for (const [key, cls] of [["group",""],["page","page"]]) {
+      const td = document.createElement("td");
+      td.className = cls;
+      td.textContent = x[key] || "";
+      tr.appendChild(td);
     }
-
-    function renderFiles() {
-      const query = document.getElementById("search")
-        .value.trim().toLowerCase();
-
-      const filtered = allFiles.filter(file =>
-        [file.name, file.comment].some(value =>
-          (value || "").toLowerCase().includes(query)
-        )
-      );
-
-      document.getElementById("status").textContent =
-        `${filtered.length} 件 / 全 ${allFiles.length} 件`;
-
-      const tbody = document.getElementById("files");
-      tbody.replaceChildren();
-
-      for (const file of filtered) {
-        const tr = document.createElement("tr");
-
-        const nameCell = document.createElement("td");
-        const link = document.createElement("a");
-        link.href = file.url;
-        link.textContent = file.name;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        nameCell.appendChild(link);
-        tr.appendChild(nameCell);
-
-        for (const value of [
-          file.comment, file.size, file.date
-        ]) {
-          const td = document.createElement("td");
-          td.textContent = value || "";
-          tr.appendChild(td);
-        }
-
-        tbody.appendChild(tr);
-      }
-    }
-
-    document.getElementById("search")
-      .addEventListener("input", renderFiles);
-
-    loadFiles();
-  </script>
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>アップローダー一覧</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      padding: 30px 20px;
-      color: #333;
-      background: #f5f6f8;
-      font-family:
-        -apple-system, BlinkMacSystemFont, "Segoe UI",
-        "Noto Sans JP", sans-serif;
-      font-size: 15px;
-    }
-
-    main {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 24px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
-
-    h1 {
-      margin: 0 0 20px;
-      font-size: 26px;
-    }
-
-    .status {
-      margin-bottom: 16px;
-      color: #666;
-      font-size: 14px;
-    }
-
-    .table-wrapper {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-    }
-
-    th,
-    td {
-      padding: 12px 14px;
-      border: 1px solid #ddd;
-      text-align: left;
-      vertical-align: top;
-      line-height: 1.6;
-    }
-
-    th {
-      background: #f0f2f5;
-      white-space: nowrap;
-      font-weight: 700;
-    }
-
-    tbody tr:nth-child(even) {
-      background: #fafafa;
-    }
-
-    tbody tr:hover {
-      background: #f0f7ff;
-    }
-
-    th:first-child,
-    td:first-child {
-      white-space: nowrap;
-      text-align: center;
-    }
-
-    th:last-child,
-    td:last-child {
-      white-space: nowrap;
-    }
-
-    a {
-      color: #0969da;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    .download-link {
-      display: inline-block;
-      padding: 5px 10px;
-      border: 1px solid #0969da;
-      border-radius: 5px;
-      white-space: nowrap;
-    }
-
-    .download-link:hover {
-      color: #fff;
-      background: #0969da;
-      text-decoration: none;
-    }
-
-    .empty {
-      padding: 24px;
-      color: #777;
-      text-align: center;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 12px;
-      }
-
-      main {
-        padding: 14px;
-      }
-
-      h1 {
-        font-size: 22px;
-      }
-
-      th,
-      td {
-        padding: 9px;
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <main>
-    <h1>アップローダー一覧</h1>
-
-    <div id="status" class="status">
-      データを読み込んでいます……
-    </div>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>ダウンロードリンク</th>
-            <th>ファイル名</th>
-            <th>コメント</th>
-            <th>日時</th>
-          </tr>
-        </thead>
-
-        <tbody id="file-list">
-          <tr>
-            <td colspan="4" class="empty">
-              読み込み中……
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
-
-  <script>
-    async function loadFiles() {
-      const status = document.getElementById("status");
-      const tbody = document.getElementById("file-list");
-
-      try {
-        const response = await fetch("./data.json", {
-          cache: "no-store"
-        });
-
-        if (!response.ok) {
-          throw new Error("data.json を取得できませんでした。");
-        }
-
-        const files = await response.json();
-
-        if (!Array.isArray(files) || files.length === 0) {
-          tbody.innerHTML = `
-            <tr>
-              <td colspan="4" class="empty">
-                表示できるファイルがありません。
-              </td>
-            </tr>
-          `;
-
-          status.textContent = "登録件数：0件";
-          return;
-        }
-
-        tbody.replaceChildren();
-
-        for (const file of files) {
-          const tr = document.createElement("tr");
-
-          // ダウンロードリンク
-          const downloadCell = document.createElement("td");
-          const downloadLink = document.createElement("a");
-
-          downloadLink.href = file.url;
-          downloadLink.textContent = "ダウンロード";
-          downloadLink.target = "_blank";
-          downloadLink.rel = "noopener noreferrer";
-          downloadLink.className = "download-link";
-
-          downloadCell.appendChild(downloadLink);
-
-          // ファイル名
-          const nameCell = document.createElement("td");
-          nameCell.textContent = file.name || "";
-
-          // コメント
-          const commentCell = document.createElement("td");
-          commentCell.textContent = file.comment || "";
-
-          // 日時
-          const dateCell = document.createElement("td");
-          dateCell.textContent = file.date || "";
-
-          tr.append(
-            downloadCell,
-            nameCell,
-            commentCell,
-            dateCell
-          );
-
-          tbody.appendChild(tr);
-        }
-
-        status.textContent = `登録件数：${files.length}件`;
-
-      } catch (error) {
-        console.error(error);
-
-        tbody.replaceChildren();
-
-        const tr = document.createElement("tr");
-        const td = document.createElement("td");
-
-        td.colSpan = 4;
-        td.className = "empty";
-        td.textContent =
-          "一覧を読み込めませんでした。data.json と公開設定を確認してください。";
-
-        tr.appendChild(td);
-        tbody.appendChild(tr);
-
-        status.textContent = "読み込みエラー";
-      }
-    }
-
-    loadFiles();
-  </script>
+    const nameTd = document.createElement("td");
+    nameTd.className = "name";
+    const a = document.createElement("a");
+    a.href = x.url;
+    a.textContent = x.name;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    nameTd.appendChild(a);
+    tr.insertBefore(nameTd, tr.children[2]);
+    const commentTd = document.createElement("td");
+    commentTd.className = "comment";
+    commentTd.textContent = x.comment || "";
+    tr.appendChild(commentTd);
+    frag.appendChild(tr);
+  }
+  tbody.appendChild(frag);
+}
+search.addEventListener("input", render);
+group.addEventListener("change", render);
+fetch("data.json")
+  .then(r => { if (!r.ok) throw new Error("data.json を取得できません"); return r.json(); })
+  .then(data => { allItems = data; render(); })
+  .catch(err => { statusEl.textContent = "一覧データを読み込めません。data.json が同じフォルダにあるか確認してください。"; console.error(err); });
+</script>
 </body>
 </html>
