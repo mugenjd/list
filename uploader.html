@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -6,96 +7,276 @@
 <title>アップローダー統合ファイル一覧</title>
 <style>
 :root { color-scheme: light; }
-body { margin: 0; background: #f5f6f8; color: #202124; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
-main { max-width: 1400px; margin: 0 auto; padding: 28px 20px 48px; }
-h1 { font-size: clamp(23px, 3vw, 32px); margin: 0 0 8px; }
-.description { color: #606770; margin: 0 0 22px; }
-.controls { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(190px, 280px); gap: 10px; margin-bottom: 12px; }
-input, select { width: 100%; box-sizing: border-box; padding: 11px 12px; font: inherit; border: 1px solid #c8ccd0; border-radius: 8px; background: white; }
-.status { color: #5f6368; font-size: 14px; margin: 10px 0; }
-.table-wrap { overflow: auto; border: 1px solid #dadce0; border-radius: 10px; background: white; }
-table { border-collapse: collapse; width: 100%; min-width: 850px; }
-th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid #e8eaed; vertical-align: top; }
-th { position: sticky; top: 0; background: #eef0f3; white-space: nowrap; }
+body {
+  margin: 0;
+  background: #f5f6f8;
+  color: #202124;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 28px 20px 48px;
+}
+h1 {
+  font-size: clamp(23px, 3vw, 32px);
+  margin: 0 0 8px;
+}
+.description {
+  color: #606770;
+  margin: 0 0 22px;
+}
+.controls {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(190px, 240px);
+  gap: 10px;
+  margin-bottom: 10px;
+}
+input, select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  font: inherit;
+  border: 1px solid #c8ccd0;
+  border-radius: 8px;
+  background: white;
+}
+.status {
+  color: #5f6368;
+  font-size: 14px;
+  margin: 10px 0;
+}
+.table-wrap {
+  overflow: auto;
+  border: 1px solid #dadce0;
+  border-radius: 10px;
+  background: white;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 850px;
+}
+th, td {
+  text-align: left;
+  padding: 11px 12px;
+  border-bottom: 1px solid #e8eaed;
+  vertical-align: top;
+}
+th {
+  position: sticky;
+  top: 0;
+  background: #eef0f3;
+  white-space: nowrap;
+}
 tbody tr:hover { background: #f8faff; }
-td.name { min-width: 260px; overflow-wrap: anywhere; }
-td.comment { min-width: 300px; white-space: pre-wrap; overflow-wrap: anywhere; }
+td.name {
+  min-width: 260px;
+  overflow-wrap: anywhere;
+}
+td.comment {
+  min-width: 300px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 td.page { min-width: 190px; }
-a { color: #075db5; text-decoration: none; }
+a {
+  color: #075db5;
+  text-decoration: none;
+}
 a:hover { text-decoration: underline; }
-@media (max-width: 650px) { main { padding: 18px 10px 32px; } .controls { grid-template-columns: 1fr; } }
+@media (max-width: 650px) {
+  main { padding: 18px 10px 32px; }
+  .controls { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
 <main>
 <h1>アップローダー統合ファイル一覧</h1>
-<p class="description">3つの一覧データをまとめて検索できます。ファイル名をクリックすると元のリンクを開きます。</p>
+<p class="description">
+  3つの一覧データをまとめて検索できます。
+  一覧とページタイトルで絞り込み、ファイル名をクリックすると元のリンクを開きます。
+</p>
+
 <div class="controls">
-  <input id="search" type="search" placeholder="ファイル名・コメント・ページ名で検索">
+  <input
+    id="search"
+    type="search"
+    placeholder="ファイル名・コメント・ページ名で検索"
+  >
+
   <select id="group">
     <option value="">すべての一覧</option>
     <option value="むげん代理公開場">むげん代理公開場</option>
     <option value="凶悪キャラスレアップローダ">凶悪キャラスレアップローダ</option>
     <option value="ターゲット倉庫">ターゲット倉庫</option>
   </select>
+
+  <select id="page">
+    <option value="">すべてのページ</option>
+  </select>
 </div>
+
 <div class="status" id="status">読み込み中...</div>
+
 <div class="table-wrap">
 <table>
-<thead><tr><th>一覧</th><th>ページ</th><th>ファイル名</th><th>コメント</th></tr></thead>
+<thead>
+<tr>
+  <th>一覧</th>
+  <th>ページ</th>
+  <th>ファイル名</th>
+  <th>コメント</th>
+</tr>
+</thead>
 <tbody id="rows"></tbody>
 </table>
 </div>
 </main>
+
 <script>
 let allItems = [];
+
 const search = document.getElementById("search");
 const group = document.getElementById("group");
+const page = document.getElementById("page");
 const statusEl = document.getElementById("status");
 const tbody = document.getElementById("rows");
 
+// 一覧の選択に応じてページタイトルの選択肢を更新
+function updatePages() {
+  const selectedGroup = group.value;
+  const previousPage = page.value;
+
+  const pages = [...new Set(
+    allItems
+      .filter(x => !selectedGroup || x.group === selectedGroup)
+      .map(x => x.page || "")
+      .filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b, "ja"));
+
+  page.replaceChildren();
+
+  const allOption = document.createElement("option");
+  allOption.value = "";
+  allOption.textContent = "すべてのページ";
+  page.appendChild(allOption);
+
+  for (const pageName of pages) {
+    const option = document.createElement("option");
+    option.value = pageName;
+    option.textContent = pageName;
+    page.appendChild(option);
+  }
+
+  // 前のページが現在の一覧にも存在する場合は選択を維持
+  if (pages.includes(previousPage)) {
+    page.value = previousPage;
+  } else {
+    page.value = "";
+  }
+}
+
+// 条件に一致するデータを表示
 function render() {
   const q = search.value.trim().toLocaleLowerCase();
-  const g = group.value;
-  const filtered = allItems.filter(x =>
-    (!g || x.group === g) &&
-    [x.name, x.comment, x.page, x.group].some(v =>
-      (v || "").toLocaleLowerCase().includes(q))
-  );
-  statusEl.textContent = `${filtered.length.toLocaleString()} 件 / 全 ${allItems.length.toLocaleString()} 件`;
+  const selectedGroup = group.value;
+  const selectedPage = page.value;
+
+  const filtered = allItems.filter(x => {
+    const matchesGroup =
+      !selectedGroup || x.group === selectedGroup;
+
+    const matchesPage =
+      !selectedPage || x.page === selectedPage;
+
+    const matchesSearch =
+      [x.name, x.comment, x.page, x.group].some(v =>
+        (v || "").toLocaleLowerCase().includes(q)
+      );
+
+    return matchesGroup && matchesPage && matchesSearch;
+  });
+
+  statusEl.textContent =
+    `${filtered.length.toLocaleString()} 件 / 全 ${allItems.length.toLocaleString()} 件`;
+
   tbody.replaceChildren();
   const frag = document.createDocumentFragment();
+
   for (const x of filtered) {
     const tr = document.createElement("tr");
-    for (const [key, cls] of [["group",""],["page","page"]]) {
-      const td = document.createElement("td");
-      td.className = cls;
-      td.textContent = x[key] || "";
-      tr.appendChild(td);
-    }
+
+    const groupTd = document.createElement("td");
+    groupTd.textContent = x.group || "";
+    tr.appendChild(groupTd);
+
+    const pageTd = document.createElement("td");
+    pageTd.className = "page";
+    pageTd.textContent = x.page || "";
+    tr.appendChild(pageTd);
+
     const nameTd = document.createElement("td");
     nameTd.className = "name";
-    const a = document.createElement("a");
-    a.href = x.url;
-    a.textContent = x.name;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    nameTd.appendChild(a);
-    tr.insertBefore(nameTd, tr.children[2]);
+
+    if (x.url) {
+      const a = document.createElement("a");
+      a.href = x.url;
+      a.textContent = x.name || x.url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      nameTd.appendChild(a);
+    } else {
+      nameTd.textContent = x.name || "";
+    }
+
+    tr.appendChild(nameTd);
+
     const commentTd = document.createElement("td");
     commentTd.className = "comment";
     commentTd.textContent = x.comment || "";
     tr.appendChild(commentTd);
+
     frag.appendChild(tr);
   }
+
   tbody.appendChild(frag);
 }
+
+// イベント設定
 search.addEventListener("input", render);
-group.addEventListener("change", render);
+
+group.addEventListener("change", () => {
+  updatePages();
+  render();
+});
+
+page.addEventListener("change", render);
+
+// data.json を読み込む
 fetch("data.json")
-  .then(r => { if (!r.ok) throw new Error("data.json を取得できません"); return r.json(); })
-  .then(data => { allItems = data; render(); })
-  .catch(err => { statusEl.textContent = "一覧データを読み込めません。data.json が同じフォルダにあるか確認してください。"; console.error(err); });
+  .then(r => {
+    if (!r.ok) {
+      throw new Error("data.json を取得できません");
+    }
+    return r.json();
+  })
+  .then(data => {
+    if (!Array.isArray(data)) {
+      throw new Error("data.json の形式が正しくありません");
+    }
+
+    allItems = data;
+    updatePages();
+    render();
+  })
+  .catch(err => {
+    statusEl.textContent =
+      "一覧データを読み込めません。data.json が同じフォルダにあるか確認してください。";
+    console.error(err);
+  });
 </script>
 </body>
 </html>
+```
