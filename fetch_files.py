@@ -78,13 +78,27 @@ def fetch_sheet(sheet):
         raise RuntimeError(f'{sheet["group"]}: CSVに見出し行がありません。')
 
     rows = []
+    current_page = ""
+
     for raw in reader:
         page = pick(raw, ALIASES["page"])
         url_value = pick(raw, ALIASES["url"])
         name = pick(raw, ALIASES["name"])
         comment = pick(raw, ALIASES["comment"])
 
-        # 完全な空行を除外
+        # ページタイトルだけの行を検出して記憶する
+        if page and not any([url_value, name, comment]):
+            current_page = page
+            continue
+
+        # ファイル行にページタイトルがない場合は、
+        # 直前に記録したページタイトルを引き継ぐ
+        if page:
+            current_page = page
+        else:
+            page = current_page
+
+        # 完全な空行は除外
         if not any([page, url_value, name, comment]):
             continue
 
