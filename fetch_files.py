@@ -14,7 +14,7 @@ SHEETS = [
     {
         "group": "むげん代理公開場",
         "spreadsheet_id": "1VH9nkUrtnHwZmnUsU_Bg5AkgQ6LFTEw_nT7tPoZfUtY",
-        "gid": "0",
+        "gid": "1931694445",
     },
     {
         "group": "凶悪キャラスレアップローダ",
@@ -24,7 +24,7 @@ SHEETS = [
     {
         "group": "ターゲット倉庫",
         "spreadsheet_id": "1VH9nkUrtnHwZmnUsU_Bg5AkgQ6LFTEw_nT7tPoZfUtY",
-        "gid": "1931694445",
+        "gid": "0",
     },
 ]
 
