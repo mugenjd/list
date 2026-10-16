@@ -4,6 +4,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>凶悪キャラアップローダー22 ファイル一覧</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 30px auto;
+      padding: 0 16px;
+      max-width: 1100px;
+      color: #222;
+      background: #f7f7f7;
+    }
+    h1 { font-size: 24px; }
+    #search {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin: 12px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    .info { color: #666; font-size: 14px; }
+    .table-wrap {
+      overflow-x: auto;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+      overflow-wrap: anywhere;
+    }
+    th { background: #eee; white-space: nowrap; }
+    a { color: #075db5; }
+    tr:last-child td { border-bottom: none; }
+  </style>
+</head>
+<body>
+  <h1>凶悪キャラアップローダー22</h1>
+  <p>
+    <a href="https://uu.getuploader.com/kyouakuchar22/">
+      元のアップローダーを開く
+    </a>
+  </p>
+
+  <input id="search" type="search" placeholder="ファイル名・コメントで検索">
+  <p class="info" id="status">読み込み中...</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ファイル名</th>
+          <th>コメント</th>
+          <th>容量</th>
+          <th>日時</th>
+        </tr>
+      </thead>
+      <tbody id="files"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let allFiles = [];
+
+    async function loadFiles() {
+      const status = document.getElementById("status");
+      try {
+        const response = await fetch("data.json");
+        if (!response.ok) throw new Error("data.json の取得に失敗");
+
+        allFiles = await response.json();
+        renderFiles();
+
+      } catch (error) {
+        status.textContent =
+          "一覧を読み込めません。GitHub Actionsの実行結果を確認してください。";
+        console.error(error);
+      }
+    }
+
+    function renderFiles() {
+      const query = document.getElementById("search")
+        .value.trim().toLowerCase();
+
+      const filtered = allFiles.filter(file =>
+        [file.name, file.comment].some(value =>
+          (value || "").toLowerCase().includes(query)
+        )
+      );
+
+      document.getElementById("status").textContent =
+        `${filtered.length} 件 / 全 ${allFiles.length} 件`;
+
+      const tbody = document.getElementById("files");
+      tbody.replaceChildren();
+
+      for (const file of filtered) {
+        const tr = document.createElement("tr");
+
+        const nameCell = document.createElement("td");
+        const link = document.createElement("a");
+        link.href = file.url;
+        link.textContent = file.name;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        nameCell.appendChild(link);
+        tr.appendChild(nameCell);
+
+        for (const value of [
+          file.comment, file.size, file.date
+        ]) {
+          const td = document.createElement("td");
+          td.textContent = value || "";
+          tr.appendChild(td);
+        }
+
+        tbody.appendChild(tr);
+      }
+    }
+
+    document.getElementById("search")
+      .addEventListener("input", renderFiles);
+
+    loadFiles();
+  </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>アップローダー一覧</title>
 
   <style>
