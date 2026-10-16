@@ -259,17 +259,19 @@ def load_spreadsheet_feeds():
         line = line.strip()
         if not line or line.startswith("#"):
             continue
-        parts = line.split("\t", 1)
-        if len(parts) != 2:
+        parts = line.split("\t")
+        if len(parts) < 2:
             continue
-        site_url, csv_url = (part.strip() for part in parts)
+        site_url = parts[0].strip()
+        csv_url = parts[1].strip()
+        display_name = parts[2].strip() if len(parts) >= 3 else ""
         if not site_url or not csv_url or "PASTE_PUBLISHED_CSV_URL_HERE" in csv_url:
             continue
-        feeds[normalize_url(site_url)] = csv_url
+        feeds[normalize_url(site_url)] = {"csv_url": csv_url, "display_name": display_name}
     return feeds
 
 
-def parse_spreadsheet_csv(site_url, csv_url):
+def parse_spreadsheet_csv(site_url, csv_url, display_name=""):
     """Read a published Google Sheets CSV containing IMPORTFEED item rows."""
     try:
         response = SESSION.get(csv_url, timeout=TIMEOUT, allow_redirects=True)
@@ -294,7 +296,7 @@ def parse_spreadsheet_csv(site_url, csv_url):
         if not has_header:
             title_idx, url_idx, date_idx = 0, 1, 2
 
-        site_name = get_site_name(site_url)
+        site_name = display_name or get_site_name(site_url)
         articles = []
         for row in data_rows:
             if len(row) <= max(title_idx, url_idx):
@@ -339,8 +341,10 @@ def main():
 
     # Fetch the three Seesaa feeds via public Google Sheets CSV when configured.
     spreadsheet_site_keys = set(spreadsheet_feeds)
-    for site_url, csv_url in spreadsheet_feeds.items():
-        articles, detail = parse_spreadsheet_csv(site_url, csv_url)
+    for site_url, feed_config in spreadsheet_feeds.items():
+        csv_url = feed_config["csv_url"]
+        display_name = feed_config["display_name"]
+        articles, detail = parse_spreadsheet_csv(site_url, csv_url, display_name)
         if articles:
             log_lines.append(f"OK SHEETS\t{site_url}\t{detail}")
             all_articles.extend(articles)
