@@ -1,0 +1,189 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ページ一覧</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 30px 20px;
+      background: #f5f6f8;
+      color: #333;
+      font-family: sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .description {
+      margin: 0 0 24px;
+      color: #666;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 500px;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #e9edf3;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: #f7faff;
+    }
+
+    th:first-child,
+    td:first-child {
+      width: 25%;
+    }
+
+    th:last-child,
+    td:last-child {
+      width: 110px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    a {
+      color: #0969da;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .open-link {
+      display: inline-block;
+      padding: 5px 12px;
+      border: 1px solid #0969da;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .open-link:hover {
+      background: #0969da;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    footer {
+      margin-top: 24px;
+      color: #888;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 20px 10px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      th, td {
+        padding: 11px 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <h1>ページ一覧</h1>
+    <p class="description">
+      作成した各種ページをまとめています。
+      下の一覧から目的のページを開いてください。
+    </p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>ページ名</th>
+            <th>説明</th>
+            <th>リンク</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <!-- ページ一覧：ここから追加・編集 -->
+
+          <tr>
+            <td>
+              <a href="./RSS.html">RSS記事一覧</a>
+            </td>
+            <td>
+              複数のブログの最新記事をまとめて確認するページ
+            </td>
+            <td>
+              <a class="open-link" href="./RSS.html">開く</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <a href="./images.html">画像一覧</a>
+            </td>
+            <td>
+              画像や名前などを一覧で確認するページ
+            </td>
+            <td>
+              <a class="open-link" href="./images.html">開く</a>
+            </td>
+          </tr>
+
+          <!-- ページ一覧：ここまで追加・編集 -->
+
+        </tbody>
+      </table>
+    </div>
+
+    <footer>
+      GitHub Pages
+    </footer>
+
+  </div>
+</body>
+</html>
