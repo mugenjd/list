@@ -136,17 +136,56 @@ def parse_feed(feed_url, site_url):
     if not response:
         return []
     parsed = feedparser.parse(response.content)
-    if not parsed.entries:
-        return []
     blog_name = parsed.feed.get("title") or get_site_name(site_url)
     out = []
-    for entry in parsed.entries[:MAX_SCAN_PER_SITE]:
-        link = entry.get("link")
-        title = (entry.get("title") or "").strip()
+
+    # First use feedparser. If an RDF/RSS variant is not recognized, fall back
+    # to extracting item fields directly from the XML-like response.
+    if parsed.entries:
+        for entry in parsed.entries[:MAX_SCAN_PER_SITE]:
+            link = entry.get("link")
+            title = (entry.get("title") or "").strip()
+            if not link or not title:
+                continue
+            date = parse_date(entry.get("published_parsed") or entry.get("updated_parsed")
+                              or entry.get("published") or entry.get("updated"))
+            if is_future_date(date):
+                continue
+            out.append({
+                "title": BeautifulSoup(title, "html.parser").get_text(" ", strip=True),
+                "url": urljoin(feed_url, link),
+                "site": blog_name,
+                "site_url": site_url,
+                "published": date,
+                "source": "RSS",
+            })
+        if out:
+            return out
+
+    # Fallback supports Seesaa RDF items such as rdf:about + dc:date,
+    # as well as RSS 2.0 items using pubDate.
+    soup = BeautifulSoup(response.content, "html.parser")
+    def local_name(tag):
+        return (tag.name or "").split(":")[-1].lower()
+
+    def child_text(item, names):
+        for child in item.find_all(True, recursive=True):
+            if local_name(child) in names:
+                value = child.get_text(" ", strip=True)
+                if value:
+                    return value
+        return ""
+
+    items = [tag for tag in soup.find_all(True) if local_name(tag) == "item"]
+    for item in items[:MAX_SCAN_PER_SITE]:
+        title = child_text(item, {"title"})
+        link = child_text(item, {"link"})
+        if not link:
+            link = item.get("rdf:about") or item.get("about") or ""
         if not link or not title:
             continue
-        date = parse_date(entry.get("published_parsed") or entry.get("updated_parsed")
-                          or entry.get("published") or entry.get("updated"))
+        date_raw = child_text(item, {"pubdate", "date", "published", "updated", "issued"})
+        date = parse_date(date_raw)
         if is_future_date(date):
             continue
         out.append({
