@@ -1,107 +1,111 @@
 
 import json
+import time
 from pathlib import Path
 from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
 
-# 取得対象のアップローダー
 BASE_URL = "https://uu.getuploader.com/kyouakuchar22/"
+SOURCE_FILE = Path("source.html")
+DATA_FILE = Path("data.json")
 
-# data.json の保存先
-OUTPUT_FILE = Path(__file__).resolve().parent / "data.json"
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (compatible; GitHubPagesCatalog/1.0)"
+}
 
 
-def fetch_files():
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/130.0.0.0 Safari/537.36"
-        )
-    }
-
-    # ページを取得
+def fetch_source():
     response = requests.get(
         BASE_URL,
-        headers=headers,
+        headers=HEADERS,
         timeout=30,
     )
-
-    # 文字コードを設定
-    response.encoding = response.apparent_encoding
-
-    # アクセス状況をログに出力
-    print("HTTP status:", response.status_code)
-    print("Response URL:", response.url)
-    print("Response body:", response.text[:1000])
-
-    # HTTPエラーがあれば、ここで停止
     response.raise_for_status()
 
-    # HTMLを解析
-    soup = BeautifulSoup(response.text, "html.parser")
+    # 元ページのHTMLを保存
+    SOURCE_FILE.write_bytes(response.content)
 
-    table = soup.select_one("table.table-small-font")
+    return response.encoding or "utf-8"
 
-    if table is None:
-        raise RuntimeError(
-            "ファイル一覧のテーブルが見つかりません。"
-            "元サイトのHTML構造を確認してください。"
-        )
 
-    files = []
+def extract_files(encoding):
+    html = SOURCE_FILE.read_text(
+        encoding=encoding,
+        errors="replace",
+    )
+    soup = BeautifulSoup(html, "html.parser")
 
-    # ファイル一覧の各行を取得
-    for row in table.select("tbody tr"):
-        cells = row.find_all("td")
+    results = []
 
-        # 必要な列が5列未満ならスキップ
-        if len(cells) < 5:
+    for table in soup.find_all("table"):
+        rows = table.find_all("tr")
+        if not rows:
             continue
 
-        # ファイル名のリンクを取得
-        link = cells[0].find("a", href=True)
+        headers = [
+            cell.get_text(" ", strip=True)
+            for cell in rows[0].find_all(["th", "td"])
+        ]
 
-        if link is None:
+        # ファイル一覧らしいテーブルだけ処理
+        if not any("ファイル" in h for h in headers):
             continue
 
-        file_url = urljoin(BASE_URL, link["href"])
-        file_name = link.get_text(" ", strip=True)
-        comment = cells[1].get_text(" ", strip=True)
-        date = cells[4].get_text(" ", strip=True)
+        for row in rows[1:]:
+            cells = row.find_all(["td", "th"])
+            if not cells:
+                continue
 
-        if not file_name:
-            continue
+            values = [
+                cell.get_text(" ", strip=True)
+                for cell in cells
+            ]
 
-        # 必要な4項目だけを保存
-        files.append({
-            "url": file_url,
-            "name": file_name,
-            "comment": comment,
-            "date": date,
-        })
+            if len(values) != len(headers):
+                continue
 
-    # 0件の場合は既存データを上書きしない
-    if not files:
-        raise RuntimeError(
-            "ファイル情報を1件も取得できませんでした。"
-            "サイトのHTML構造やアクセス制限を確認してください。"
-        )
+            item = dict(zip(headers, values))
 
-    # JSONとして保存
-    with OUTPUT_FILE.open("w", encoding="utf-8") as f:
-        json.dump(
-            files,
-            f,
-            ensure_ascii=False,
-            indent=2,
-        )
+            # ファイル名のリンクを取得
+            link = None
+            for cell in cells:
+                for a in cell.find_all("a", href=True):
+                    text = a.get_text(" ", strip=True)
+                    if text:
+                        link = urljoin(BASE_URL, a["href"])
+                        break
+                if link:
+                    break
 
-    print(f"{len(files)}件のファイル情報を保存しました。")
-    print(f"保存先: {OUTPUT_FILE}")
+            filename = item.get("ファイル", "")
+            if not filename:
+                continue
+
+            results.append({
+                "name": filename,
+                "comment": item.get("コメント", ""),
+                "original": item.get("オリジナル", ""),
+                "size": item.get("容量", ""),
+                "date": item.get("日時", ""),
+                "url": link or BASE_URL,
+            })
+
+        if results:
+            break
+
+    DATA_FILE.write_text(
+        json.dumps(results, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+    print(f"取得件数: {len(results)}")
+    print(f"HTML保存: {SOURCE_FILE}")
+    print(f"一覧保存: {DATA_FILE}")
 
 
 if __name__ == "__main__":
-    fetch_files()
+    encoding = fetch_source()
+    time.sleep(1)
+    extract_files(encoding)
