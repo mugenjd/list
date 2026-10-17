@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172554">
   <title>ページ一覧</title>
 
   <style>
@@ -11,189 +12,403 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --blue: #3b82f6;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+
     body {
       margin: 0;
-      padding: 30px 20px;
-      background: #f5f6f8;
-      color: #333;
-      font-family: sans-serif;
+      background: #f1f5f9;
+      color: var(--text);
+      font-family:
+        -apple-system, BlinkMacSystemFont,
+        "Segoe UI", "Noto Sans JP", sans-serif;
       font-size: 16px;
       line-height: 1.7;
     }
 
-    .container {
-      max-width: 1100px;
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* ヘッダー */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 58px 24px 66px;
+      color: #fff;
+      background: linear-gradient(135deg, #172554, #3730a3 65%, #2563eb);
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero::before {
+      width: 300px;
+      height: 300px;
+      right: 8%;
+      top: -190px;
+      background: rgb(255 255 255 / 9%);
+    }
+
+    .hero::after {
+      width: 220px;
+      height: 220px;
+      right: 20%;
+      bottom: -175px;
+      background: rgb(147 197 253 / 15%);
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1050px;
       margin: 0 auto;
     }
 
-    h1 {
-      margin: 0 0 8px;
-      font-size: 28px;
-    }
-
-    .description {
-      margin: 0 0 24px;
-      color: #666;
-    }
-
-    .table-wrapper {
-      overflow-x: auto;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 500px;
-    }
-
-    th, td {
-      padding: 14px 16px;
-      border-bottom: 1px solid #e5e7eb;
-      text-align: left;
-      vertical-align: top;
-    }
-
-    th {
-      background: #e9edf3;
-      font-weight: bold;
-      white-space: nowrap;
-    }
-
-    tbody tr:last-child td {
-      border-bottom: none;
-    }
-
-    tbody tr:hover {
-      background: #f7faff;
-    }
-
-    th:first-child,
-    td:first-child {
-      width: 25%;
-    }
-
-    th:last-child,
-    td:last-child {
-      width: 110px;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    a {
-      color: #0969da;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    .open-link {
+    .eyebrow {
       display: inline-block;
-      padding: 5px 12px;
-      border: 1px solid #0969da;
-      border-radius: 5px;
+      margin-bottom: 12px;
+      padding: 4px 12px;
+      border: 1px solid rgb(255 255 255 / 30%);
+      border-radius: 999px;
+      background: rgb(255 255 255 / 10%);
+      color: #dbeafe;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 42px);
+      line-height: 1.3;
+      letter-spacing: 1px;
+    }
+
+    .hero-description {
+      margin: 16px 0 0;
+      color: #dbeafe;
+      font-size: 16px;
+    }
+
+    /* メイン */
+    main {
+      max-width: 1050px;
+      margin: -22px auto 0;
+      padding: 0 24px 48px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 21px;
+    }
+
+    .page-count {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    /* カード一覧 */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .page-card {
+      --accent: #3b82f6;
+      --accent-bg: #eff6ff;
+
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 210px;
+      padding: 24px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 4px 12px rgb(15 23 42 / 4%);
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+    }
+
+    .page-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--accent);
+    }
+
+    .page-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent);
+      box-shadow: 0 12px 28px rgb(15 23 42 / 10%);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 17px;
+    }
+
+    .card-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 56px;
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: var(--accent-bg);
+      color: var(--accent);
+      font-size: 27px;
+      font-weight: bold;
+    }
+
+    .card-label {
+      margin-bottom: 3px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .page-card h3 {
+      margin: 0;
+      font-size: 19px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .card-description {
+      flex: 1;
+      margin: 0 0 22px;
+      color: var(--muted);
       font-size: 14px;
     }
 
-    .open-link:hover {
-      background: #0969da;
-      color: #fff;
-      text-decoration: none;
+    .card-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 14px;
+      border-top: 1px solid #f1f5f9;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .arrow {
+      display: inline-block;
+      transition: transform 0.2s ease;
+    }
+
+    .page-card:hover .arrow {
+      transform: translateX(5px);
+    }
+
+    /* 各ページのカラー */
+    .uploader {
+      --accent: #2563eb;
+      --accent-bg: #eff6ff;
+    }
+
+    .rss {
+      --accent: #ea580c;
+      --accent-bg: #fff7ed;
+    }
+
+    .youtube {
+      --accent: #dc2626;
+      --accent-bg: #fef2f2;
+    }
+
+    .oromizu {
+      --accent: #7c3aed;
+      --accent-bg: #f5f3ff;
     }
 
     footer {
-      margin-top: 24px;
-      color: #888;
-      font-size: 13px;
+      padding: 22px 15px;
+      border-top: 1px solid var(--border);
+      color: #94a3b8;
+      font-size: 12px;
       text-align: center;
     }
 
-    @media (max-width: 600px) {
-      body {
-        padding: 20px 10px;
+    @media (max-width: 650px) {
+      .hero {
+        padding: 42px 20px 48px;
       }
 
-      h1 {
-        font-size: 24px;
+      .hero-description {
+        font-size: 14px;
       }
 
-      th, td {
-        padding: 11px 12px;
+      main {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .card-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+
+      .page-card {
+        min-height: 190px;
+        padding: 21px;
+      }
+
+      .page-card h3 {
+        font-size: 18px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
 
-    <h1>ページ一覧</h1>
-    <p class="description">
-      作成した各種ページをまとめています。
-      下の一覧から目的のページを開いてください。
-    </p>
+  <header class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow">MY WEB PORTAL</span>
+      <h1>ページ一覧</h1>
+      <p class="hero-description">
+        制作したツール・データベース・記事をまとめています。
+        <br>
+        気になるページを選んでご利用ください。
+      </p>
+    </div>
+  </header>
 
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>ページ名</th>
-            <th>説明</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <!-- ページ一覧：ここから追加・編集 -->
-          <tr>
-            <td>
-              <a href="./uploader.html">getuploader一覧</a>
-            </td>
-            <td>
-              凶悪ロダ・ターゲット倉庫・むげん代理公開場の3つのリンクを一覧にしたページ
-            </td>
-          </tr>
-          
-          <tr>
-            <td>
-              <a href="./RSS.html">MUGENブログ新着記事一覧</a>
-            </td>
-            <td>
-              複数のブログの記事を一覧にしたページ
-            </td>
-          </tr>
-          
-          <tr>
-            <td>
-              <a href="./video-list.html">YouTube動画検索</a>
-            </td>
-            <td>
-              Youtubeに投稿した自分のチャンネルの動画を検索するページ
-            </td>
-          </tr>
-
-          <tr>
-            <td>
-              <a href="./oromizudaisuki-list.html">オロミズ大好き氏一覧</a>
-            </td>
-            <td>
-              オロミズ大好き氏の公開物を一覧にしたページ
-            </td>
-          </tr>
-
-          <!-- ページ一覧：ここまで追加・編集 -->
-
-        </tbody>
-      </table>
+  <main>
+    <div class="section-heading">
+      <h2>コンテンツ一覧</h2>
+      <span class="page-count">4 PAGES</span>
     </div>
 
-    <footer>
-      GitHub Pages
-    </footer>
+    <div class="card-grid">
 
-  </div>
+      <!-- アップローダー一覧 -->
+      <a class="page-card uploader" href="./uploader.html">
+        <div class="card-top">
+          <div class="card-icon" aria-hidden="true">▤</div>
+          <div>
+            <div class="card-label">FILE DATABASE</div>
+            <h3>getuploader一覧</h3>
+          </div>
+        </div>
+        <p class="card-description">
+          凶悪ロダ・ターゲット倉庫・むげん代理公開場の
+          3つのアップローダーをまとめたファイル一覧です。
+        </p>
+        <div class="card-link">
+          <span>一覧を開く</span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </div>
+      </a>
+
+      <!-- RSSブログ記事一覧 -->
+      <a class="page-card rss" href="./RSS.html">
+        <div class="card-top">
+          <div class="card-icon" aria-hidden="true">◔</div>
+          <div>
+            <div class="card-label">LATEST ARTICLES</div>
+            <h3>MUGENブログ新着記事一覧</h3>
+          </div>
+        </div>
+        <p class="card-description">
+          複数のブログから新着記事を集めて、
+          まとめてチェックできるページです。
+        </p>
+        <div class="card-link">
+          <span>記事一覧を開く</span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </div>
+      </a>
+
+      <!-- YouTube動画検索 -->
+      <a class="page-card youtube" href="./video-list.html">
+        <div class="card-top">
+          <div class="card-icon" aria-hidden="true">▶</div>
+          <div>
+            <div class="card-label">VIDEO SEARCH</div>
+            <h3>YouTube動画検索</h3>
+          </div>
+        </div>
+        <p class="card-description">
+          自分のYouTubeチャンネルに投稿した動画を
+          検索できるページです。
+        </p>
+        <div class="card-link">
+          <span>動画を探す</span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </div>
+      </a>
+
+      <!-- オロミズ大好き氏一覧 -->
+      <a class="page-card oromizu" href="./oromizudaisuki-list.html">
+        <div class="card-top">
+          <div class="card-icon" aria-hidden="true">▦</div>
+          <div>
+            <div class="card-label">CONTENT ARCHIVE</div>
+            <h3>オロミズ大好き氏一覧</h3>
+          </div>
+        </div>
+        <p class="card-description">
+          オロミズ大好き氏の公開物を
+          一覧から探せるページです。
+        </p>
+        <div class="card-link">
+          <span>公開物一覧を開く</span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </div>
+      </a>
+
+    </div>
+  </main>
+
+  <footer>
+    © GitHub Pages
+  </footer>
+
 </body>
 </html>
