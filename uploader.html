@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>アップローダー統合ファイル一覧</title>
+
 <style>
 :root {
   color-scheme: light;
@@ -32,9 +34,10 @@ h1 {
   margin: 0 0 22px;
 }
 
+/* 検索欄・一覧・ページの幅 */
 .controls {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(190px, 240px) 150px;
+  grid-template-columns: minmax(220px, 1fr) 230px 250px;
   gap: 10px;
   margin-bottom: 10px;
 }
@@ -42,6 +45,7 @@ h1 {
 input,
 select {
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   padding: 11px 12px;
   font: inherit;
@@ -86,13 +90,13 @@ th {
   white-space: nowrap;
 }
 
-/* 一覧列だけ非表示。絞り込み機能は維持 */
+/* 一覧列は非表示。絞り込み機能は維持 */
 th.group-column,
 td.group-column {
   display: none;
 }
 
-/* 表示列の幅を固定 */
+/* 表示列の幅 */
 th.page-column,
 td.page-column {
   width: 300px;
@@ -151,6 +155,7 @@ a:hover {
   text-decoration: underline;
 }
 
+/* スマートフォン */
 @media (max-width: 650px) {
   main {
     padding: 18px 10px 32px;
@@ -276,7 +281,7 @@ dateSort.addEventListener("click", () => {
   render();
 });
 
-// 一覧の選択に応じてページタイトルの選択肢を更新
+// 一覧の選択に応じてページの選択肢を更新
 function updatePages() {
   const selectedGroup = group.value;
   const previousPage = page.value;
@@ -319,7 +324,7 @@ function updatePages() {
       .map(x => x.page || "")
       .filter(Boolean)
   )].sort((a, b) => {
-    // 「すべての一覧」のときだけ一覧の優先順を適用
+    // すべての一覧では一覧の優先順を適用
     if (!selectedGroup) {
       const groupA = groupOrder.findIndex(g =>
         allItems.some(x => x.group === g && x.page === a)
@@ -354,7 +359,7 @@ function updatePages() {
     page.appendChild(option);
   }
 
-  // 前のページが現在の一覧にも存在する場合は選択を維持
+  // 現在の一覧に存在する場合は前の選択を維持
   if (pages.includes(previousPage)) {
     page.value = previousPage;
   } else {
@@ -383,7 +388,7 @@ function render() {
     return matchesGroup && matchesPage && matchesSearch;
   });
 
-  // 日時で並べ替え。日時が空欄・形式不明の行は末尾
+  // 日時で並べ替え。日時不明の行は末尾
   filtered.sort((a, b) => {
     const dateA = parseDate(a.date);
     const dateB = parseDate(b.date);
@@ -406,7 +411,7 @@ function render() {
   for (const x of filtered) {
     const tr = document.createElement("tr");
 
-    // 一覧名：列は非表示だが絞り込み用データを維持
+    // 一覧名：列は非表示だが絞り込み用に保持
     const groupTd = document.createElement("td");
     groupTd.className = "group-column";
     groupTd.textContent = x.group || "";
@@ -418,7 +423,7 @@ function render() {
     pageTd.textContent = x.page || "";
     tr.appendChild(pageTd);
 
-    // ファイル名（クリックすると元のリンクを開く）
+    // ファイル名：クリックすると元のリンクを開く
     const nameTd = document.createElement("td");
     nameTd.className = "name-column";
 
