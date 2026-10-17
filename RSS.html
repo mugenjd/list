@@ -1,103 +1,717 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MUGENブログ新着記事一覧</title>
-<style>
-:root{color-scheme:light dark;--border: #8885;--muted:#777}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6}
-header{padding:24px 16px;background:#202b3b;color:white}header .wrap,main{max-width:1000px;margin:auto}
-h1{font-size:1.65rem;margin:0 0 4px}.sub{opacity:.8;font-size:.92rem}
-main{padding:18px 14px 40px}.controls{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 18px}
-input,select,button{font:inherit;padding:10px;border:1px solid var(--border);border-radius:8px;background:transparent}
-input{flex:1;min-width:220px}.count{color:var(--muted);font-size:.9rem}
-article{border:1px solid var(--border);border-radius:10px;padding:14px;margin:10px 0}
-article h2{font-size:1.05rem;line-height:1.45;margin:0 0 7px}
-article h2 a{text-decoration:none}article h2 a:hover{text-decoration:underline}
-.meta{font-size:.84rem;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
-.badge{border:1px solid var(--border);border-radius:999px;padding:1px 8px}
-#status{padding:14px;color:var(--muted)}.empty{padding:30px;text-align:center;color:var(--muted)}
-footer{padding:20px;text-align:center;color:var(--muted);font-size:.8rem}
-</style>
-</head>
-<body>
-<header><div class="wrap">
-  <h1>MUGENブログ新着記事一覧</h1>
-  <div class="sub">登録ブログのRSS・記事一覧ページから新着情報を集約</div>
-</div></header>
-<main>
-  <div id="status">記事データを読み込んでいます…</div>
-  <div class="controls">
-    <input id="search" type="search" placeholder="記事タイトル・ブログ名で検索">
-    <select id="siteFilter"><option value="">すべてのブログ</option></select>
-    <select id="sort"><option value="new">新しい順</option><option value="old">古い順</option></select>
-  </div>
-  <div id="summary" class="count"></div>
-  <section id="articles"></section>
-  <div id="empty" class="empty" hidden>該当する記事がありません。</div>
-</main>
-<footer>記事の著作権は各ブログの運営者に帰属します。タイトルをクリックすると元記事へ移動します。</footer>
-<script>
-const $ = s => document.querySelector(s);
-let all = [];
-function dateText(value) {
-  if (!value) return "日時不明";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "日時不明";
-  return new Intl.DateTimeFormat("ja-JP",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",timeZone:"Asia/Tokyo"}).format(d);
-}
-function render() {
-  const q = $("#search").value.trim().toLocaleLowerCase();
-  const site = $("#siteFilter").value;
-  const direction = $("#sort").value === "old" ? 1 : -1;
-  const rows = all.filter(a => (!site || a.site === site) &&
-      (!q || (a.title+" "+a.site).toLocaleLowerCase().includes(q)));
-  rows.sort((a,b) => {
-    const da = a.published ? Date.parse(a.published) : 0;
-    const db = b.published ? Date.parse(b.published) : 0;
-    return (da-db)*direction;
-  });
-  $("#summary").textContent = `${rows.length.toLocaleString()}件 / 全${all.length.toLocaleString()}件`;
-  $("#articles").replaceChildren();
-  $("#empty").hidden = rows.length !== 0;
-  const frag = document.createDocumentFragment();
-  for (const a of rows) {
-    const card = document.createElement("article");
-    const h = document.createElement("h2");
-    const link = document.createElement("a");
-    link.href = a.url; link.target = "_blank"; link.rel = "noopener noreferrer";
-    link.textContent = a.title || "(タイトルなし)";
-    h.append(link);
-    const meta = document.createElement("div"); meta.className = "meta";
-    const blog = document.createElement("span"); blog.textContent = a.site || "ブログ名不明";
-    const date = document.createElement("span"); date.textContent = dateText(a.published);
-    const source = document.createElement("span"); source.className = "badge"; source.textContent = a.source || "取得";
-    meta.append(blog,date,source); card.append(h,meta); frag.append(card);
-  }
-  $("#articles").append(frag);
-}
-async function start() {
-  try {
-    const res = await fetch("./articles.json?ts="+Date.now());
-    if (!res.ok) throw new Error("articles.json を取得できませんでした");
-    const data = await res.json();
-    all = Array.isArray(data.articles) ? data.articles : [];
-    const sites = [...new Set(all.map(a=>a.site).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"ja"));
-    for (const s of sites) {
-      const o = document.createElement("option"); o.value=s; o.textContent=s; $("#siteFilter").append(o);
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F97316">
+  <title>MUGENブログ新着記事一覧</title>
+
+  <style>
+    :root {
+      color-scheme: light;
+      --orange: #F97316;
+      --orange-dark: #C2410C;
+      --orange-light: #FFF7ED;
+      --orange-border: #FED7AA;
+      --text: #292524;
+      --muted: #78716C;
+      --border: #E7E5E4;
+      --white: #FFFFFF;
+      --shadow: 0 5px 18px rgba(124, 45, 18, 0.07);
     }
-    $("#status").textContent = `最終更新：${dateText(data.updated_at)}（JST）／登録サイト ${data.site_count ?? "?"}件`;
-    render();
-  } catch(e) {
-    $("#status").textContent = "記事データを読み込めませんでした。GitHub Actions の実行結果と articles.json を確認してください。";
-    console.error(e);
-  }
-}
-$("#search").addEventListener("input",render);
-$("#siteFilter").addEventListener("change",render);
-$("#sort").addEventListener("change",render);
-start();
-</script>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #FFFAF5;
+      color: var(--text);
+      font-family:
+        -apple-system, BlinkMacSystemFont,
+        "Segoe UI", "Noto Sans JP",
+        "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      line-height: 1.7;
+    }
+
+    a {
+      color: var(--orange-dark);
+    }
+
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 3px solid #FDBA74;
+      outline-offset: 3px;
+    }
+
+    /* ヘッダー */
+    header {
+      position: relative;
+      overflow: hidden;
+      padding: 42px 20px 46px;
+      color: #FFFFFF;
+      background: linear-gradient(135deg, #EA580C 0%, #F97316 55%, #FB923C 100%);
+    }
+
+    header::before,
+    header::after {
+      position: absolute;
+      content: "";
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.09);
+      pointer-events: none;
+    }
+
+    header::before {
+      width: 300px;
+      height: 300px;
+      top: -170px;
+      right: -45px;
+    }
+
+    header::after {
+      width: 190px;
+      height: 190px;
+      bottom: -135px;
+      right: 20%;
+    }
+
+    .header-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 22px;
+      padding: 7px 13px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 999px;
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.13);
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .back-link:hover {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.23);
+      transform: translateY(-1px);
+    }
+
+    .eyebrow {
+      margin: 0 0 7px;
+      color: #FFEDD5;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 2.55rem);
+      line-height: 1.3;
+      letter-spacing: -0.025em;
+    }
+
+    .subtitle {
+      max-width: 720px;
+      margin: 14px 0 0;
+      color: #FFF7ED;
+      font-size: 0.98rem;
+    }
+
+    /* メイン */
+    main {
+      position: relative;
+      z-index: 2;
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      padding: 30px 24px 48px;
+    }
+
+    .status {
+      margin: 0 0 18px;
+      padding: 12px 16px;
+      border: 1px solid var(--orange-border);
+      border-radius: 12px;
+      color: #9A3412;
+      background: #FFF7ED;
+      font-size: 0.88rem;
+      overflow-wrap: anywhere;
+    }
+
+    .status.error {
+      border-color: #FECACA;
+      color: #991B1B;
+      background: #FEF2F2;
+    }
+
+    /* 検索パネル */
+    .filter-panel {
+      margin-bottom: 24px;
+      padding: 22px;
+      border: 1px solid #F1E5D9;
+      border-radius: 18px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .filter-heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 16px;
+      font-size: 1.12rem;
+      font-weight: 750;
+    }
+
+    .filter-icon {
+      display: inline-grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      flex-shrink: 0;
+      border-radius: 10px;
+      color: var(--orange-dark);
+      background: #FFEDD5;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(220px, 1.6fr) minmax(180px, 1fr) minmax(140px, 0.8fr);
+      gap: 14px;
+    }
+
+    .control {
+      min-width: 0;
+    }
+
+    .control label {
+      display: block;
+      margin-bottom: 6px;
+      color: #57534E;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .control input,
+    .control select {
+      width: 100%;
+      min-height: 45px;
+      padding: 10px 12px;
+      border: 1px solid #D6D3D1;
+      border-radius: 10px;
+      color: var(--text);
+      background: #FFFFFF;
+      font: inherit;
+      font-size: 0.93rem;
+    }
+
+    .control input::placeholder {
+      color: #A8A29E;
+    }
+
+    .control input:focus,
+    .control select:focus {
+      border-color: var(--orange);
+      outline: 3px solid rgba(249, 115, 22, 0.13);
+    }
+
+    /* 記事件数 */
+    .results-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 0 0 15px;
+    }
+
+    .results-heading h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .summary {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border: 1px solid var(--orange-border);
+      border-radius: 999px;
+      color: var(--orange-dark);
+      background: #FFF7ED;
+      font-size: 0.85rem;
+      font-weight: 750;
+    }
+
+    /* 記事カード */
+    .articles {
+      display: grid;
+      gap: 12px;
+    }
+
+    .article-card {
+      min-width: 0;
+      padding: 19px 21px;
+      border: 1px solid var(--border);
+      border-left: 4px solid #FDBA74;
+      border-radius: 13px;
+      background: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(41, 37, 36, 0.025);
+      transition:
+        border-color 0.2s,
+        border-left-color 0.2s,
+        box-shadow 0.2s,
+        transform 0.2s;
+    }
+
+    .article-card:hover {
+      border-color: var(--orange-border);
+      border-left-color: var(--orange);
+      box-shadow: var(--shadow);
+      transform: translateY(-2px);
+    }
+
+    .article-card h3 {
+      margin: 0;
+      font-size: 1.02rem;
+      line-height: 1.65;
+      overflow-wrap: anywhere;
+    }
+
+    .article-card h3 a {
+      color: #292524;
+      text-decoration: none;
+      text-decoration-color: #FDBA74;
+      text-underline-offset: 4px;
+    }
+
+    .article-card h3 a:hover {
+      color: var(--orange-dark);
+      text-decoration: underline;
+    }
+
+    .article-meta {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px 13px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      overflow-wrap: anywhere;
+    }
+
+    .meta-label {
+      color: #A8A29E;
+    }
+
+    .source-badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border: 1px solid #FED7AA;
+      border-radius: 999px;
+      color: #9A3412;
+      background: #FFF7ED;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    /* 空欄・エラー表示 */
+    .empty {
+      padding: 42px 20px;
+      border: 1px dashed #FDBA74;
+      border-radius: 14px;
+      color: #78716C;
+      background: #FFFCF8;
+      text-align: center;
+    }
+
+    .empty-icon {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--orange);
+      font-size: 1.8rem;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    /* フッター */
+    footer {
+      padding: 24px 20px;
+      border-top: 1px solid #F1E5D9;
+      color: #78716C;
+      background: #FFFFFF;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    footer p {
+      max-width: 850px;
+      margin: 4px auto;
+    }
+
+    footer a {
+      color: var(--orange-dark);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* スマートフォン */
+    @media (max-width: 720px) {
+      header {
+        padding: 30px 18px 35px;
+      }
+
+      main {
+        padding: 22px 15px 35px;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .filter-panel {
+        padding: 17px;
+        border-radius: 14px;
+      }
+
+      .article-card {
+        padding: 16px;
+      }
+
+      .article-card h3 {
+        font-size: 0.97rem;
+      }
+
+      .article-meta {
+        gap: 7px 11px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="header-inner">
+      <a class="back-link" href="./index.html">
+        ← ページ一覧に戻る
+      </a>
+
+      <p class="eyebrow">MUGEN BLOGS / LATEST ARTICLES</p>
+      <h1>MUGENブログ新着記事一覧</h1>
+      <p class="subtitle">
+        登録ブログのRSS・記事一覧ページから新着情報を集約します。
+        気になる記事を検索して、各ブログのページへ移動できます。
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <p id="status" class="status" role="status" aria-live="polite">
+      記事データを読み込んでいます…
+    </p>
+
+    <section class="filter-panel" aria-label="記事の検索と絞り込み">
+      <h2 class="filter-heading">
+        <span class="filter-icon" aria-hidden="true">⌕</span>
+        記事を検索・絞り込み
+      </h2>
+
+      <div class="controls">
+        <div class="control">
+          <label for="search">キーワード検索</label>
+          <input
+            id="search"
+            type="search"
+            placeholder="記事タイトル・ブログ名で検索"
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="control">
+          <label for="siteFilter">ブログ</label>
+          <select id="siteFilter">
+            <option value="">すべてのブログ</option>
+          </select>
+        </div>
+
+        <div class="control">
+          <label for="sort">並べ替え</label>
+          <select id="sort">
+            <option value="new">新しい順</option>
+            <option value="old">古い順</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="resultsTitle">
+      <div class="results-heading">
+        <h2 id="resultsTitle">記事一覧</h2>
+        <span id="summary" class="summary">0 件</span>
+      </div>
+
+      <div id="articles" class="articles"></div>
+
+      <div id="empty" class="empty" hidden>
+        <span class="empty-icon" aria-hidden="true">⌕</span>
+        該当する記事がありません。
+        <br>
+        検索キーワードやブログの選択を変更してください。
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      本ページは各ブログの新着記事を一覧表示するためのものです。
+    </p>
+    <p>
+      記事の著作権は各記事の著作者・権利者に帰属します。
+    </p>
+    <p>
+      <a href="./index.html">ページ一覧に戻る</a>
+    </p>
+  </footer>
+
+  <script>
+    const $ = (selector) => document.querySelector(selector);
+
+    let all = [];
+
+    function dateText(value) {
+      if (!value) return "日時不明";
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return "日時不明";
+      }
+
+      return new Intl.DateTimeFormat("ja-JP", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Asia/Tokyo"
+      }).format(date);
+    }
+
+    function timestamp(value) {
+      if (!value) return 0;
+
+      const result = new Date(value).getTime();
+
+      return Number.isNaN(result) ? 0 : result;
+    }
+
+    function render() {
+      const query = $("#search").value.trim().toLocaleLowerCase("ja");
+      const selectedSite = $("#siteFilter").value;
+      const sortOrder = $("#sort").value;
+
+      const filtered = all.filter((article) => {
+        const site = String(article.site || "");
+        const title = String(article.title || "");
+
+        const matchesSite =
+          !selectedSite || site === selectedSite;
+
+        const matchesQuery =
+          !query ||
+          (title + " " + site)
+            .toLocaleLowerCase("ja")
+            .includes(query);
+
+        return matchesSite && matchesQuery;
+      });
+
+      filtered.sort((a, b) => {
+        const difference =
+          timestamp(a.published) - timestamp(b.published);
+
+        return sortOrder === "old" ? difference : -difference;
+      });
+
+      $("#summary").textContent = `${filtered.length.toLocaleString("ja-JP")} 件`;
+
+      const container = $("#articles");
+      container.replaceChildren();
+
+      $("#empty").hidden = filtered.length !== 0;
+
+      const fragment = document.createDocumentFragment();
+
+      for (const article of filtered) {
+        const card = document.createElement("article");
+        card.className = "article-card";
+
+        const heading = document.createElement("h3");
+        const link = document.createElement("a");
+
+        link.href = String(article.url || "#");
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = article.title || "タイトルなし";
+
+        heading.appendChild(link);
+        card.appendChild(heading);
+
+        const meta = document.createElement("div");
+        meta.className = "article-meta";
+
+        const siteItem = document.createElement("span");
+        siteItem.className = "meta-item";
+
+        const siteLabel = document.createElement("span");
+        siteLabel.className = "meta-label";
+        siteLabel.textContent = "ブログ";
+
+        const siteName = document.createElement("span");
+        siteName.textContent = article.site || "ブログ名不明";
+
+        siteItem.append(siteLabel, siteName);
+
+        const dateItem = document.createElement("span");
+        dateItem.className = "meta-item";
+
+        const dateLabel = document.createElement("span");
+        dateLabel.className = "meta-label";
+        dateLabel.textContent = "投稿日";
+
+        const dateValue = document.createElement("time");
+        dateValue.textContent = dateText(article.published);
+
+        if (article.published && timestamp(article.published)) {
+          dateValue.dateTime = new Date(
+            article.published
+          ).toISOString();
+        }
+
+        dateItem.append(dateLabel, dateValue);
+
+        const sourceItem = document.createElement("span");
+        sourceItem.className = "source-badge";
+        sourceItem.textContent = article.source || "取得";
+
+        meta.append(siteItem, dateItem, sourceItem);
+        card.appendChild(meta);
+
+        fragment.appendChild(card);
+      }
+
+      container.appendChild(fragment);
+    }
+
+    async function start() {
+      const status = $("#status");
+
+      try {
+        const response = await fetch(
+          "./articles.json?ts=" + Date.now(),
+          { cache: "no-store" }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `articles.json の取得に失敗しました: HTTP ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+
+        all = Array.isArray(data.articles)
+          ? data.articles.filter((article) =>
+              article &&
+              typeof article === "object" &&
+              article.url
+            )
+          : [];
+
+        const sites = [
+          ...new Set(
+            all
+              .map((article) => String(article.site || ""))
+              .filter(Boolean)
+          )
+        ].sort((a, b) => a.localeCompare(b, "ja"));
+
+        const siteFilter = $("#siteFilter");
+        siteFilter.replaceChildren();
+
+        const allOption = document.createElement("option");
+        allOption.value = "";
+        allOption.textContent = "すべてのブログ";
+        siteFilter.appendChild(allOption);
+
+        for (const site of sites) {
+          const option = document.createElement("option");
+          option.value = site;
+          option.textContent = site;
+          siteFilter.appendChild(option);
+        }
+
+        status.textContent =
+          `最終更新：${dateText(data.updated_at)}（JST）` +
+          ` ／ 登録サイト ${data.site_count ?? sites.length} 件` +
+          ` ／ 記事 ${all.length.toLocaleString("ja-JP")} 件`;
+
+        render();
+      } catch (error) {
+        console.error(error);
+
+        status.textContent =
+          "記事データを読み込めませんでした。" +
+          " GitHub Actions の実行結果と articles.json を確認してください。";
+
+        status.classList.add("error");
+
+        $("#summary").textContent = "取得失敗";
+        $("#articles").replaceChildren();
+        $("#empty").hidden = false;
+        $("#empty").textContent =
+          "記事データを読み込めませんでした。しばらくしてから再読み込みしてください。";
+      }
+    }
+
+    $("#search").addEventListener("input", render);
+    $("#siteFilter").addEventListener("change", render);
+    $("#sort").addEventListener("change", render);
+
+    start();
+  </script>
 </body>
 </html>
