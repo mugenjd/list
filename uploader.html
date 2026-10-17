@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -6,31 +7,37 @@
 <title>アップローダー統合ファイル一覧</title>
 <style>
 :root { color-scheme: light; }
+
 body {
   margin: 0;
   background: #f5f6f8;
   color: #202124;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
+
 main {
   max-width: 1400px;
   margin: 0 auto;
   padding: 28px 20px 48px;
 }
+
 h1 {
   font-size: clamp(23px, 3vw, 32px);
   margin: 0 0 8px;
 }
+
 .description {
   color: #606770;
   margin: 0 0 22px;
 }
+
 .controls {
   display: grid;
   grid-template-columns: minmax(220px, 1fr) minmax(190px, 240px);
   gap: 10px;
   margin-bottom: 10px;
 }
+
 input, select {
   width: 100%;
   box-sizing: border-box;
@@ -40,59 +47,90 @@ input, select {
   border-radius: 8px;
   background: white;
 }
+
 .status {
   color: #5f6368;
   font-size: 14px;
   margin: 10px 0;
 }
+
 .table-wrap {
   overflow: auto;
   border: 1px solid #dadce0;
   border-radius: 10px;
   background: white;
 }
+
 table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 850px;
+  min-width: 1000px;
 }
+
 th, td {
   text-align: left;
   padding: 11px 12px;
   border-bottom: 1px solid #e8eaed;
   vertical-align: top;
 }
+
 th {
   position: sticky;
   top: 0;
   background: #eef0f3;
   white-space: nowrap;
 }
-tbody tr:hover { background: #f8faff; }
+
+tbody tr:hover {
+  background: #f8faff;
+}
+
 td.name {
   min-width: 260px;
   overflow-wrap: anywhere;
 }
+
 td.comment {
   min-width: 300px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-td.page { min-width: 190px; }
+
+td.page {
+  min-width: 190px;
+}
+
+td.date {
+  min-width: 125px;
+  white-space: nowrap;
+  font-size: 13px;
+  color: #606770;
+}
+
 a {
   color: #075db5;
   text-decoration: none;
 }
-a:hover { text-decoration: underline; }
+
+a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 650px) {
-  main { padding: 18px 10px 32px; }
-  .controls { grid-template-columns: 1fr; }
+  main {
+    padding: 18px 10px 32px;
+  }
+
+  .controls {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
 <body>
 <main>
 <h1>アップローダー統合ファイル一覧</h1>
+
 <p class="description">
   3つの一覧データをまとめて検索できます。
   一覧とページタイトルで絞り込み、ファイル名をクリックすると元のリンクを開きます。
@@ -127,6 +165,7 @@ a:hover { text-decoration: underline; }
   <th>ページ</th>
   <th>ファイル名</th>
   <th>コメント</th>
+  <th>日時</th>
 </tr>
 </thead>
 <tbody id="rows"></tbody>
@@ -147,7 +186,6 @@ const tbody = document.getElementById("rows");
 function updatePages() {
   const selectedGroup = group.value;
   const previousPage = page.value;
-
 
   const groupOrder = [
     "凶悪キャラスレアップローダ",
@@ -188,6 +226,7 @@ function updatePages() {
       const groupA = groupOrder.findIndex(g =>
         allItems.some(x => x.group === g && x.page === a)
       );
+
       const groupB = groupOrder.findIndex(g =>
         allItems.some(x => x.group === g && x.page === b)
       );
@@ -200,7 +239,6 @@ function updatePages() {
 
     return comparePages(a, b);
   });
-
 
   page.replaceChildren();
 
@@ -254,15 +292,18 @@ function render() {
   for (const x of filtered) {
     const tr = document.createElement("tr");
 
+    // 一覧名
     const groupTd = document.createElement("td");
     groupTd.textContent = x.group || "";
     tr.appendChild(groupTd);
 
+    // ページタイトル
     const pageTd = document.createElement("td");
     pageTd.className = "page";
     pageTd.textContent = x.page || "";
     tr.appendChild(pageTd);
 
+    // ファイル名（クリックすると元のリンクを開く）
     const nameTd = document.createElement("td");
     nameTd.className = "name";
 
@@ -279,10 +320,17 @@ function render() {
 
     tr.appendChild(nameTd);
 
+    // コメント
     const commentTd = document.createElement("td");
     commentTd.className = "comment";
     commentTd.textContent = x.comment || "";
     tr.appendChild(commentTd);
+
+    // 日時
+    const dateTd = document.createElement("td");
+    dateTd.className = "date";
+    dateTd.textContent = x.date || "";
+    tr.appendChild(dateTd);
 
     frag.appendChild(tr);
   }
