@@ -12,10 +12,14 @@
   color-scheme: light;
   --primary: #2563eb;
   --primary-dark: #1d4ed8;
+  --primary-deep: #172554;
+  --primary-light: #eff6ff;
+  --primary-border: #bfdbfe;
   --text: #1e293b;
   --muted: #64748b;
   --border: #e2e8f0;
   --background: #f1f5f9;
+  --white: #ffffff;
 }
 
 * {
@@ -33,6 +37,10 @@ body {
   line-height: 1.7;
 }
 
+a {
+  color: var(--primary-dark);
+}
+
 /* ヘッダー */
 .hero {
   position: relative;
@@ -41,9 +49,9 @@ body {
   color: white;
   background: linear-gradient(
     135deg,
-    #172554,
-    #3730a3 65%,
-    #2563eb
+    #172554 0%,
+    #3730a3 55%,
+    #2563eb 100%
   );
 }
 
@@ -83,17 +91,18 @@ body {
   align-items: center;
   gap: 6px;
   margin-bottom: 18px;
-  padding: 5px 11px;
+  padding: 6px 12px;
   border: 1px solid rgb(255 255 255 / 30%);
   border-radius: 8px;
   color: #dbeafe;
   font-size: 13px;
+  text-decoration: none;
   transition: background 0.2s;
 }
 
 .back-link:hover {
+  color: white;
   background: rgb(255 255 255 / 12%);
-  text-decoration: none;
 }
 
 .eyebrow {
@@ -146,13 +155,13 @@ main {
   letter-spacing: 1px;
 }
 
-/* 検索・絞り込みカード */
+/* 検索・絞り込み */
 .filter-panel {
   margin-bottom: 20px;
   padding: 20px;
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: white;
+  background: var(--white);
   box-shadow: 0 4px 14px rgb(15 23 42 / 4%);
 }
 
@@ -172,8 +181,8 @@ main {
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: #eff6ff;
-  color: var(--primary);
+  background: #dbeafe;
+  color: var(--primary-dark);
   font-size: 17px;
 }
 
@@ -212,9 +221,7 @@ select {
   color: var(--text);
   font: inherit;
   font-size: 14px;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 input::placeholder {
@@ -251,6 +258,7 @@ select:focus {
   display: inline-block;
   margin-right: 5px;
   padding: 3px 10px;
+  border: 1px solid #bfdbfe;
   border-radius: 7px;
   background: #dbeafe;
   color: #1d4ed8;
@@ -302,7 +310,7 @@ tbody tr {
 }
 
 tbody tr:nth-child(even) {
-  background: #fafcff;
+  background: #f8faff;
 }
 
 tbody tr:hover {
@@ -359,6 +367,11 @@ th.sortable:hover {
   background: #d4e2ff;
 }
 
+th.sortable:focus-visible {
+  outline: 3px solid #60a5fa;
+  outline-offset: -3px;
+}
+
 .sort-heading {
   display: inline-flex;
   align-items: center;
@@ -389,6 +402,11 @@ a.file-link:hover {
   text-decoration: underline;
 }
 
+a:focus-visible {
+  outline: 3px solid #60a5fa;
+  outline-offset: 3px;
+}
+
 /* 読み込み・エラー・空データ */
 .message-cell {
   padding: 38px 20px;
@@ -408,6 +426,7 @@ a.file-link:hover {
 footer {
   padding: 20px 12px;
   border-top: 1px solid #e2e8f0;
+  background: #fff;
   color: #94a3b8;
   font-size: 12px;
   text-align: center;
@@ -513,7 +532,7 @@ footer {
 
   <div class="section-heading">
     <h2>ファイル検索</h2>
-    <span class="section-label">SEARCH & FILTER</span>
+    <span class="section-label">SEARCH &amp; FILTER</span>
   </div>
 
   <section class="filter-panel" aria-label="検索と絞り込み">
@@ -523,7 +542,6 @@ footer {
     </h3>
 
     <div class="controls">
-
       <div class="control-group">
         <label class="control-label" for="search">キーワード検索</label>
         <input
@@ -549,7 +567,6 @@ footer {
           <option value="">すべてのページ</option>
         </select>
       </div>
-
     </div>
   </section>
 
@@ -603,8 +620,6 @@ footer {
 "use strict";
 
 let allItems = [];
-
-// 初期状態は日時の降順（新しい順）
 let dateSortOrder = "desc";
 
 const search = document.getElementById("search");
@@ -656,7 +671,6 @@ function parseDate(value) {
     year, month - 1, day, hour, minute
   );
 
-  // 存在しない日付が自動補正された場合は無効
   if (
     date.getFullYear() !== year ||
     date.getMonth() !== month - 1 ||
@@ -670,7 +684,7 @@ function parseDate(value) {
   return date.getTime();
 }
 
-// 日時見出しをクリックして昇順・降順を切り替え
+// 日時見出しで昇順・降順を切り替え
 function toggleDateSort() {
   dateSortOrder = dateSortOrder === "desc" ? "asc" : "desc";
 
@@ -767,7 +781,6 @@ function updatePages() {
     page.appendChild(option);
   }
 
-  // 現在の一覧に存在する場合は前の選択を維持
   page.value = pages.includes(previousPage) ? previousPage : "";
 }
 
@@ -784,7 +797,7 @@ function showEmptyMessage(message) {
   tbody.replaceChildren(tr);
 }
 
-// 条件に一致するデータを表示
+// 検索・絞り込み結果を表示
 function render() {
   const q = search.value.trim().toLocaleLowerCase();
   const selectedGroup = group.value;
@@ -805,7 +818,7 @@ function render() {
     return matchesGroup && matchesPage && matchesSearch;
   });
 
-  // 日時で並べ替え。日時不明の行は末尾
+  // 日時不明の行は末尾に表示
   filtered.sort((a, b) => {
     const dateA = parseDate(a.date);
     const dateB = parseDate(b.date);
@@ -848,19 +861,16 @@ function render() {
   for (const x of filtered) {
     const tr = document.createElement("tr");
 
-    // 一覧名：非表示だが絞り込み用に保持
     const groupTd = document.createElement("td");
     groupTd.className = "group-column";
     groupTd.textContent = x.group || "";
     tr.appendChild(groupTd);
 
-    // ページタイトル
     const pageTd = document.createElement("td");
     pageTd.className = "page-column";
     pageTd.textContent = x.page || "";
     tr.appendChild(pageTd);
 
-    // ファイル名：クリックすると元のリンクを開く
     const nameTd = document.createElement("td");
     nameTd.className = "name-column";
 
@@ -878,13 +888,11 @@ function render() {
 
     tr.appendChild(nameTd);
 
-    // コメント
     const commentTd = document.createElement("td");
     commentTd.className = "comment-column";
     commentTd.textContent = x.comment || "";
     tr.appendChild(commentTd);
 
-    // 日時
     const dateTd = document.createElement("td");
     dateTd.className = "date-column";
     dateTd.textContent = x.date || "";
