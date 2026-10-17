@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -81,6 +81,21 @@ th {
   white-space: nowrap;
 }
 
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+th.sortable:hover {
+  background: #dfe4eb;
+}
+
+.sort-icon {
+  display: inline-block;
+  margin-left: 4px;
+  color: #075db5;
+}
+
 tbody tr:hover {
   background: #f8faff;
 }
@@ -134,6 +149,7 @@ a:hover {
 <p class="description">
   3つの一覧データをまとめて検索できます。
   一覧とページタイトルで絞り込み、ファイル名をクリックすると元のリンクを開きます。
+  日時の見出しをクリックすると昇順・降順を切り替えられます。
 </p>
 
 <div class="controls">
@@ -165,7 +181,15 @@ a:hover {
   <th>ページ</th>
   <th>ファイル名</th>
   <th>コメント</th>
-  <th>日時</th>
+  <th
+    id="dateSort"
+    class="sortable"
+    aria-label="日時で並べ替え"
+    aria-sort="descending"
+    title="クリックで日時の昇順・降順を切り替え"
+  >
+    日時<span id="dateSortIcon" class="sort-icon">▼</span>
+  </th>
 </tr>
 </thead>
 <tbody id="rows"></tbody>
@@ -176,11 +200,60 @@ a:hover {
 <script>
 let allItems = [];
 
+// 初期状態は日時の降順（新しい順）
+let dateSortOrder = "desc";
+
 const search = document.getElementById("search");
 const group = document.getElementById("group");
 const page = document.getElementById("page");
 const statusEl = document.getElementById("status");
 const tbody = document.getElementById("rows");
+const dateSort = document.getElementById("dateSort");
+const dateSortIcon = document.getElementById("dateSortIcon");
+
+// 日時文字列を比較用の数値に変換
+// 対応例：26/10/10 12:10
+function parseDate(value) {
+  if (!value) return null;
+
+  const match = String(value).trim().match(
+    /^(\d{2})\/(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2})$/
+  );
+
+  if (!match) return null;
+
+  const [, yy, mm, dd, hh, min] = match;
+
+  const year = Number(yy) >= 70
+    ? 1900 + Number(yy)
+    : 2000 + Number(yy);
+
+  const month = Number(mm);
+  const day = Number(dd);
+  const hour = Number(hh);
+  const minute = Number(min);
+
+  const timestamp = new Date(
+    year, month - 1, day, hour, minute
+  ).getTime();
+
+  return Number.isNaN(timestamp) ? null : timestamp;
+}
+
+// 日時の見出しをクリックして並べ替え方向を切り替え
+dateSort.addEventListener("click", () => {
+  dateSortOrder = dateSortOrder === "desc" ? "asc" : "desc";
+
+  dateSortIcon.textContent =
+    dateSortOrder === "desc" ? "▼" : "▲";
+
+  dateSort.setAttribute(
+    "aria-sort",
+    dateSortOrder === "desc" ? "descending" : "ascending"
+  );
+
+  render();
+});
 
 // 一覧の選択に応じてページタイトルの選択肢を更新
 function updatePages() {
@@ -283,6 +356,20 @@ function render() {
     return matchesGroup && matchesPage && matchesSearch;
   });
 
+  // 日時で並べ替え。日時が空欄・形式不明の行は末尾に配置
+  filtered.sort((a, b) => {
+    const dateA = parseDate(a.date);
+    const dateB = parseDate(b.date);
+
+    if (dateA === null && dateB === null) return 0;
+    if (dateA === null) return 1;
+    if (dateB === null) return -1;
+
+    return dateSortOrder === "asc"
+      ? dateA - dateB
+      : dateB - dateA;
+  });
+
   statusEl.textContent =
     `${filtered.length.toLocaleString()} 件 / 全 ${allItems.length.toLocaleString()} 件`;
 
@@ -373,3 +460,4 @@ fetch("data.json")
 </script>
 </body>
 </html>
+```
