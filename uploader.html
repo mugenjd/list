@@ -4,226 +4,604 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#172554">
 <title>getuploader一覧</title>
 
 <style>
 :root {
   color-scheme: light;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --text: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --background: #f1f5f9;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  background: #f5f6f8;
-  color: #202124;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--background);
+  color: var(--text);
+  font-family:
+    -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Noto Sans JP", sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
 }
 
-main {
+/* ヘッダー */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 42px 24px 48px;
+  color: white;
+  background: linear-gradient(
+    135deg,
+    #172554,
+    #3730a3 65%,
+    #2563eb
+  );
+}
+
+.hero::before,
+.hero::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero::before {
+  width: 300px;
+  height: 300px;
+  top: -190px;
+  right: 8%;
+  background: rgb(255 255 255 / 9%);
+}
+
+.hero::after {
+  width: 220px;
+  height: 220px;
+  bottom: -175px;
+  right: 20%;
+  background: rgb(147 197 253 / 15%);
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 28px 20px 48px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+  padding: 5px 11px;
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 8px;
+  color: #dbeafe;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.back-link:hover {
+  background: rgb(255 255 255 / 12%);
+  text-decoration: none;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 8px;
+  color: #bfdbfe;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 2px;
 }
 
 h1 {
-  font-size: clamp(23px, 3vw, 32px);
-  margin: 0 0 8px;
+  margin: 0;
+  font-size: clamp(26px, 4vw, 36px);
+  line-height: 1.35;
+  letter-spacing: 0.5px;
 }
 
 .description {
-  color: #606770;
-  margin: 0 0 22px;
+  margin: 14px 0 0;
+  color: #dbeafe;
+  font-size: 14px;
+  line-height: 1.9;
 }
 
-/* 検索欄・一覧・ページの幅 */
+/* メインコンテンツ */
+main {
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 30px 24px 48px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: 21px;
+}
+
+.section-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* 検索・絞り込みカード */
+.filter-panel {
+  margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 4px 14px rgb(15 23 42 / 4%);
+}
+
+.filter-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.filter-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: var(--primary);
+  font-size: 17px;
+}
+
 .controls {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 200px 440px;
-  gap: 10px;
-  margin-bottom: 10px;
+  grid-template-columns:
+    minmax(240px, 1fr)
+    minmax(220px, 260px)
+    minmax(260px, 440px);
+  gap: 12px;
+}
+
+.control-group {
+  min-width: 0;
+}
+
+.control-label {
+  display: block;
+  margin-bottom: 6px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 input,
 select {
+  display: block;
   width: 100%;
   min-width: 0;
-  box-sizing: border-box;
-  padding: 11px 12px;
+  height: 46px;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  outline: none;
+  background: #fff;
+  color: var(--text);
   font: inherit;
-  border: 1px solid #c8ccd0;
-  border-radius: 8px;
-  background: white;
-}
-
-.status {
-  color: #5f6368;
   font-size: 14px;
-  margin: 10px 0;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
+input::placeholder {
+  color: #94a3b8;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 12%);
+}
+
+/* 件数表示 */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0 12px;
+}
+
+.status-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.status-detail {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.count-badge {
+  display: inline-block;
+  margin-right: 5px;
+  padding: 3px 10px;
+  border-radius: 7px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 14px;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 表 */
 .table-wrap {
   overflow: auto;
-  border: 1px solid #dadce0;
-  border-radius: 10px;
+  border: 1px solid #dbe3ee;
+  border-radius: 12px;
   background: white;
+  box-shadow: 0 4px 14px rgb(15 23 42 / 4%);
 }
 
 table {
-  border-collapse: collapse;
   width: 100%;
-  min-width: 1000px;
+  min-width: 1050px;
+  border-collapse: separate;
+  border-spacing: 0;
   table-layout: fixed;
 }
 
 th,
 td {
-  box-sizing: border-box;
+  padding: 13px 14px;
+  border-bottom: 1px solid #e8edf4;
   text-align: left;
-  padding: 11px 12px;
-  border-bottom: 1px solid #e8eaed;
   vertical-align: top;
+  overflow-wrap: anywhere;
 }
 
 th {
   position: sticky;
   top: 0;
-  background: #eef0f3;
+  z-index: 1;
+  background: #e8efff;
+  color: #1e3a8a;
+  font-size: 13px;
+  font-weight: 700;
   white-space: nowrap;
 }
 
-/* 一覧列は非表示。絞り込み機能は維持 */
+tbody tr {
+  background: white;
+  transition: background 0.15s;
+}
+
+tbody tr:nth-child(even) {
+  background: #fafcff;
+}
+
+tbody tr:hover {
+  background: #eff6ff;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* 非表示の一覧列：絞り込み機能用 */
 th.group-column,
 td.group-column {
   display: none;
 }
 
-/* 表示列の幅 */
+/* 列幅 */
 th.page-column,
 td.page-column {
-  width: 300px;
+  width: 260px;
 }
 
 th.name-column,
 td.name-column {
-  width: 420px;
-  overflow-wrap: anywhere;
+  width: 380px;
 }
 
 th.comment-column,
 td.comment-column {
   width: auto;
   white-space: pre-wrap;
-  overflow-wrap: anywhere;
 }
 
 th.date-column,
 td.date-column {
-  width: 145px;
+  width: 150px;
   white-space: nowrap;
 }
 
 td.date-column {
-  font-size: 13px;
-  color: #606770;
+  color: #64748b;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
-/* 日時の並べ替え */
+/* 日時ソート */
 th.sortable {
   cursor: pointer;
   user-select: none;
+  transition: background 0.15s;
 }
 
 th.sortable:hover {
-  background: #dfe4eb;
+  background: #d4e2ff;
+}
+
+.sort-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 }
 
 .sort-icon {
-  display: inline-block;
-  margin-left: 4px;
-  color: #075db5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 21px;
+  height: 21px;
+  border-radius: 5px;
+  background: #d1e2ff;
+  color: #1d4ed8;
+  font-size: 11px;
 }
 
-tbody tr:hover {
-  background: #f8faff;
-}
-
-a {
-  color: #075db5;
+/* ファイルリンク */
+a.file-link {
+  color: #1d4ed8;
+  font-weight: 600;
   text-decoration: none;
 }
 
-a:hover {
+a.file-link:hover {
+  color: #1e40af;
   text-decoration: underline;
+}
+
+/* 読み込み・エラー・空データ */
+.message-cell {
+  padding: 38px 20px;
+  color: #64748b;
+  text-align: center;
+  overflow-wrap: normal;
+}
+
+.message-symbol {
+  display: block;
+  margin-bottom: 8px;
+  color: #94a3b8;
+  font-size: 26px;
+}
+
+/* フッター */
+footer {
+  padding: 20px 12px;
+  border-top: 1px solid #e2e8f0;
+  color: #94a3b8;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* タブレット */
+@media (max-width: 1000px) {
+  .controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .control-group:first-child {
+    grid-column: 1 / -1;
+  }
 }
 
 /* スマートフォン */
 @media (max-width: 650px) {
+  .hero {
+    padding: 30px 18px 36px;
+  }
+
+  .back-link {
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-size: 27px;
+  }
+
+  .description {
+    font-size: 13px;
+  }
+
   main {
-    padding: 18px 10px 32px;
+    padding: 24px 12px 32px;
+  }
+
+  .section-heading h2 {
+    font-size: 19px;
+  }
+
+  .filter-panel {
+    padding: 15px;
   }
 
   .controls {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .control-group:first-child {
+    grid-column: auto;
+  }
+
+  input,
+  select {
+    height: 44px;
+  }
+
+  .status-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  th,
+  td {
+    padding: 11px 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
   }
 }
 </style>
 </head>
 
 <body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <a class="back-link" href="./index.html">
+      <span aria-hidden="true">←</span>
+      ページ一覧に戻る
+    </a>
+
+    <span class="eyebrow">FILE DATABASE</span>
+    <h1>getuploader一覧</h1>
+
+    <p class="description">
+      凶悪ロダ・ターゲット倉庫・むげん代理公開場の一覧データをまとめて検索できます。<br>
+      一覧とページタイトルで絞り込み、ファイル名をクリックすると元のリンクを開きます。<br>
+      日時の見出しをクリックすると昇順・降順を切り替えられます。
+    </p>
+  </div>
+</header>
+
 <main>
-<h1>getuploader一覧</h1>
 
-<p class="description">
-  凶悪ロダ・ターゲット倉庫・むげん代理公開場の一覧データをまとめて検索できます。<br>
-  一覧とページタイトルで絞り込み、ファイル名をクリックすると元のリンクを開きます。<br>
-  日時の見出しをクリックすると昇順・降順を切り替えられます。
-</p>
+  <div class="section-heading">
+    <h2>ファイル検索</h2>
+    <span class="section-label">SEARCH & FILTER</span>
+  </div>
 
-<div class="controls">
-  <input
-    id="search"
-    type="search"
-    placeholder="ファイル名・コメント・ページ名で検索"
-  >
+  <section class="filter-panel" aria-label="検索と絞り込み">
+    <h3 class="filter-title">
+      <span class="filter-icon" aria-hidden="true">⌕</span>
+      検索条件
+    </h3>
 
-  <select id="group">
-    <option value="">すべての一覧</option>
-    <option value="凶悪キャラスレアップローダ">凶悪キャラスレアップローダ</option>
-    <option value="ターゲット倉庫">ターゲット倉庫</option>
-    <option value="むげん代理公開場">むげん代理公開場</option>
-  </select>
+    <div class="controls">
 
-  <select id="page">
-    <option value="">すべてのページ</option>
-  </select>
-</div>
+      <div class="control-group">
+        <label class="control-label" for="search">キーワード検索</label>
+        <input
+          id="search"
+          type="search"
+          placeholder="ファイル名・コメント・ページ名で検索"
+        >
+      </div>
 
-<div class="status" id="status">読み込み中...</div>
+      <div class="control-group">
+        <label class="control-label" for="group">一覧を選択</label>
+        <select id="group">
+          <option value="">すべての一覧</option>
+          <option value="凶悪キャラスレアップローダ">凶悪キャラスレアップローダ</option>
+          <option value="ターゲット倉庫">ターゲット倉庫</option>
+          <option value="むげん代理公開場">むげん代理公開場</option>
+        </select>
+      </div>
 
-<div class="table-wrap">
-<table>
-<thead>
-<tr>
-  <th class="group-column">一覧</th>
-  <th class="page-column">ページ</th>
-  <th class="name-column">ファイル名</th>
-  <th class="comment-column">コメント</th>
-  <th
-    id="dateSort"
-    class="date-column sortable"
-    aria-sort="descending"
-    title="クリックで日時の昇順・降順を切り替え"
-  >
-    日時<span id="dateSortIcon" class="sort-icon">▼</span>
-  </th>
-</tr>
-</thead>
+      <div class="control-group">
+        <label class="control-label" for="page">ページを選択</label>
+        <select id="page">
+          <option value="">すべてのページ</option>
+        </select>
+      </div>
 
-<tbody id="rows"></tbody>
-</table>
-</div>
+    </div>
+  </section>
+
+  <div class="status-bar">
+    <div class="status-title">検索結果</div>
+    <div id="status" class="status-detail" aria-live="polite">
+      データを読み込み中...
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="group-column">一覧</th>
+          <th class="page-column">ページ</th>
+          <th class="name-column">ファイル名</th>
+          <th class="comment-column">コメント</th>
+          <th
+            id="dateSort"
+            class="date-column sortable"
+            aria-sort="descending"
+            title="クリックで日時の昇順・降順を切り替え"
+            tabindex="0"
+          >
+            <span class="sort-heading">
+              日時
+              <span id="dateSortIcon" class="sort-icon" aria-hidden="true">▼</span>
+            </span>
+          </th>
+        </tr>
+      </thead>
+
+      <tbody id="rows">
+        <tr>
+          <td colspan="5" class="message-cell">
+            データを読み込み中...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
 </main>
 
+<footer>
+  GitHub Pages
+</footer>
+
 <script>
+"use strict";
+
 let allItems = [];
 
 // 初期状態は日時の降順（新しい順）
@@ -236,6 +614,12 @@ const statusEl = document.getElementById("status");
 const tbody = document.getElementById("rows");
 const dateSort = document.getElementById("dateSort");
 const dateSortIcon = document.getElementById("dateSortIcon");
+
+const groupOrder = [
+  "凶悪キャラスレアップローダ",
+  "ターゲット倉庫",
+  "むげん代理公開場"
+];
 
 // 日時文字列を比較用の数値に変換
 // 対応例：26/10/10 12:10
@@ -259,15 +643,35 @@ function parseDate(value) {
   const hour = Number(hh);
   const minute = Number(min);
 
-  const timestamp = new Date(
-    year, month - 1, day, hour, minute
-  ).getTime();
+  if (
+    month < 1 || month > 12 ||
+    day < 1 || day > 31 ||
+    hour < 0 || hour > 23 ||
+    minute < 0 || minute > 59
+  ) {
+    return null;
+  }
 
-  return Number.isNaN(timestamp) ? null : timestamp;
+  const date = new Date(
+    year, month - 1, day, hour, minute
+  );
+
+  // 存在しない日付が自動補正された場合は無効
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day ||
+    date.getHours() !== hour ||
+    date.getMinutes() !== minute
+  ) {
+    return null;
+  }
+
+  return date.getTime();
 }
 
 // 日時見出しをクリックして昇順・降順を切り替え
-dateSort.addEventListener("click", () => {
+function toggleDateSort() {
   dateSortOrder = dateSortOrder === "desc" ? "asc" : "desc";
 
   dateSortIcon.textContent =
@@ -279,44 +683,49 @@ dateSort.addEventListener("click", () => {
   );
 
   render();
+}
+
+dateSort.addEventListener("click", toggleDateSort);
+
+dateSort.addEventListener("keydown", event => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    toggleDateSort();
+  }
 });
+
+// ページ名から数字を取得
+function getPageNumber(name) {
+  const match = String(name).match(/(\d+)\s*(?:\||$)/);
+  if (match) return Number(match[1]);
+
+  const fallback = String(name).match(/(\d+)/);
+  return fallback ? Number(fallback[1]) : null;
+}
+
+// ページ名の並べ替え
+function comparePages(a, b) {
+  const numA = getPageNumber(a);
+  const numB = getPageNumber(b);
+
+  if (numA === null && numB !== null) return -1;
+  if (numA !== null && numB === null) return 1;
+
+  if (
+    numA !== null &&
+    numB !== null &&
+    numA !== numB
+  ) {
+    return numA - numB;
+  }
+
+  return a.localeCompare(b, "ja");
+}
 
 // 一覧の選択に応じてページの選択肢を更新
 function updatePages() {
   const selectedGroup = group.value;
   const previousPage = page.value;
-
-  const groupOrder = [
-    "凶悪キャラスレアップローダ",
-    "ターゲット倉庫",
-    "むげん代理公開場"
-  ];
-
-  function getPageNumber(name) {
-    const match = name.match(/(\d+)\s*(?:\||$)/);
-    if (match) return Number(match[1]);
-
-    const fallback = name.match(/(\d+)/);
-    return fallback ? Number(fallback[1]) : null;
-  }
-
-  function comparePages(a, b) {
-    const numA = getPageNumber(a);
-    const numB = getPageNumber(b);
-
-    if (numA === null && numB !== null) return -1;
-    if (numA !== null && numB === null) return 1;
-
-    if (
-      numA !== null &&
-      numB !== null &&
-      numA !== numB
-    ) {
-      return numA - numB;
-    }
-
-    return a.localeCompare(b, "ja");
-  }
 
   const pages = [...new Set(
     allItems
@@ -324,7 +733,6 @@ function updatePages() {
       .map(x => x.page || "")
       .filter(Boolean)
   )].sort((a, b) => {
-    // すべての一覧では一覧の優先順を適用
     if (!selectedGroup) {
       const groupA = groupOrder.findIndex(g =>
         allItems.some(x => x.group === g && x.page === a)
@@ -360,11 +768,20 @@ function updatePages() {
   }
 
   // 現在の一覧に存在する場合は前の選択を維持
-  if (pages.includes(previousPage)) {
-    page.value = previousPage;
-  } else {
-    page.value = "";
-  }
+  page.value = pages.includes(previousPage) ? previousPage : "";
+}
+
+// 結果が0件の場合の表示
+function showEmptyMessage(message) {
+  const tr = document.createElement("tr");
+  const td = document.createElement("td");
+
+  td.colSpan = 5;
+  td.className = "message-cell";
+  td.textContent = message;
+
+  tr.appendChild(td);
+  tbody.replaceChildren(tr);
 }
 
 // 条件に一致するデータを表示
@@ -382,7 +799,7 @@ function render() {
 
     const matchesSearch =
       [x.name, x.comment, x.page, x.group].some(v =>
-        (v || "").toLocaleLowerCase().includes(q)
+        String(v || "").toLocaleLowerCase().includes(q)
       );
 
     return matchesGroup && matchesPage && matchesSearch;
@@ -402,16 +819,36 @@ function render() {
       : dateB - dateA;
   });
 
-  statusEl.textContent =
-    `${filtered.length.toLocaleString()} 件 / 全 ${allItems.length.toLocaleString()} 件`;
+  statusEl.replaceChildren();
+
+  const countBadge = document.createElement("span");
+  countBadge.className = "count-badge";
+  countBadge.textContent = filtered.length.toLocaleString();
+
+  statusEl.appendChild(countBadge);
+  statusEl.appendChild(
+    document.createTextNode(
+      `件 / 全 ${allItems.length.toLocaleString()} 件`
+    )
+  );
 
   tbody.replaceChildren();
+
+  if (filtered.length === 0) {
+    showEmptyMessage(
+      allItems.length === 0
+        ? "表示できるデータがありません。"
+        : "条件に一致するファイルはありません。"
+    );
+    return;
+  }
+
   const frag = document.createDocumentFragment();
 
   for (const x of filtered) {
     const tr = document.createElement("tr");
 
-    // 一覧名：列は非表示だが絞り込み用に保持
+    // 一覧名：非表示だが絞り込み用に保持
     const groupTd = document.createElement("td");
     groupTd.className = "group-column";
     groupTd.textContent = x.group || "";
@@ -429,6 +866,7 @@ function render() {
 
     if (x.url) {
       const a = document.createElement("a");
+      a.className = "file-link";
       a.href = x.url;
       a.textContent = x.name || x.url;
       a.target = "_blank";
@@ -469,12 +907,13 @@ group.addEventListener("change", () => {
 page.addEventListener("change", render);
 
 // data.json を読み込む
-fetch("data.json")
-  .then(r => {
-    if (!r.ok) {
+fetch("./data.json")
+  .then(response => {
+    if (!response.ok) {
       throw new Error("data.json を取得できません");
     }
-    return r.json();
+
+    return response.json();
   })
   .then(data => {
     if (!Array.isArray(data)) {
@@ -485,11 +924,16 @@ fetch("data.json")
     updatePages();
     render();
   })
-  .catch(err => {
-    statusEl.textContent =
-      "一覧データを読み込めません。data.json が同じフォルダにあるか確認してください。";
-    console.error(err);
+  .catch(error => {
+    statusEl.textContent = "データを読み込めませんでした。";
+
+    showEmptyMessage(
+      "data.json が同じフォルダにあるか確認してください。"
+    );
+
+    console.error("データ読み込みエラー:", error);
   });
 </script>
+
 </body>
 </html>
