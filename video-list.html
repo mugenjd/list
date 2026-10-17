@@ -695,7 +695,7 @@
         ← トップページへ戻る
       </a>
       <h1>▶ YouTube動画検索</h1>
-      <p>動画を検索して、カテゴリ・class・tagから絞り込めます。</p>
+      <p>動画を検索して、カテゴリ・分類・タグから絞り込めます。</p>
     </div>
   </header>
 
@@ -712,7 +712,7 @@
           <input
             type="search"
             id="keyword"
-            placeholder="動画名・カテゴリ・class・tag"
+            placeholder="動画名・カテゴリ・分類・タグ"
             autocomplete="off"
           >
         </div>
@@ -725,16 +725,16 @@
         </div>
 
         <div class="field">
-          <label for="class-filter">class</label>
+          <label for="class-filter">分類</label>
           <select id="class-filter">
-            <option value="">すべてのclass</option>
+            <option value="">すべての分類</option>
           </select>
         </div>
 
         <div class="field">
-          <label for="tag-filter">tag</label>
+          <label for="tag-filter">タグ</label>
           <select id="tag-filter">
-            <option value="">すべてのtag</option>
+            <option value="">すべてのタグ</option>
           </select>
         </div>
       </div>
@@ -857,7 +857,7 @@
             }
           }
         } catch (_) {
-          // URLでなければ、後続の判定で対象外とする
+          // URLでなければ対象外
         }
 
         return "";
@@ -903,6 +903,7 @@
 
       function updateCategoryOptions() {
         const categories = uniqueSorted(videos.map(video => video.category));
+
         setSelectOptions(
           elements.category,
           categories,
@@ -921,7 +922,7 @@
         setSelectOptions(
           elements.className,
           classes,
-          "すべてのclass",
+          "すべての分類",
           state.className
         );
       }
@@ -933,7 +934,7 @@
         setSelectOptions(
           elements.tag,
           tags,
-          "すべてのtag",
+          "すべてのタグ",
           state.tag
         );
       }
@@ -1048,7 +1049,7 @@
         title.appendChild(titleLink);
         content.appendChild(title);
 
-        // カテゴリ・class
+        // カテゴリ・分類
         const metadata = document.createElement("div");
         metadata.className = "metadata";
 
@@ -1070,11 +1071,9 @@
 
         if (video.className) {
           metadata.appendChild(createButton(
-            video.className,
+            "分類：" + video.className,
             "class-chip",
             () => {
-              // 選択classが現在のカテゴリに属さない場合は
-              // その動画のカテゴリに切り替える
               const compatible = getClassVideos(
                 state.category,
                 video.className
@@ -1090,7 +1089,7 @@
               refreshFilters();
               renderVideos();
             },
-            "このclassで絞り込む"
+            "この分類で絞り込む"
           ));
         }
 
@@ -1098,13 +1097,13 @@
           content.appendChild(metadata);
         }
 
-        // tag
+        // タグ
         const tagList = document.createElement("div");
         tagList.className = "tag-list";
 
         video.tags.forEach(tag => {
           tagList.appendChild(createButton(
-            tag,
+            "タグ：" + tag,
             "tag-chip",
             () => {
               const compatible = getClassVideos(
@@ -1128,7 +1127,7 @@
               refreshFilters();
               renderVideos();
             },
-            "このtagで絞り込む"
+            "このタグで絞り込む"
           ));
         });
 
@@ -1156,7 +1155,6 @@
               return;
             }
 
-            // 同じカードで再生中の動画を切り替える
             const iframe = document.createElement("iframe");
             iframe.src =
               "https://www.youtube-nocookie.com/embed/" +
@@ -1193,7 +1191,12 @@
         const totalPages = Math.ceil(totalItems / PAGE_SIZE);
         if (totalPages <= 1) return;
 
-        const addPageButton = (label, page, active = false, disabled = false) => {
+        const addPageButton = (
+          label,
+          page,
+          active = false,
+          disabled = false
+        ) => {
           const button = createButton(
             label,
             "page-button" + (active ? " active" : ""),
@@ -1213,7 +1216,12 @@
           elements.pagination.appendChild(button);
         };
 
-        addPageButton("‹ 前へ", Math.max(1, currentPage - 1), false, currentPage === 1);
+        addPageButton(
+          "‹ 前へ",
+          Math.max(1, currentPage - 1),
+          false,
+          currentPage === 1
+        );
 
         const pages = new Set([
           1,
@@ -1256,13 +1264,18 @@
 
       function renderVideos() {
         const filtered = getFilteredVideos();
-        const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+        const totalPages = Math.max(
+          1,
+          Math.ceil(filtered.length / PAGE_SIZE)
+        );
 
         if (currentPage > totalPages) {
           currentPage = totalPages;
         }
 
-        elements.count.textContent = filtered.length.toLocaleString("ja-JP");
+        elements.count.textContent =
+          filtered.length.toLocaleString("ja-JP");
+
         elements.list.replaceChildren();
 
         if (filtered.length === 0) {
@@ -1277,7 +1290,8 @@
           heading.textContent = "動画が見つかりませんでした";
 
           const message = document.createElement("span");
-          message.textContent = "検索条件を変更して、もう一度お試しください。";
+          message.textContent =
+            "検索条件を変更して、もう一度お試しください。";
 
           empty.append(icon, heading, message);
           elements.list.appendChild(empty);
@@ -1361,7 +1375,8 @@
           const parsed = Papa.parse(csvText, {
             header: true,
             skipEmptyLines: "greedy",
-            transformHeader: header => normalize(header).replace(/^\uFEFF/, "")
+            transformHeader: header =>
+              normalize(header).replace(/^\uFEFF/, "")
           });
 
           if (parsed.errors && parsed.errors.length) {
@@ -1387,11 +1402,14 @@
           ];
 
           const headers = Object.keys(rows[0] || {});
-          const missing = requiredColumns.filter(key => !headers.includes(key));
+          const missing = requiredColumns.filter(
+            key => !headers.includes(key)
+          );
 
           if (missing.length) {
             throw new Error(
-              "CSVに必要な列がありません: " + missing.join(", ") +
+              "CSVに必要な列がありません: " +
+              missing.join(", ") +
               "（必要な列: title, category, class, tags, id）"
             );
           }
@@ -1420,8 +1438,10 @@
           videos = [];
           refreshFilters();
           renderVideos();
+
           setStatus(
-            "読み込みエラー： " + (error.message || String(error)),
+            "読み込みエラー： " +
+            (error.message || String(error)),
             true
           );
         }
