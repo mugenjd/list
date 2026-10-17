@@ -105,6 +105,10 @@ def fetch_sheet(sheet):
 
     for raw in reader:
         page = pick(raw, ALIASES["page"])
+        
+        # ページ名末尾の「 | uploader.jp」を削除
+        page = page.removesuffix(" | uploader.jp")
+
         url_value = pick(raw, ALIASES["url"])
         name = pick(raw, ALIASES["name"])
         comment = pick(raw, ALIASES["comment"])
