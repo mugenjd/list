@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -5,7 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>アップローダー統合ファイル一覧</title>
 <style>
-:root { color-scheme: light; }
+:root {
+  color-scheme: light;
+}
 
 body {
   margin: 0;
@@ -37,7 +40,8 @@ h1 {
   margin-bottom: 10px;
 }
 
-input, select {
+input,
+select {
   width: 100%;
   box-sizing: border-box;
   padding: 11px 12px;
@@ -67,7 +71,8 @@ table {
   table-layout: fixed;
 }
 
-th, td {
+th,
+td {
   box-sizing: border-box;
   text-align: left;
   padding: 11px 12px;
@@ -88,27 +93,37 @@ td.group-column {
   display: none;
 }
 
-/* 列幅を固定 */
-col.group-col {
-  width: 0;
-}
-
-col.page-col {
+/* 表示列の幅を固定 */
+th.page-column,
+td.page-column {
   width: 190px;
 }
 
-col.name-col {
+th.name-column,
+td.name-column {
   width: 300px;
+  overflow-wrap: anywhere;
 }
 
-col.comment-col {
+th.comment-column,
+td.comment-column {
   width: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
-col.date-col {
+th.date-column,
+td.date-column {
   width: 145px;
+  white-space: nowrap;
 }
 
+td.date-column {
+  font-size: 13px;
+  color: #606770;
+}
+
+/* 日時の並べ替え */
 th.sortable {
   cursor: pointer;
   user-select: none;
@@ -126,25 +141,6 @@ th.sortable:hover {
 
 tbody tr:hover {
   background: #f8faff;
-}
-
-td.name {
-  overflow-wrap: anywhere;
-}
-
-td.comment {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-td.page {
-  overflow-wrap: anywhere;
-}
-
-td.date {
-  white-space: nowrap;
-  font-size: 13px;
-  color: #606770;
 }
 
 a {
@@ -167,6 +163,7 @@ a:hover {
 }
 </style>
 </head>
+
 <body>
 <main>
 <h1>アップローダー統合ファイル一覧</h1>
@@ -200,23 +197,15 @@ a:hover {
 
 <div class="table-wrap">
 <table>
-<colgroup>
-  <col class="group-col">
-  <col class="page-col">
-  <col class="name-col">
-  <col class="comment-col">
-  <col class="date-col">
-</colgroup>
 <thead>
 <tr>
   <th class="group-column">一覧</th>
-  <th>ページ</th>
-  <th>ファイル名</th>
-  <th>コメント</th>
+  <th class="page-column">ページ</th>
+  <th class="name-column">ファイル名</th>
+  <th class="comment-column">コメント</th>
   <th
     id="dateSort"
-    class="sortable"
-    aria-label="日時で並べ替え"
+    class="date-column sortable"
     aria-sort="descending"
     title="クリックで日時の昇順・降順を切り替え"
   >
@@ -224,6 +213,7 @@ a:hover {
   </th>
 </tr>
 </thead>
+
 <tbody id="rows"></tbody>
 </table>
 </div>
@@ -272,7 +262,7 @@ function parseDate(value) {
   return Number.isNaN(timestamp) ? null : timestamp;
 }
 
-// 日時の見出しをクリックして並べ替え方向を切り替え
+// 日時見出しをクリックして昇順・降順を切り替え
 dateSort.addEventListener("click", () => {
   dateSortOrder = dateSortOrder === "desc" ? "asc" : "desc";
 
@@ -313,7 +303,11 @@ function updatePages() {
     if (numA === null && numB !== null) return -1;
     if (numA !== null && numB === null) return 1;
 
-    if (numA !== null && numB !== null && numA !== numB) {
+    if (
+      numA !== null &&
+      numB !== null &&
+      numA !== numB
+    ) {
       return numA - numB;
     }
 
@@ -337,8 +331,10 @@ function updatePages() {
       );
 
       if (groupA !== groupB) {
-        return (groupA === -1 ? Infinity : groupA) -
-               (groupB === -1 ? Infinity : groupB);
+        return (
+          (groupA === -1 ? Infinity : groupA) -
+          (groupB === -1 ? Infinity : groupB)
+        );
       }
     }
 
@@ -388,7 +384,7 @@ function render() {
     return matchesGroup && matchesPage && matchesSearch;
   });
 
-  // 日時で並べ替え。日時が空欄・形式不明の行は末尾に配置
+  // 日時で並べ替え。日時が空欄・形式不明の行は末尾
   filtered.sort((a, b) => {
     const dateA = parseDate(a.date);
     const dateB = parseDate(b.date);
@@ -411,7 +407,7 @@ function render() {
   for (const x of filtered) {
     const tr = document.createElement("tr");
 
-    // 一覧名：列は非表示だが、絞り込み用データは維持
+    // 一覧名：列は非表示だが絞り込み用データを維持
     const groupTd = document.createElement("td");
     groupTd.className = "group-column";
     groupTd.textContent = x.group || "";
@@ -419,13 +415,13 @@ function render() {
 
     // ページタイトル
     const pageTd = document.createElement("td");
-    pageTd.className = "page";
+    pageTd.className = "page-column";
     pageTd.textContent = x.page || "";
     tr.appendChild(pageTd);
 
     // ファイル名（クリックすると元のリンクを開く）
     const nameTd = document.createElement("td");
-    nameTd.className = "name";
+    nameTd.className = "name-column";
 
     if (x.url) {
       const a = document.createElement("a");
@@ -442,13 +438,13 @@ function render() {
 
     // コメント
     const commentTd = document.createElement("td");
-    commentTd.className = "comment";
+    commentTd.className = "comment-column";
     commentTd.textContent = x.comment || "";
     tr.appendChild(commentTd);
 
     // 日時
     const dateTd = document.createElement("td");
-    dateTd.className = "date";
+    dateTd.className = "date-column";
     dateTd.textContent = x.date || "";
     tr.appendChild(dateTd);
 
@@ -493,3 +489,4 @@ fetch("data.json")
 </script>
 </body>
 </html>
+```
