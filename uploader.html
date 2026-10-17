@@ -64,10 +64,12 @@ input, select {
 table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 850px;
+  min-width: 1000px;
+  table-layout: fixed;
 }
 
 th, td {
+  box-sizing: border-box;
   text-align: left;
   padding: 11px 12px;
   border-bottom: 1px solid #e8eaed;
@@ -81,10 +83,31 @@ th {
   white-space: nowrap;
 }
 
-/* 一覧列だけを非表示にする */
+/* 一覧列だけ非表示。絞り込み機能は維持 */
 th.group-column,
 td.group-column {
   display: none;
+}
+
+/* 列幅を固定 */
+col.group-col {
+  width: 0;
+}
+
+col.page-col {
+  width: 190px;
+}
+
+col.name-col {
+  width: 300px;
+}
+
+col.comment-col {
+  width: auto;
+}
+
+col.date-col {
+  width: 145px;
 }
 
 th.sortable {
@@ -107,22 +130,19 @@ tbody tr:hover {
 }
 
 td.name {
-  min-width: 260px;
   overflow-wrap: anywhere;
 }
 
 td.comment {
-  min-width: 300px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
 td.page {
-  min-width: 190px;
+  overflow-wrap: anywhere;
 }
 
 td.date {
-  min-width: 125px;
   white-space: nowrap;
   font-size: 13px;
   color: #606770;
@@ -181,6 +201,13 @@ a:hover {
 
 <div class="table-wrap">
 <table>
+<colgroup>
+  <col class="group-col">
+  <col class="page-col">
+  <col class="name-col">
+  <col class="comment-col">
+  <col class="date-col">
+</colgroup>
 <thead>
 <tr>
   <th class="group-column">一覧</th>
