@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#172554">
+<meta name="theme-color" content="#1d4ed8">
 <title>getuploader一覧</title>
 
 <style>
@@ -17,8 +17,8 @@
   --primary-border: #bfdbfe;
   --text: #1e293b;
   --muted: #64748b;
-  --border: #e2e8f0;
-  --background: #f1f5f9;
+  --border: #dbe5f3;
+  --background: #f3f7fd;
   --white: #ffffff;
 }
 
@@ -28,7 +28,9 @@
 
 body {
   margin: 0;
-  background: var(--background);
+  background:
+    radial-gradient(ellipse at top left, #e2edff 0, transparent 38%),
+    var(--background);
   color: var(--text);
   font-family:
     -apple-system, BlinkMacSystemFont,
@@ -48,10 +50,10 @@ a {
   padding: 42px 24px 48px;
   color: white;
   background: linear-gradient(
-    135deg,
-    #172554 0%,
-    #3730a3 55%,
-    #2563eb 100%
+    125deg,
+    #10204b 0%,
+    #1e40af 52%,
+    #3b82f6 100%
   );
 }
 
@@ -64,19 +66,21 @@ a {
 }
 
 .hero::before {
-  width: 300px;
-  height: 300px;
-  top: -190px;
-  right: 8%;
-  background: rgb(255 255 255 / 9%);
+  width: 340px;
+  height: 340px;
+  top: -200px;
+  right: 7%;
+  border: 1px solid rgb(255 255 255 / 20%);
+  background: rgb(255 255 255 / 5%);
 }
 
 .hero::after {
-  width: 220px;
-  height: 220px;
-  bottom: -175px;
+  width: 240px;
+  height: 240px;
+  bottom: -190px;
   right: 20%;
-  background: rgb(147 197 253 / 15%);
+  border: 1px solid rgb(191 219 254 / 25%);
+  background: rgb(147 197 253 / 13%);
 }
 
 .hero-inner {
@@ -89,20 +93,22 @@ a {
 .back-link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   margin-bottom: 18px;
-  padding: 6px 12px;
-  border: 1px solid rgb(255 255 255 / 30%);
-  border-radius: 8px;
-  color: #dbeafe;
+  padding: 7px 13px;
+  border: 1px solid rgb(255 255 255 / 35%);
+  border-radius: 9px;
+  background: rgb(255 255 255 / 7%);
+  color: #eff6ff;
   font-size: 13px;
   text-decoration: none;
-  transition: background 0.2s;
+  transition: background 0.2s, border-color 0.2s;
 }
 
 .back-link:hover {
+  border-color: rgb(255 255 255 / 60%);
+  background: rgb(255 255 255 / 16%);
   color: white;
-  background: rgb(255 255 255 / 12%);
 }
 
 .eyebrow {
@@ -123,7 +129,7 @@ h1 {
 
 .description {
   margin: 14px 0 0;
-  color: #dbeafe;
+  color: #e0ecff;
   font-size: 14px;
   line-height: 1.9;
 }
@@ -146,10 +152,11 @@ main {
 .section-heading h2 {
   margin: 0;
   font-size: 21px;
+  color: #172554;
 }
 
 .section-label {
-  color: var(--muted);
+  color: #64748b;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 1px;
@@ -159,17 +166,18 @@ main {
 .filter-panel {
   margin-bottom: 20px;
   padding: 20px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--white);
-  box-shadow: 0 4px 14px rgb(15 23 42 / 4%);
+  border: 1px solid #d6e5fb;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #ffffff, #f7faff);
+  box-shadow: 0 5px 18px rgb(30 64 175 / 6%);
 }
 
 .filter-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   margin: 0 0 14px;
+  color: #1e3a8a;
   font-size: 15px;
   font-weight: bold;
 }
@@ -178,12 +186,13 @@ main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #bfdbfe;
+  border-radius: 9px;
   background: #dbeafe;
-  color: var(--primary-dark);
-  font-size: 17px;
+  color: #1d4ed8;
+  font-size: 19px;
 }
 
 .controls {
@@ -214,7 +223,7 @@ select {
   min-width: 0;
   height: 46px;
   padding: 10px 12px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #cbdaf0;
   border-radius: 9px;
   outline: none;
   background: #fff;
@@ -228,10 +237,15 @@ input::placeholder {
   color: #94a3b8;
 }
 
+input:hover,
+select:hover {
+  border-color: #93b4ed;
+}
+
 input:focus,
 select:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgb(37 99 235 / 12%);
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 13%);
 }
 
 /* 件数表示 */
@@ -245,6 +259,7 @@ select:focus {
 }
 
 .status-title {
+  color: #172554;
   font-size: 16px;
   font-weight: 700;
 }
@@ -270,10 +285,10 @@ select:focus {
 /* 表 */
 .table-wrap {
   overflow: auto;
-  border: 1px solid #dbe3ee;
-  border-radius: 12px;
+  border: 1px solid #d4e1f3;
+  border-radius: 13px;
   background: white;
-  box-shadow: 0 4px 14px rgb(15 23 42 / 4%);
+  box-shadow: 0 5px 18px rgb(30 64 175 / 6%);
 }
 
 table {
@@ -287,7 +302,7 @@ table {
 th,
 td {
   padding: 13px 14px;
-  border-bottom: 1px solid #e8edf4;
+  border-bottom: 1px solid #e6edf7;
   text-align: left;
   vertical-align: top;
   overflow-wrap: anywhere;
@@ -297,7 +312,7 @@ th {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: #e8efff;
+  background: linear-gradient(180deg, #e8f1ff, #dceaff);
   color: #1e3a8a;
   font-size: 13px;
   font-weight: 700;
@@ -310,11 +325,11 @@ tbody tr {
 }
 
 tbody tr:nth-child(even) {
-  background: #f8faff;
+  background: #f7faff;
 }
 
 tbody tr:hover {
-  background: #eff6ff;
+  background: #eaf3ff;
 }
 
 tbody tr:last-child td {
@@ -364,7 +379,7 @@ th.sortable {
 }
 
 th.sortable:hover {
-  background: #d4e2ff;
+  background: #c9defe;
 }
 
 th.sortable:focus-visible {
@@ -384,8 +399,9 @@ th.sortable:focus-visible {
   justify-content: center;
   width: 21px;
   height: 21px;
+  border: 1px solid #bfd7ff;
   border-radius: 5px;
-  background: #d1e2ff;
+  background: #cfe2ff;
   color: #1d4ed8;
   font-size: 11px;
 }
@@ -418,14 +434,14 @@ a:focus-visible {
 .message-symbol {
   display: block;
   margin-bottom: 8px;
-  color: #94a3b8;
+  color: #60a5fa;
   font-size: 26px;
 }
 
 /* フッター */
 footer {
   padding: 20px 12px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #dbe5f3;
   background: #fff;
   color: #94a3b8;
   font-size: 12px;
@@ -516,7 +532,7 @@ footer {
       <span aria-hidden="true">←</span>
       ページ一覧に戻る
     </a>
-    
+
     <h1>getuploader一覧</h1>
 
     <p class="description">
