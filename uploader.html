@@ -64,7 +64,7 @@ input, select {
 table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 1000px;
+  min-width: 850px;
 }
 
 th, td {
@@ -79,6 +79,12 @@ th {
   top: 0;
   background: #eef0f3;
   white-space: nowrap;
+}
+
+/* 一覧列だけを非表示にする */
+th.group-column,
+td.group-column {
+  display: none;
 }
 
 th.sortable {
@@ -177,7 +183,7 @@ a:hover {
 <table>
 <thead>
 <tr>
-  <th>一覧</th>
+  <th class="group-column">一覧</th>
   <th>ページ</th>
   <th>ファイル名</th>
   <th>コメント</th>
@@ -379,8 +385,9 @@ function render() {
   for (const x of filtered) {
     const tr = document.createElement("tr");
 
-    // 一覧名
+    // 一覧名：列は非表示だが、絞り込み用データは維持
     const groupTd = document.createElement("td");
+    groupTd.className = "group-column";
     groupTd.textContent = x.group || "";
     tr.appendChild(groupTd);
 
