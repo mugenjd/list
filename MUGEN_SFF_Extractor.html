@@ -1,155 +1,342 @@
-
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#6d28d9">
+
 <title>MUGENツール配布ページ</title>
 <meta name="description" content="MUGEN関連ツールのダウンロードページです。">
 
 <style>
+:root {
+    --primary: #16a34a;
+    --primary-dark: #15803d;
+    --primary-deep: #14532d;
+    --primary-light: #f0fdf4;
+    --primary-border: #bbf7d0;
+    --text: #1f2937;
+    --muted: #64748b;
+    --background: #f7fcf8;
+    --white: #ffffff;
+}
+
 * {
     box-sizing: border-box;
 }
 
 body {
     margin: 0;
-    padding: 30px 16px;
-    background: #f3f4f6;
-    color: #222;
-    font-family: "Meiryo", "Yu Gothic", sans-serif;
+    padding: 0;
+    color: var(--text);
+    background: var(--background);
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Noto Sans JP", Meiryo, sans-serif;
     line-height: 1.8;
 }
 
-.container {
-    max-width: 850px;
-    margin: 0 auto;
-    background: #fff;
-    border-radius: 14px;
+/* ヘッダー */
+.hero {
+    position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+    padding: 36px 24px 42px;
+    color: white;
+    background: linear-gradient(
+        120deg,
+        #14532d 0%,
+        #15803d 50%,
+        #4ade80 100%
+    );
 }
 
-.header {
-    padding: 30px 20px;
-    background: #b71c1c;
-    color: #fff;
-    text-align: center;
+.hero::before,
+.hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.09);
+    pointer-events: none;
 }
 
-.header h1 {
+.hero::before {
+    width: 300px;
+    height: 300px;
+    top: -170px;
+    right: 6%;
+}
+
+.hero::after {
+    width: 220px;
+    height: 220px;
+    bottom: -155px;
+    right: 24%;
+}
+
+.hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
     margin: 0 0 8px;
-    font-size: 28px;
+    font-size: clamp(26px, 4vw, 38px);
+    line-height: 1.35;
+    font-weight: 800;
 }
 
-.header p {
+.hero-description {
     margin: 0;
+    color: rgba(255, 255, 255, 0.9);
     font-size: 14px;
 }
 
-.content {
-    padding: 28px;
+/* メイン */
+main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 32px 24px 50px;
 }
 
-h2 {
-    padding-bottom: 8px;
-    border-bottom: 2px solid #d32f2f;
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 18px;
     font-size: 21px;
+    font-weight: 800;
 }
 
-.software {
-    padding: 20px;
-    border: 1px solid #ddd;
+.section-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    color: var(--primary-dark);
+    background: var(--primary-light);
+    border: 1px solid var(--primary-border);
     border-radius: 10px;
-    background: #fffafa;
+    font-size: 19px;
 }
 
-.software h2 {
-    margin-top: 0;
-    border: none;
-    font-size: 24px;
+/* ソフトウェアカード */
+.software {
+    padding: 26px;
+    background: var(--white);
+    border: 1px solid var(--primary-border);
+    border-radius: 14px;
+    box-shadow: 0 5px 18px rgba(20, 83, 45, 0.06);
 }
 
+.software-title {
+    margin: 0 0 12px;
+    color: var(--primary-deep);
+    font-size: 25px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.software-description {
+    margin: 0 0 22px;
+    color: #4b5563;
+}
+
+/* ダウンロードボタン */
 .download-button {
-    display: block;
-    max-width: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 480px;
+    min-height: 58px;
     margin: 24px auto;
-    padding: 15px 20px;
-    border-radius: 8px;
-    background: #c62828;
-    color: #fff;
+    padding: 14px 20px;
+    color: white;
+    background: linear-gradient(
+        120deg,
+        #166534,
+        #16a34a
+    );
+    border: 1px solid transparent;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+    font-size: 17px;
+    font-weight: 800;
     text-align: center;
     text-decoration: none;
-    font-size: 18px;
-    font-weight: bold;
-    transition: background 0.2s;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s,
+        background 0.2s;
 }
 
 .download-button:hover {
-    background: #8e0000;
+    background: linear-gradient(
+        120deg,
+        #14532d,
+        #15803d
+    );
+    box-shadow: 0 7px 18px rgba(22, 163, 74, 0.28);
+    transform: translateY(-2px);
 }
 
+.download-button:focus-visible {
+    outline: 3px solid #4ade80;
+    outline-offset: 4px;
+}
+
+.download-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+/* ファイル情報 */
 .info {
-    margin: 20px 0;
-    padding: 14px 18px;
-    background: #f5f5f5;
-    border-radius: 8px;
+    margin-top: 26px;
+    padding: 17px 20px;
+    background: var(--primary-light);
+    border: 1px solid var(--primary-border);
+    border-radius: 10px;
+}
+
+.info-title {
+    margin: 0 0 10px;
+    color: var(--primary-deep);
+    font-size: 16px;
+    font-weight: 800;
 }
 
 .info p {
     margin: 5px 0;
+    font-size: 14px;
+    overflow-wrap: anywhere;
 }
 
+.info strong {
+    color: #374151;
+}
+
+/* 使い方 */
+.guide {
+    margin-top: 32px;
+}
+
+.guide-list {
+    margin: 0;
+    padding: 22px 24px 22px 48px;
+    background: white;
+    border: 1px solid var(--primary-border);
+    border-radius: 12px;
+}
+
+.guide-list li {
+    padding: 5px 0;
+}
+
+.guide-list li::marker {
+    color: var(--primary-dark);
+    font-weight: 800;
+}
+
+/* 注意事項 */
 .notice {
-    padding: 14px 18px;
-    background: #fff3e0;
-    border-left: 4px solid #ef6c00;
+    padding: 18px 20px;
+    color: #78350f;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-left: 5px solid #f59e0b;
+    border-radius: 10px;
     font-size: 14px;
 }
 
-.footer {
-    padding: 18px;
-    background: #292929;
-    color: #ddd;
-    text-align: center;
-    font-size: 13px;
+.notice p {
+    margin: 5px 0;
 }
 
-@media (max-width: 600px) {
-    body {
-        padding: 12px 8px;
+/* フッター */
+footer {
+    padding: 24px 20px;
+    color: var(--muted);
+    background: white;
+    border-top: 1px solid var(--primary-border);
+    text-align: center;
+    font-size: 12px;
+}
+
+/* スマートフォン対応 */
+@media (max-width: 700px) {
+    .hero {
+        padding: 28px 17px 32px;
     }
 
-    .header h1 {
-        font-size: 23px;
+    main {
+        padding: 24px 12px 36px;
     }
 
-    .content {
-        padding: 18px;
+    .software {
+        padding: 19px;
+    }
+
+    .software-title {
+        font-size: 22px;
     }
 
     .download-button {
+        min-height: 54px;
+        padding: 12px;
         font-size: 16px;
     }
+
+    .info {
+        padding: 14px;
+    }
+
+    .guide-list {
+        padding: 18px 16px 18px 38px;
+    }
 }
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="container">
-
-    <header class="header">
+<header class="hero">
+    <div class="hero-inner">
         <h1>MUGENツール配布ページ</h1>
-        <p>Windows向けツール・ダウンロード</p>
-    </header>
+        <p class="hero-description">
+            Windows向けツール・ダウンロード
+        </p>
+    </div>
+</header>
 
-    <main class="content">
+<main>
 
-        <section class="software">
-            <h2>MUGEN SFF Extractor</h2>
+    <section aria-labelledby="download-heading">
+        <h2 class="section-heading" id="download-heading">
+            <span class="section-icon" aria-hidden="true">↓</span>
+            ツールのダウンロード
+        </h2>
 
-            <p>
+        <div class="software">
+            <h3 class="software-title">MUGEN SFF Extractor</h3>
+
+            <p class="software-description">
                 MUGENのSFFファイルからポートレート画像を
                 GIF形式で抽出するWindows向けツールです。
             </p>
@@ -157,46 +344,56 @@ h2 {
             <a
                 class="download-button"
                 href="./zip/MUGEN_SFF_Extractor.zip"
-                download
+                download="MUGEN_SFF_Extractor.zip"
             >
-                &#11015; ZIPファイルをダウンロード
+                <span class="download-icon" aria-hidden="true">⇩</span>
+                ZIPファイルをダウンロード
             </a>
 
             <div class="info">
+                <p class="info-title">ファイル情報</p>
                 <p><strong>ファイル形式：</strong> ZIP</p>
                 <p><strong>対応環境：</strong> Windows</p>
                 <p><strong>利用方法：</strong> ZIPを展開して使用</p>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section>
-            <h2>使い方</h2>
-            <ol>
-                <li>上のダウンロードボタンをクリックします。</li>
-                <li>ダウンロードしたZIPファイルを展開します。</li>
-                <li>同梱の説明書を確認して使用してください。</li>
-            </ol>
-        </section>
+    <section class="guide" aria-labelledby="guide-heading">
+        <h2 class="section-heading" id="guide-heading">
+            <span class="section-icon" aria-hidden="true">☰</span>
+            使い方
+        </h2>
 
-        <section>
-            <h2>注意事項</h2>
-            <div class="notice">
-                <p>
-                    使用前に同梱の説明書および利用条件を確認してください。
-                </p>
-                <p>
-                    配布ファイルは、公開前にウイルスチェックを行ってください。
-                </p>
-            </div>
-        </section>
+        <ol class="guide-list">
+            <li>上のダウンロードボタンをクリックします。</li>
+            <li>ダウンロードしたZIPファイルを展開します。</li>
+            <li>同梱の説明書を確認して使用してください。</li>
+        </ol>
+    </section>
 
-    </main>
+    <section class="guide" aria-labelledby="notice-heading">
+        <h2 class="section-heading" id="notice-heading">
+            <span class="section-icon" aria-hidden="true">!</span>
+            注意事項
+        </h2>
 
-    <footer class="footer">
-        MUGENツール配布ページ
-    </footer>
+        <div class="notice">
+            <p>
+                使用前に同梱の説明書および利用条件を確認してください。
+            </p>
+            <p>
+                配布ファイルは、公開前にウイルスチェックを行ってください。
+            </p>
+        </div>
+    </section>
 
-</div>
+</main>
+
+<footer>
+    MUGENツール配布ページ
+</footer>
 
 </body>
 </html>
+```
