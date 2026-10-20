@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#6d28d9">
+<meta name="theme-color" content="#16a34a">
 
 <title>MUGENツール配布ページ</title>
 <meta name="description" content="MUGEN関連ツールのダウンロードページです。">
@@ -91,6 +91,34 @@ h1 {
     margin: 0;
     color: rgba(255, 255, 255, 0.9);
     font-size: 14px;
+}
+
+/* ページ一覧に戻るボタン */
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 9px 16px;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.back-button:hover {
+    background: rgba(255, 255, 255, 0.24);
+    transform: translateY(-2px);
+}
+
+.back-button:focus-visible {
+    outline: 3px solid #bbf7d0;
+    outline-offset: 3px;
 }
 
 /* メイン */
@@ -309,7 +337,6 @@ footer {
         transition-duration: 0.01ms !important;
     }
 }
-
 </style>
 </head>
 
@@ -318,9 +345,17 @@ footer {
 <header class="hero">
     <div class="hero-inner">
         <h1>MUGENツール配布ページ</h1>
+
         <p class="hero-description">
             Windows向けツール・ダウンロード
         </p>
+
+        <a
+            class="back-button"
+            href="https://mugenjd.github.io/list/index.html"
+        >
+            ← ページ一覧に戻る
+        </a>
     </div>
 </header>
 
