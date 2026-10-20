@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUGENツール配布ページ</title>
+<meta name="description" content="MUGEN関連ツールのダウンロードページです。">
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 30px 16px;
+    background: #f3f4f6;
+    color: #222;
+    font-family: "Meiryo", "Yu Gothic", sans-serif;
+    line-height: 1.8;
+}
+
+.container {
+    max-width: 850px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+.header {
+    padding: 30px 20px;
+    background: #b71c1c;
+    color: #fff;
+    text-align: center;
+}
+
+.header h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+}
+
+.header p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.content {
+    padding: 28px;
+}
+
+h2 {
+    padding-bottom: 8px;
+    border-bottom: 2px solid #d32f2f;
+    font-size: 21px;
+}
+
+.software {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fffafa;
+}
+
+.software h2 {
+    margin-top: 0;
+    border: none;
+    font-size: 24px;
+}
+
+.download-button {
+    display: block;
+    max-width: 420px;
+    margin: 24px auto;
+    padding: 15px 20px;
+    border-radius: 8px;
+    background: #c62828;
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.download-button:hover {
+    background: #8e0000;
+}
+
+.info {
+    margin: 20px 0;
+    padding: 14px 18px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+.info p {
+    margin: 5px 0;
+}
+
+.notice {
+    padding: 14px 18px;
+    background: #fff3e0;
+    border-left: 4px solid #ef6c00;
+    font-size: 14px;
+}
+
+.footer {
+    padding: 18px;
+    background: #292929;
+    color: #ddd;
+    text-align: center;
+    font-size: 13px;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 12px 8px;
+    }
+
+    .header h1 {
+        font-size: 23px;
+    }
+
+    .content {
+        padding: 18px;
+    }
+
+    .download-button {
+        font-size: 16px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header class="header">
+        <h1>MUGENツール配布ページ</h1>
+        <p>Windows向けツール・ダウンロード</p>
+    </header>
+
+    <main class="content">
+
+        <section class="software">
+            <h2>MUGEN SFF Extractor</h2>
+
+            <p>
+                MUGENのSFFファイルからポートレート画像を
+                GIF形式で抽出するWindows向けツールです。
+            </p>
+
+            <a
+                class="download-button"
+                href="./MUGEN_SFF_Extractor.zip"
+                download
+            >
+                &#11015; ZIPファイルをダウンロード
+            </a>
+
+            <div class="info">
+                <p><strong>ファイル形式：</strong> ZIP</p>
+                <p><strong>対応環境：</strong> Windows</p>
+                <p><strong>利用方法：</strong> ZIPを展開して使用</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>使い方</h2>
+            <ol>
+                <li>上のダウンロードボタンをクリックします。</li>
+                <li>ダウンロードしたZIPファイルを展開します。</li>
+                <li>同梱の説明書を確認して使用してください。</li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>注意事項</h2>
+            <div class="notice">
+                <p>
+                    使用前に同梱の説明書および利用条件を確認してください。
+                </p>
+                <p>
+                    配布ファイルは、公開前にウイルスチェックを行ってください。
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        MUGENツール配布ページ
+    </footer>
+
+</div>
+
+</body>
+</html>
