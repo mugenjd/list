@@ -1,24 +1,23 @@
-```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#166534">
-  <meta name="description" content="MUGEN関連の一覧ページやYouTube動画検索、自作ツールの配布ページなど、制作物へのリンク集です。">
+  <meta name="theme-color" content="#172554">
+  <meta name="description" content="MUGEN関連の一覧ページやYouTube動画検索など、自作ツール・コンテンツへのリンク集です。">
   <title>制作物まとめ</title>
 
   <style>
     :root {
-      --background: #f3faf5;
+      --background: #f4f6fb;
       --surface: #ffffff;
-      --text: #183326;
-      --muted: #64786b;
-      --border: #dcebe0;
-      --green: #166534;
-      --green-light: #228348;
-      --shadow: 0 8px 28px rgba(22, 101, 52, 0.07);
-      --shadow-hover: 0 16px 36px rgba(22, 101, 52, 0.15);
+      --text: #18243b;
+      --muted: #69758b;
+      --border: #e4e9f2;
+      --navy: #172554;
+      --navy-light: #263b75;
+      --shadow: 0 8px 28px rgba(23, 37, 84, 0.07);
+      --shadow-hover: 0 16px 36px rgba(23, 37, 84, 0.14);
     }
 
     * {
@@ -32,7 +31,7 @@
     body {
       margin: 0;
       background:
-        radial-gradient(ellipse at top left, #dcfce7 0, transparent 38%),
+        radial-gradient(ellipse at top left, #e8edff 0, transparent 38%),
         var(--background);
       color: var(--text);
       font-family:
@@ -53,9 +52,9 @@
       color: #fff;
       background: linear-gradient(
         125deg,
-        #14532d 0%,
-        #166534 52%,
-        #22a052 100%
+        #101b40 0%,
+        #1e3470 52%,
+        #354fa0 100%
       );
     }
 
@@ -63,7 +62,7 @@
     .hero::after {
       position: absolute;
       content: "";
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 50%;
       pointer-events: none;
     }
@@ -96,10 +95,10 @@
       gap: 8px;
       margin-bottom: 15px;
       padding: 5px 12px;
-      border: 1px solid rgba(255, 255, 255, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.24);
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.09);
-      color: #dcfce7;
+      background: rgba(255, 255, 255, 0.08);
+      color: #dbe6ff;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.12em;
@@ -109,7 +108,7 @@
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: #86efac;
+      background: #8daeff;
       content: "";
     }
 
@@ -124,7 +123,7 @@
     .hero-description {
       max-width: 600px;
       margin: 18px 0 0;
-      color: #dcfce7;
+      color: #d4def8;
       font-size: 15px;
     }
 
@@ -133,7 +132,7 @@
       height: 4px;
       margin-top: 26px;
       border-radius: 10px;
-      background: linear-gradient(90deg, #86efac, #ffffff);
+      background: linear-gradient(90deg, #91b5ff, #ffffff);
     }
 
     /* メインコンテンツ */
@@ -184,9 +183,9 @@
     }
 
     .page-card {
-      --accent: #15803d;
-      --accent-bg: #f0fdf4;
-      --accent-border: #bbf7d0;
+      --accent: #2563eb;
+      --accent-bg: #eff6ff;
+      --accent-border: #dbeafe;
 
       position: relative;
       display: flex;
@@ -206,6 +205,7 @@
         border-color 0.2s ease;
     }
 
+    /* カード上部の色 */
     .page-card::before {
       position: absolute;
       top: 0;
@@ -227,35 +227,36 @@
       outline-offset: 4px;
     }
 
-    /* 各カードのアクセントカラー */
+    /* 各カードのテーマカラー */
     .uploader {
-      --accent: #15803d;
-      --accent-bg: #f0fdf4;
-      --accent-border: #bbf7d0;
+      --accent: #2563eb;
+      --accent-bg: #eff6ff;
+      --accent-border: #bfdbfe;
     }
 
     .rss {
-      --accent: #16a34a;
-      --accent-bg: #f0fdf4;
-      --accent-border: #bbf7d0;
+      --accent: #ea580c;
+      --accent-bg: #fff7ed;
+      --accent-border: #fed7aa;
     }
 
     .youtube {
-      --accent: #166534;
-      --accent-bg: #dcfce7;
-      --accent-border: #86efac;
+      --accent: #dc2626;
+      --accent-bg: #fef2f2;
+      --accent-border: #fecaca;
     }
 
     .oromizu {
-      --accent: #228348;
-      --accent-bg: #ecfdf5;
-      --accent-border: #a7f3d0;
+      --accent: #9333ea;
+      --accent-bg: #faf5ff;
+      --accent-border: #e9d5ff;
     }
 
+    /* MUGENツール配布ページ：緑 */
     .tools {
-      --accent: #0f766e;
-      --accent-bg: #f0fdfa;
-      --accent-border: #99f6e4;
+      --accent: #16a34a;
+      --accent-bg: #f0fdf4;
+      --accent-border: #bbf7d0;
     }
 
     .card-top {
@@ -306,7 +307,6 @@
       font-size: 20px;
       font-weight: 800;
       line-height: 1.5;
-      overflow-wrap: anywhere;
     }
 
     .card-description {
@@ -327,7 +327,7 @@
 
     .card-destination {
       overflow-wrap: anywhere;
-      color: #748579;
+      color: #8590a3;
       font-size: 11px;
     }
 
@@ -366,7 +366,7 @@
     footer {
       padding: 23px 20px;
       border-top: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.75);
+      background: rgba(255, 255, 255, 0.65);
       color: var(--muted);
       text-align: center;
       font-size: 12px;
@@ -430,8 +430,8 @@
       <div class="eyebrow">MY PROJECTS</div>
       <h1>制作物まとめ</h1>
       <p class="hero-description">
-        MUGEN関連の一覧ページやYouTube動画検索、
-        自作ツールの配布ページなど、各種コンテンツをまとめています。
+        MUGEN関連の一覧ページやYouTube動画検索など、
+        各種コンテンツ・ツールをまとめています。
       </p>
       <div class="hero-line"></div>
     </div>
@@ -449,9 +449,11 @@
 
       <div class="page-grid">
 
-        <!-- getuploader一覧 -->
-        <a class="page-card uploader"
-           href="https://mugenjd.github.io/list/uploader.html">
+        <!-- getuploader一覧：青 -->
+        <a
+          class="page-card uploader"
+          href="https://mugenjd.github.io/list/uploader.html"
+        >
           <div class="card-top">
             <div class="card-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
@@ -462,10 +464,12 @@
             </div>
             <span class="card-label">UPLOADER</span>
           </div>
+
           <h3 class="card-title">getuploader一覧</h3>
           <p class="card-description">
             各アップローダーのファイル情報を一覧で確認できます。
           </p>
+
           <div class="card-bottom">
             <span class="card-destination">uploader.html</span>
             <span class="card-arrow" aria-hidden="true">
@@ -477,9 +481,11 @@
           </div>
         </a>
 
-        <!-- MUGENブログ新着記事一覧 -->
-        <a class="page-card rss"
-           href="https://mugenjd.github.io/list/RSS.html">
+        <!-- MUGENブログ新着記事一覧：オレンジ -->
+        <a
+          class="page-card rss"
+          href="https://mugenjd.github.io/list/RSS.html"
+        >
           <div class="card-top">
             <div class="card-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
@@ -490,10 +496,12 @@
             </div>
             <span class="card-label">RSS / BLOG</span>
           </div>
+
           <h3 class="card-title">MUGENブログ新着記事一覧</h3>
           <p class="card-description">
             複数のブログから新着記事を集めて、まとめて確認できます。
           </p>
+
           <div class="card-bottom">
             <span class="card-destination">RSS.html</span>
             <span class="card-arrow" aria-hidden="true">
@@ -505,9 +513,11 @@
           </div>
         </a>
 
-        <!-- YouTube動画検索 -->
-        <a class="page-card youtube"
-           href="https://mugenjd.github.io/list/video-list.html">
+        <!-- YouTube動画検索：赤 -->
+        <a
+          class="page-card youtube"
+          href="https://mugenjd.github.io/list/video-list.html"
+        >
           <div class="card-top">
             <div class="card-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
@@ -517,10 +527,12 @@
             </div>
             <span class="card-label">YOUTUBE</span>
           </div>
+
           <h3 class="card-title">YouTube動画検索</h3>
           <p class="card-description">
             キーワードやカテゴリー、クラス、タグを使って動画を検索できます。
           </p>
+
           <div class="card-bottom">
             <span class="card-destination">video-list.html</span>
             <span class="card-arrow" aria-hidden="true">
@@ -532,9 +544,11 @@
           </div>
         </a>
 
-        <!-- オロミズ大好き氏一覧 -->
-        <a class="page-card oromizu"
-           href="https://mugenjd.github.io/list/oromizudaisuki-list.html">
+        <!-- オロミズ大好き氏一覧：紫 -->
+        <a
+          class="page-card oromizu"
+          href="https://mugenjd.github.io/list/oromizudaisuki-list.html"
+        >
           <div class="card-top">
             <div class="card-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
@@ -543,10 +557,12 @@
             </div>
             <span class="card-label">MUGEN</span>
           </div>
+
           <h3 class="card-title">オロミズ大好き氏一覧</h3>
           <p class="card-description">
             オロミズ大好き氏関連の情報を一覧で確認できます。
           </p>
+
           <div class="card-bottom">
             <span class="card-destination">oromizudaisuki-list.html</span>
             <span class="card-arrow" aria-hidden="true">
@@ -558,22 +574,25 @@
           </div>
         </a>
 
-        <!-- MUGENツール配布ページ -->
-        <a class="page-card tools"
-           href="https://mugenjd.github.io/list/MUGEN_SFF_Extractor.html">
+        <!-- MUGENツール配布ページ：緑 -->
+        <a
+          class="page-card tools"
+          href="https://mugenjd.github.io/list/tools.html"
+        >
           <div class="card-top">
             <div class="card-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
-                <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17a2.1 2.1 0 0 0 3 3l5.3-5.3a4 4 0 0 0 5.4-5.4L15 12l-3-3z"></path>
+                <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4L14 13l-3-3z"></path>
               </svg>
             </div>
-            <span class="card-label">TOOLS / DOWNLOAD</span>
+            <span class="card-label">MUGEN TOOLS</span>
           </div>
+
           <h3 class="card-title">MUGENツール配布ページ</h3>
           <p class="card-description">
-            MUGEN SFF Extractorなど、自作ツールの説明書や
-            ダウンロードファイルを公開しています。
+            MUGEN関連の自作ツールを公開・ダウンロードできます。
           </p>
+
           <div class="card-bottom">
             <span class="card-destination">tools.html</span>
             <span class="card-arrow" aria-hidden="true">
@@ -594,4 +613,3 @@
   </footer>
 </body>
 </html>
-```
