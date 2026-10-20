@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-10-19T21:04:08.602254+00:00",
+  "updated_at": "2026-10-20T20:00:58.673379+00:00",
   "site_count": 153,
   "article_count": 739,
   "articles": [
+    {
+      "title": "[ブルアカ]大決戦 vsゲブラ「ゲブラが大決戦でやってきた地獄」",
+      "url": "https://0saft.blog.fc2.com/blog-entry-12736.html",
+      "site": "ネームレスゼロ",
+      "site_url": "https://0saft.blog.fc2.com/",
+      "published": "2026-10-20T12:35:31+00:00",
+      "source": "RSS",
+      "id": "56e363989f4d203d"
+    },
     {
       "title": "[グラブル]ハロウィンアズサさん、引けるまで回した結果「通常攻撃が乱撃攻撃で、10T奥義のお姉さんは好きですか？」",
       "url": "https://0saft.blog.fc2.com/blog-entry-12735.html",
@@ -137,15 +146,6 @@
       "published": "2026-10-12T13:40:30+00:00",
       "source": "RSS",
       "id": "47dc4688171b9e9e"
-    },
-    {
-      "title": "[グラブル]3凸済みハロウィンスタレを引いた結果　「ちがう、そうじゃない」",
-      "url": "https://0saft.blog.fc2.com/blog-entry-12731.html",
-      "site": "ネームレスゼロ",
-      "site_url": "https://0saft.blog.fc2.com/",
-      "published": "2026-10-12T12:19:58+00:00",
-      "source": "RSS",
-      "id": "d026186c55874468"
     },
     {
       "title": "Melty Blood Another 更新",
