@@ -930,18 +930,18 @@ group.addEventListener("change", () => {
 
 page.addEventListener("change", render);
 
-// loder.json を読み込む
-fetch("./loder.json")
+// .json を読み込む
+fetch("./loader.json")
   .then(response => {
     if (!response.ok) {
-      throw new Error("loder.json を取得できません");
+      throw new Error("loader.json を取得できません");
     }
 
     return response.json();
   })
   .then(data => {
     if (!Array.isArray(data)) {
-      throw new Error("loder.json の形式が正しくありません");
+      throw new Error("loader.json の形式が正しくありません");
     }
 
     allItems = data;
@@ -952,7 +952,7 @@ fetch("./loder.json")
     statusEl.textContent = "データを読み込めませんでした。";
 
     showEmptyMessage(
-      "loder.json が同じフォルダにあるか確認してください。"
+      "loader.json が同じフォルダにあるか確認してください。"
     );
 
     console.error("データ読み込みエラー:", error);
