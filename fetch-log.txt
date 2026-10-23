@@ -116,7 +116,7 @@ OK RSS	http://dryicemugen.blog.fc2.com	http://dryicemugen.blog.fc2.com/?xml	5
 OK RSS	http://blog.livedoor.jp/mugen_watasi/	http://blog.livedoor.jp/mugen_watasi/index.rdf	10
 OK RSS	https://mivxpse4sw5p.blog.fc2.com	https://mivxpse4sw5p.blog.fc2.com/?xml	5
 OK RSS	https://sakura5656539.livedoor.blog	https://sakura5656539.livedoor.blog/index.rdf	5
-OK RSS	http://nuwqsbocc.blog.fc2.com	http://nuwqsbocc.blog.fc2.com/?xml	5
+OK RSS	http://nuwqsbocc.blog.fc2.com	https://nuwqsbocc.blog.fc2.com/?xml	5
 OK RSS	http://humihumi654.blog.fc2.com	http://humihumi654.blog.fc2.com/?xml	5
 OK RSS	http://blueeyes37.blog.fc2.com	http://blueeyes37.blog.fc2.com/?xml	5
 OK RSS	http://gokuraku1147.blog41.fc2.com	http://gokuraku1147.blog41.fc2.com/?xml	5
