@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -589,7 +588,7 @@ footer {
   <div class="status-bar">
     <div class="status-title">検索結果</div>
     <div id="status" class="status-detail" aria-live="polite">
-      データを読み込み中...
+      CSVデータを読み込み中...
     </div>
   </div>
 
@@ -619,7 +618,7 @@ footer {
       <tbody id="rows">
         <tr>
           <td colspan="5" class="message-cell">
-            データを読み込み中...
+            CSVデータを読み込み中...
           </td>
         </tr>
       </tbody>
@@ -651,6 +650,75 @@ const groupOrder = [
   "ターゲット倉庫",
   "むげん代理公開場"
 ];
+
+/**
+ * CSV解析
+ * カンマ、ダブルクォート、セル内改行に対応
+ */
+function parseCSV(text) {
+  // UTF-8 BOMを除去
+  text = text.replace(/^\uFEFF/, "");
+
+  const rows = [];
+  let row = [];
+  let field = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        field += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ",") {
+        row.push(field);
+        field = "";
+      } else if (ch === "\n") {
+        row.push(field);
+        rows.push(row);
+        row = [];
+        field = "";
+      } else if (ch !== "\r") {
+        field += ch;
+      }
+    }
+  }
+
+  // 最終行を追加
+  if (field !== "" || row.length > 0) {
+    row.push(field);
+    rows.push(row);
+  }
+
+  if (rows.length === 0) {
+    return [];
+  }
+
+  const headers = rows.shift().map(h => h.trim());
+
+  return rows
+    .filter(r => r.some(v => v.trim() !== ""))
+    .map(r => {
+      const item = {};
+
+      headers.forEach((header, index) => {
+        item[header] = r[index] ?? "";
+      });
+
+      return item;
+    });
+}
 
 // 日時文字列を比較用の数値に変換
 // 対応例：26/10/10 12:10
@@ -930,21 +998,53 @@ group.addEventListener("change", () => {
 
 page.addEventListener("change", render);
 
-// .json を読み込む
-fetch("./loader.json")
+/**
+ * CSV読み込み
+ * HTMLと同じフォルダの loader.csv を使用
+ */
+fetch("./loader.csv")
   .then(response => {
     if (!response.ok) {
-      throw new Error("loader.json を取得できません");
+      throw new Error("loader.csv を取得できません");
     }
 
-    return response.json();
+    return response.text();
   })
-  .then(data => {
-    if (!Array.isArray(data)) {
-      throw new Error("loader.json の形式が正しくありません");
+  .then(text => {
+    const data = parseCSV(text);
+
+    if (data.length === 0) {
+      allItems = [];
+      updatePages();
+      render();
+      return;
     }
 
-    allItems = data;
+    const requiredColumns = [
+      "group", "page", "url", "name", "comment", "date"
+    ];
+
+    const headers = Object.keys(data[0]);
+
+    const missingColumns = requiredColumns.filter(
+      key => !headers.includes(key)
+    );
+
+    if (missingColumns.length > 0) {
+      throw new Error(
+        "CSVの列名が不足しています: " + missingColumns.join(", ")
+      );
+    }
+
+    allItems = data.map(item => ({
+      group: item.group || "",
+      page: item.page || "",
+      url: item.url || "",
+      name: item.name || "",
+      comment: item.comment || "",
+      date: item.date || ""
+    }));
+
     updatePages();
     render();
   })
@@ -952,10 +1052,10 @@ fetch("./loader.json")
     statusEl.textContent = "データを読み込めませんでした。";
 
     showEmptyMessage(
-      "loader.json が同じフォルダにあるか確認してください。"
+      "loader.csv が同じフォルダにあるか、CSVの列名・形式が正しいか確認してください。"
     );
 
-    console.error("データ読み込みエラー:", error);
+    console.error("CSV読み込みエラー:", error);
   });
 </script>
 
