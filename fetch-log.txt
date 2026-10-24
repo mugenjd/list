@@ -56,7 +56,7 @@ OK RSS	https://parent-forgery.fc2.net	https://parent-forgery.fc2.net/?xml	2
 OK RSS	https://karmam.livedoor.blog	https://karmam.livedoor.blog/index.rdf	15
 OK RSS	https://moyashimugen.fc2.net	https://moyashimugen.fc2.net/?xml	5
 OK RSS	http://aaamugen.blog.fc2.com	http://aaamugen.blog.fc2.com/?xml	5
-OK RSS	http://blog.livedoor.jp/awino	http://blog.livedoor.jp/awino/index.rdf	10
+OK RSS	http://blog.livedoor.jp/awino	http://blog.livedoor.jp/awino/index.rdf	9
 OK RSS	https://mugeneinzbern.blog.fc2.com	https://mugeneinzbern.blog.fc2.com/?xml	8
 OK RSS	https://halkaze.fc2.net	https://halkaze.fc2.net/?xml	5
 OK RSS	http://gustab.blog.fc2blog.us	http://gustab.blog.fc2blog.us/?xml	5
