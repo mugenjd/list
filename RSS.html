@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -183,6 +182,7 @@
       border-radius: 10px;
       color: var(--orange-dark);
       background: #FFEDD5;
+      font-size: 1rem;
     }
 
     .controls {
@@ -444,7 +444,7 @@
 
     <section class="filter-panel" aria-label="記事の検索と絞り込み">
       <h2 class="filter-heading">
-        <span class="filter-icon" aria-hidden="true">⌕</span>
+        <span class="filter-icon" aria-hidden="true">🔍</span>
         記事を検索・絞り込み
       </h2>
 
@@ -456,6 +456,7 @@
             type="search"
             placeholder="記事タイトル・ブログ名で検索"
             autocomplete="off"
+            enterkeyhint="search"
           >
         </div>
 
@@ -485,7 +486,7 @@
       <div id="articles" class="articles"></div>
 
       <div id="empty" class="empty" hidden>
-        <span class="empty-icon" aria-hidden="true">⌕</span>
+        <span class="empty-icon" aria-hidden="true">🔍</span>
         該当する記事がありません。
         <br>
         検索キーワードやブログの選択を変更してください。
@@ -510,14 +511,15 @@
 
     let all = [];
 
-    function dateText(value) {
-      if (!value) return "日時不明";
-
+    function safeDate(value) {
+      if (!value) return null;
       const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
 
-      if (Number.isNaN(date.getTime())) {
-        return "日時不明";
-      }
+    function dateText(value) {
+      const date = safeDate(value);
+      if (!date) return "日時不明";
 
       return new Intl.DateTimeFormat("ja-JP", {
         year: "numeric",
@@ -530,11 +532,25 @@
     }
 
     function timestamp(value) {
-      if (!value) return 0;
+      const date = safeDate(value);
+      return date ? date.getTime() : 0;
+    }
 
-      const result = new Date(value).getTime();
+    function sanitizeUrl(rawUrl) {
+      try {
+        const url = new URL(rawUrl, window.location.href);
+        return (url.protocol === "http:" || url.protocol === "https:") ? url.href : "#";
+      } catch {
+        return "#";
+      }
+    }
 
-      return Number.isNaN(result) ? 0 : result;
+    function debounce(fn, delay = 250) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+      };
     }
 
     function render() {
@@ -546,31 +562,24 @@
         const site = String(article.site || "");
         const title = String(article.title || "");
 
-        const matchesSite =
-          !selectedSite || site === selectedSite;
-
+        const matchesSite = !selectedSite || site === selectedSite;
         const matchesQuery =
           !query ||
-          (title + " " + site)
-            .toLocaleLowerCase("ja")
-            .includes(query);
+          (title + " " + site).toLocaleLowerCase("ja").includes(query);
 
         return matchesSite && matchesQuery;
       });
 
       filtered.sort((a, b) => {
-        const difference =
-          timestamp(a.published) - timestamp(b.published);
-
-        return sortOrder === "old" ? difference : -difference;
+        const diff = timestamp(a.published) - timestamp(b.published);
+        return sortOrder === "old" ? diff : -diff;
       });
 
       $("#summary").textContent = `${filtered.length.toLocaleString("ja-JP")} 件`;
+      $("#empty").hidden = filtered.length !== 0;
 
       const container = $("#articles");
       container.replaceChildren();
-
-      $("#empty").hidden = filtered.length !== 0;
 
       const fragment = document.createDocumentFragment();
 
@@ -581,7 +590,7 @@
         const heading = document.createElement("h3");
         const link = document.createElement("a");
 
-        link.href = String(article.url || "#");
+        link.href = sanitizeUrl(article.url);
         link.target = "_blank";
         link.rel = "noopener noreferrer";
         link.textContent = article.title || "タイトルなし";
@@ -592,36 +601,33 @@
         const meta = document.createElement("div");
         meta.className = "article-meta";
 
+        // ブログ名
         const siteItem = document.createElement("span");
         siteItem.className = "meta-item";
-
         const siteLabel = document.createElement("span");
         siteLabel.className = "meta-label";
         siteLabel.textContent = "ブログ";
-
         const siteName = document.createElement("span");
         siteName.textContent = article.site || "ブログ名不明";
-
         siteItem.append(siteLabel, siteName);
 
+        // 投稿日
         const dateItem = document.createElement("span");
         dateItem.className = "meta-item";
-
         const dateLabel = document.createElement("span");
         dateLabel.className = "meta-label";
         dateLabel.textContent = "投稿日";
-
         const dateValue = document.createElement("time");
         dateValue.textContent = dateText(article.published);
 
-        if (article.published && timestamp(article.published)) {
-          dateValue.dateTime = new Date(
-            article.published
-          ).toISOString();
+        const validDate = safeDate(article.published);
+        if (validDate) {
+          dateValue.dateTime = validDate.toISOString();
         }
 
         dateItem.append(dateLabel, dateValue);
 
+        // ソースバッジ
         const sourceItem = document.createElement("span");
         sourceItem.className = "source-badge";
         sourceItem.textContent = article.source || "取得";
@@ -639,33 +645,22 @@
       const status = $("#status");
 
       try {
-        const response = await fetch(
-          "./articles.json?ts=" + Date.now(),
-          { cache: "no-store" }
-        );
+        const response = await fetch("./articles.json?ts=" + Date.now(), {
+          cache: "no-store"
+        });
 
         if (!response.ok) {
-          throw new Error(
-            `articles.json の取得に失敗しました: HTTP ${response.status}`
-          );
+          throw new Error(`HTTP ${response.status}`);
         }
 
         const data = await response.json();
 
         all = Array.isArray(data.articles)
-          ? data.articles.filter((article) =>
-              article &&
-              typeof article === "object" &&
-              article.url
-            )
+          ? data.articles.filter((a) => a && typeof a === "object" && a.url)
           : [];
 
         const sites = [
-          ...new Set(
-            all
-              .map((article) => String(article.site || ""))
-              .filter(Boolean)
-          )
+          ...new Set(all.map((a) => String(a.site || "")).filter(Boolean))
         ].sort((a, b) => a.localeCompare(b, "ja"));
 
         const siteFilter = $("#siteFilter");
@@ -691,13 +686,9 @@
         render();
       } catch (error) {
         console.error(error);
-
         status.textContent =
-          "記事データを読み込めませんでした。" +
-          " GitHub Actions の実行結果と articles.json を確認してください。";
-
+          "記事データを読み込めませんでした。GitHub Actions の実行結果と articles.json を確認してください。";
         status.classList.add("error");
-
         $("#summary").textContent = "取得失敗";
         $("#articles").replaceChildren();
         $("#empty").hidden = false;
@@ -706,7 +697,7 @@
       }
     }
 
-    $("#search").addEventListener("input", render);
+    $("#search").addEventListener("input", debounce(render, 250));
     $("#siteFilter").addEventListener("change", render);
     $("#sort").addEventListener("change", render);
 
