@@ -205,7 +205,7 @@
         border-color 0.2s ease;
     }
 
-    /* カード上部の色 */
+    /* カード上部のアクセントカラーバー */
     .page-card::before {
       position: absolute;
       top: 0;
@@ -252,11 +252,17 @@
       --accent-border: #e9d5ff;
     }
 
-    /* MUGENツール配布ページ：緑 */
     .tools {
       --accent: #16a34a;
       --accent-bg: #f0fdf4;
       --accent-border: #bbf7d0;
+    }
+
+    /* ダッシュボード（新設）：インディゴ */
+    .dashboard {
+      --accent: #4f46e5;
+      --accent-bg: #eef2ff;
+      --accent-border: #c7d2fe;
     }
 
     .card-top {
@@ -329,6 +335,7 @@
       overflow-wrap: anywhere;
       color: #8590a3;
       font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
     }
 
     .card-arrow {
@@ -364,7 +371,7 @@
 
     /* フッター */
     footer {
-      padding: 23px 20px;
+      padding: 28px 20px;
       border-top: 1px solid var(--border);
       background: rgba(255, 255, 255, 0.65);
       color: var(--muted);
@@ -372,7 +379,7 @@
       font-size: 12px;
     }
 
-    /* スマートフォン */
+    /* レスポンシブ対応 */
     @media (max-width: 640px) {
       .hero {
         padding: 48px 22px 55px;
@@ -444,16 +451,43 @@
           <h2 class="section-title" id="pages-heading">コンテンツ一覧</h2>
           <p class="section-subtitle">見たいページを選択してください。</p>
         </div>
-        <span class="item-count">5 PAGES</span>
+        <span class="item-count">6 PAGES</span>
       </div>
 
       <div class="page-grid">
 
+        <!-- 統合アーカイブダッシュボード（追加カード：インディゴ） -->
+        <a class="page-card dashboard" href="https://mugenjd.github.io/list/loader.html">
+          <div class="card-top">
+            <div class="card-icon" aria-hidden="true">
+              <!-- データベース / アーカイブ アイコン -->
+              <svg viewBox="0 0 24 24">
+                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+              </svg>
+            </div>
+            <span class="card-label">DASHBOARD</span>
+          </div>
+
+          <h3 class="card-title">MUGENアーカイブ統合ダッシュボード</h3>
+          <p class="card-description">
+            getuploader過去アーカイブとはちまんブログ転載データを横断的に閲覧・検索できます。
+          </p>
+
+          <div class="card-bottom">
+            <span class="card-destination">loader.html</span>
+            <span class="card-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M5 12h14"></path>
+                <path d="m12 5 7 7-7 7"></path>
+              </svg>
+            </span>
+          </div>
+        </a>
+
         <!-- getuploader一覧：青 -->
-        <a
-          class="page-card uploader"
-          href="https://mugenjd.github.io/list/uploader.html"
-        >
+        <a class="page-card uploader" href="https://mugenjd.github.io/list/uploader.html">
           <div class="card-top">
             <div class="card-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
@@ -482,10 +516,7 @@
         </a>
 
         <!-- MUGENブログ新着記事一覧：オレンジ -->
-        <a
-          class="page-card rss"
-          href="https://mugenjd.github.io/list/RSS.html"
-        >
+        <a class="page-card rss" href="https://mugenjd.github.io/list/RSS.html">
           <div class="card-top">
             <div class="card-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
@@ -514,10 +545,7 @@
         </a>
 
         <!-- YouTube動画検索：赤 -->
-        <a
-          class="page-card youtube"
-          href="https://mugenjd.github.io/list/video-list.html"
-        >
+        <a class="page-card youtube" href="https://mugenjd.github.io/list/video-list.html">
           <div class="card-top">
             <div class="card-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
@@ -545,10 +573,7 @@
         </a>
 
         <!-- オロミズ大好き氏一覧：紫 -->
-        <a
-          class="page-card oromizu"
-          href="https://mugenjd.github.io/list/oromizudaisuki-list.html"
-        >
+        <a class="page-card oromizu" href="https://mugenjd.github.io/list/oromizudaisuki-list.html">
           <div class="card-top">
             <div class="card-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
@@ -575,10 +600,7 @@
         </a>
 
         <!-- MUGENツール配布ページ：緑 -->
-        <a
-          class="page-card tools"
-          href="https://mugenjd.github.io/list/MUGEN_SFF_Extractor.html"
-        >
+        <a class="page-card tools" href="https://mugenjd.github.io/list/MUGEN_SFF_Extractor.html">
           <div class="card-top">
             <div class="card-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
@@ -594,7 +616,7 @@
           </p>
 
           <div class="card-bottom">
-            <span class="card-destination">tools.html</span>
+            <span class="card-destination">MUGEN_SFF_Extractor.html</span>
             <span class="card-arrow" aria-hidden="true">
               <svg viewBox="0 0 24 24">
                 <path d="M5 12h14"></path>
@@ -609,7 +631,7 @@
   </main>
 
   <footer>
-    制作物まとめ
+    &copy; 制作物まとめ
   </footer>
 </body>
 </html>
