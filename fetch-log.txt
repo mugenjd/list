@@ -1,7 +1,6 @@
 OK SHEETS	https://mugenrick.seesaa.net	5 rows
 OK SHEETS	http://zaf112.seesaa.net	5 rows
 OK SHEETS	http://orochigrade3.seesaa.net	4 rows
-OK RSS	https://ssssc-mugen-blog.netlify.app/	https://ssssc-mugen-blog.netlify.app/rss.xml	1
 OK RSS	https://zinnzouninngennhachigou.doorblog.jp/	https://zinnzouninngennhachigou.doorblog.jp/index.rdf	1
 OK RSS	https://bubbleisland.hatenablog.com	https://bubbleisland.hatenablog.com/feed	29
 OK RSS	https://unitokagaming8528.fc2.net	https://unitokagaming8528.fc2.net/?xml	5
