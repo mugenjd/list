@@ -1,28 +1,38 @@
 #!/usr/bin/env python3
-"""Fetch blog posts from RSS/Atom where available, otherwise parse the blog homepage."""
+"""Fetch blog posts from RSS/Atom where available, otherwise parse the blog homepage.
+
+Outputs both articles.json and rss.xml.
+"""
 from __future__ import annotations
 
-import json
+import csv
+from datetime import datetime, timezone
+from email.utils import format_datetime, parsedate_to_datetime
+import hashlib
 import html
+import io
+import json
+from pathlib import Path
 import re
 import time
-import hashlib
-import csv
-import io
-from datetime import datetime, timezone
-from email.utils import parsedate_to_datetime
-from pathlib import Path
-from urllib.parse import urljoin, urlparse, urldefrag
+from urllib.parse import urldefrag, urljoin, urlparse
 
+from bs4 import BeautifulSoup
 import feedparser
 import requests
-from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parent
 SITES_FILE = ROOT / "sites.txt"
 SHEETS_FEEDS_FILE = ROOT / "spreadsheet_feeds.txt"
 OUTPUT_FILE = ROOT / "articles.json"
+RSS_OUTPUT_FILE = ROOT / "rss.xml"
 LOG_FILE = ROOT / "fetch-log.txt"
+
+# RSS配信用メタ情報
+SITE_BASE_URL = "https://ssssc-mugen-blog.netlify.app/"
+SITE_TITLE = "MUGENブログ新着記事一覧"
+SITE_DESCRIPTION = "登録ブログのRSS・新着記事集約フィード"
+
 MAX_PER_SITE = 5
 MAX_SCAN_PER_SITE = 100
 TIMEOUT = 18
@@ -32,14 +42,17 @@ HEADERS = {
 SESSION = requests.Session()
 SESSION.headers.update(HEADERS)
 
+
 def normalize_url(url: str) -> str:
     url = urldefrag(url.strip())[0]
     return url.rstrip("/") if urlparse(url).path not in ("", "/") else url
+
 
 def get_site_name(url: str) -> str:
     host = urlparse(url).netloc.lower()
     host = host.removeprefix("www.")
     return host or url
+
 
 def parse_date(value):
     if not value:
@@ -61,6 +74,7 @@ def parse_date(value):
         except Exception:
             return ""
 
+
 def is_future_date(value, now=None):
     """Return True only when a parseable publication date is later than now (UTC)."""
     if not value:
@@ -73,6 +87,7 @@ def is_future_date(value, now=None):
     except (TypeError, ValueError):
         return False
 
+
 def fetch(url):
     try:
         r = SESSION.get(url, timeout=TIMEOUT, allow_redirects=True)
@@ -83,14 +98,13 @@ def fetch(url):
     except requests.RequestException:
         return None
 
+
 def feed_candidates(site_url, homepage_html=None):
     """Known feed paths plus autodiscovery links from HTML."""
     p = urlparse(site_url)
     origin = f"{p.scheme}://{p.netloc}"
-    path = p.path.rstrip("/")
     candidates = []
 
-    # If a supplied URL is already a feed-like endpoint, try it first.
     if any(x in p.path.lower() for x in ("atom.xml", "rss", "feed", "index.rdf")):
         candidates.append(site_url)
 
@@ -103,7 +117,6 @@ def feed_candidates(site_url, homepage_html=None):
             if "alternate" in rel and ("rss" in typ or "atom" in typ or "xml" in typ):
                 candidates.append(urljoin(site_url, href))
 
-    # Common endpoints used by Japanese blog platforms.
     candidates += [
         origin + "/atom.xml",
         origin + "/rss",
@@ -117,12 +130,11 @@ def feed_candidates(site_url, homepage_html=None):
     host = p.netloc.lower()
     if "fc2.com" in host or "fc2.net" in host:
         candidates += [origin + "/?xml", origin + "/?xml&all", origin + "/rss"]
-    if "hatenablog.com" in host or "hatenadiary.com" in host or "hateblo.jp" in host or "blog.jp" in host:
+    if any(k in host for k in ("hatenablog.com", "hatenadiary.com", "hateblo.jp", "blog.jp")):
         candidates += [origin + "/rss", origin + "/feed", origin + "/atom.xml"]
     if "livedoor.blog" in host or host == "blog.livedoor.jp":
         candidates += [origin + "/index.rdf", origin + "/atom.xml", origin + "/rss"]
     if "seesaa.net" in host:
-        # Seesaa documents index.rdf (RSS/RDF) and index20.rdf (RSS 2.0).
         candidates += [
             origin + "/index20.rdf",
             origin + "/index.rdf",
@@ -132,8 +144,8 @@ def feed_candidates(site_url, homepage_html=None):
     if "ameblo.jp" in host:
         candidates += [origin + "/rss.html", origin + "/atom.xml"]
 
-    # Preserve order while removing duplicates.
     return list(dict.fromkeys(candidates))
+
 
 def parse_feed(feed_url, site_url):
     response = fetch(feed_url)
@@ -149,8 +161,12 @@ def parse_feed(feed_url, site_url):
         title = (entry.get("title") or "").strip()
         if not link or not title:
             continue
-        date = parse_date(entry.get("published_parsed") or entry.get("updated_parsed")
-                          or entry.get("published") or entry.get("updated"))
+        date = parse_date(
+            entry.get("published_parsed")
+            or entry.get("updated_parsed")
+            or entry.get("published")
+            or entry.get("updated")
+        )
         if is_future_date(date):
             continue
         out.append({
@@ -163,6 +179,7 @@ def parse_feed(feed_url, site_url):
         })
     return out
 
+
 def looks_like_article(url, title, site_url):
     if not title or len(title.strip()) < 2:
         return False
@@ -172,13 +189,16 @@ def looks_like_article(url, title, site_url):
     path = u.path.lower()
     if path in ("", "/", "/index.html", "/index.htm"):
         return False
-    bad = ("#","javascript:", "/category/", "/tag/", "/archives/", "/page/", "/profile",
-           "/about", "/contact", "/rss", "/atom", "/search", "/admin", "/login")
+    bad = (
+        "#", "javascript:", "/category/", "/tag/", "/archives/", "/page/",
+        "/profile", "/about", "/contact", "/rss", "/atom", "/search", "/admin", "/login"
+    )
     if any(x in path for x in bad):
         return False
     if title.strip().lower() in {"トップページ", "ホーム", "home", "次のページ", "前のページ", "続きを読む"}:
         return False
     return True
+
 
 def parse_homepage(site_url):
     response = fetch(site_url)
@@ -189,7 +209,6 @@ def parse_homepage(site_url):
     site_name = (soup.title.get_text(" ", strip=True) if soup.title else "") or get_site_name(site_url)
     out, seen = [], set()
 
-    # Many blogs use h1/h2/h3 or article elements around post titles.
     selectors = [
         "article h1 a[href]", "article h2 a[href]", "article h3 a[href]",
         "h1.entry-title a[href]", "h2.entry-title a[href]", "h3.entry-title a[href]",
@@ -201,7 +220,6 @@ def parse_homepage(site_url):
     anchors = []
     for selector in selectors:
         anchors.extend(soup.select(selector))
-    # fallback: inspect ordinary links if theme-specific selectors found nothing
     if not anchors:
         anchors = soup.find_all("a", href=True)
 
@@ -215,13 +233,11 @@ def parse_homepage(site_url):
         href = normalize_url(href)
         if not looks_like_article(href, title, actual_home) or href in seen:
             continue
-        # Avoid generic image-only anchors and navigation labels.
         if len(title) > 220:
             title = title[:217] + "..."
         seen.add(href)
 
         published = ""
-        # Search nearby containers for a date/time element or a recognizable date string.
         container = a.find_parent(["article", "li", "div"])
         if container:
             time_tag = container.find("time")
@@ -250,12 +266,8 @@ def parse_homepage(site_url):
         })
     return out
 
-def load_spreadsheet_feeds():
-    """Load rows as: site URL, published CSV URL, optional display name.
 
-    Accept tabs or ordinary spaces between the first two URL fields and the
-    display name. URLs themselves must not contain spaces.
-    """
+def load_spreadsheet_feeds():
     feeds = {}
     if not SHEETS_FEEDS_FILE.exists():
         return feeds
@@ -276,7 +288,6 @@ def load_spreadsheet_feeds():
 
 
 def parse_spreadsheet_csv(site_url, csv_url, display_name=""):
-    """Read a published Google Sheets CSV containing IMPORTFEED item rows."""
     try:
         response = SESSION.get(csv_url, timeout=TIMEOUT, allow_redirects=True)
         if response.status_code >= 400:
@@ -294,7 +305,6 @@ def parse_spreadsheet_csv(site_url, csv_url, display_name=""):
         title_idx = next((i for i, h in enumerate(headers) if h in ("title", "タイトル", "itemtitle")), 0)
         url_idx = next((i for i, h in enumerate(headers) if h in ("url", "link", "リンク", "記事url", "記事リンク")), 1)
         date_idx = next((i for i, h in enumerate(headers) if h in ("created", "published", "date", "pubdate", "公開日時", "投稿日", "日付", "更新日時")), 2)
-        # If the first row is not a recognizable header, treat it as data.
         known_headers = {"title", "タイトル", "url", "link", "created", "published", "date", "pubdate", "author"}
         has_header = any(h in known_headers for h in headers)
         data_rows = rows[1:] if has_header else rows
@@ -332,9 +342,75 @@ def parse_spreadsheet_csv(site_url, csv_url, display_name=""):
 def stable_id(item):
     return hashlib.sha256(item["url"].encode("utf-8")).hexdigest()[:16]
 
+
+def escape_xml(text: str) -> str:
+    """Escape XML special characters."""
+    return (
+        str(text or "")
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+        .replace("'", "&apos;")
+    )
+
+
+def generate_rss_xml(articles: list[dict], build_time: datetime) -> str:
+    """Generate RSS 2.0 XML string from articles."""
+    items_xml = []
+    for item in articles:
+        title = escape_xml(item.get("title", ""))
+        url = escape_xml(item.get("url", ""))
+        site = escape_xml(item.get("site", ""))
+        source = escape_xml(item.get("source", ""))
+
+        pub_date_tag = ""
+        pub_iso = item.get("published")
+        if pub_iso:
+            try:
+                dt = datetime.fromisoformat(pub_iso.replace("Z", "+00:00"))
+                pub_date_tag = f"<pubDate>{format_datetime(dt)}</pubDate>"
+            except (ValueError, TypeError):
+                pass
+
+        description = f"ブログ: {site}"
+        if source:
+            description += f" (取得方法: {source})"
+
+        items_xml.append(
+            f"""    <item>
+      <title>{title}</title>
+      <link>{url}</link>
+      <guid isPermaLink="true">{url}</guid>
+      {pub_date_tag}
+      <description>{escape_xml(description)}</description>
+    </item>"""
+        )
+
+    last_build = format_datetime(build_time)
+    items_block = "\n".join(items_xml)
+
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>{escape_xml(SITE_TITLE)}</title>
+    <link>{escape_xml(SITE_BASE_URL)}</link>
+    <description>{escape_xml(SITE_DESCRIPTION)}</description>
+    <language>ja</language>
+    <lastBuildDate>{last_build}</lastBuildDate>
+    <atom:link href="{escape_xml(urljoin(SITE_BASE_URL, 'rss.xml'))}" rel="self" type="application/rss+xml" />
+{items_block}
+  </channel>
+</rss>
+"""
+
+
 def main():
-    sites = [line.strip() for line in SITES_FILE.read_text(encoding="utf-8").splitlines()
-             if line.strip() and not line.strip().startswith("#")]
+    sites = [
+        line.strip()
+        for line in SITES_FILE.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.strip().startswith("#")
+    ]
     all_articles, log_lines = [], []
     spreadsheet_feeds = load_spreadsheet_feeds()
     normalized_sites = []
@@ -344,7 +420,6 @@ def main():
             site = "https://" + site
         normalized_sites.append(site)
 
-    # Fetch the three Seesaa feeds via public Google Sheets CSV when configured.
     spreadsheet_site_keys = set(spreadsheet_feeds)
     for site_url, feed_config in spreadsheet_feeds.items():
         csv_url = feed_config["csv_url"]
@@ -360,7 +435,7 @@ def main():
         if normalize_url(site) in spreadsheet_site_keys:
             print(f"[{i}/{len(normalized_sites)}] {site}: handled via Google Sheets")
             continue
-        # A provided feed URL may be used directly; otherwise fetch homepage and discover feeds.
+
         homepage = None
         if not any(x in urlparse(site).path.lower() for x in ("atom.xml", "rss", "feed", "index.rdf")):
             resp = fetch(site)
@@ -380,13 +455,7 @@ def main():
                 break
 
         if not articles:
-            # Parse HTML from the site homepage (if already fetched, avoid another request).
-            if homepage is not None:
-                # Reuse the first response content by parsing a small helper copy via BeautifulSoup.
-                # parse_homepage is used for robustness and follows redirects.
-                articles = parse_homepage(effective_site)
-            else:
-                articles = parse_homepage(effective_site)
+            articles = parse_homepage(effective_site)
             if articles:
                 log_lines.append(f"OK HTML\t{site}\t{len(articles)}")
             else:
@@ -394,9 +463,8 @@ def main():
 
         all_articles.extend(articles)
         print(f"[{i}/{len(sites)}] {site}: {len(articles)} articles")
-        time.sleep(0.25)  # be polite to the sites
+        time.sleep(0.25)
 
-    # Exclude future-dated entries and retain at most five articles per blog.
     now = datetime.now(timezone.utc)
     per_site = {}
     for item in all_articles:
@@ -406,11 +474,9 @@ def main():
 
     limited_articles = []
     for site_items in per_site.values():
-        # Known publication dates first, newest first; undated items follow.
         site_items.sort(key=lambda x: (bool(x.get("published")), x.get("published") or ""), reverse=True)
         limited_articles.extend(site_items[:MAX_PER_SITE])
 
-    # Deduplicate by canonical URL.
     deduped = {}
     for item in limited_articles:
         item["id"] = stable_id(item)
@@ -421,21 +487,30 @@ def main():
             deduped[key] = item
 
     items = list(deduped.values())
-    # Decode HTML entities in visible text, e.g. &#039; -> apostrophe and &amp; -> &.
     for item in items:
         for field in ("title", "site"):
             if item.get(field):
                 item[field] = html.unescape(str(item[field]))
+
     items.sort(key=lambda x: x.get("published") or "", reverse=True)
+
+    # 1. JSON出力
     payload = {
-        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": now.isoformat(),
         "site_count": len(normalized_sites),
         "article_count": len(items),
         "articles": items,
     }
     OUTPUT_FILE.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # 2. RSS (XML) 出力
+    rss_xml_content = generate_rss_xml(items, now)
+    RSS_OUTPUT_FILE.write_text(rss_xml_content, encoding="utf-8")
+
+    # 3. ログ出力
     LOG_FILE.write_text("\n".join(log_lines) + "\n", encoding="utf-8")
-    print(f"Done: {len(items)} unique articles from {len(sites)} sites")
+    print(f"Done: {len(items)} unique articles from {len(sites)} sites (JSON & RSS saved)")
+
 
 if __name__ == "__main__":
     main()
