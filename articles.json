@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T14:35:07.558841+00:00",
+  "updated_at": "2026-10-25T14:40:38.844022+00:00",
   "site_count": 154,
   "article_count": 740,
   "articles": [
@@ -65,15 +65,6 @@
       "published": "2026-10-24T17:16:17+00:00",
       "source": "RSS",
       "id": "ec7114c71afefa20"
-    },
-    {
-      "title": "「SC東方シリーズ」の配布を始めました",
-      "url": "https://example.com/sunflower/entries/20261024.html",
-      "site": "太阳花厂",
-      "site_url": "https://ssssc-mugen-blog.netlify.app/",
-      "published": "2026-10-24T11:00:00+00:00",
-      "source": "RSS",
-      "id": "bd6318313c24f884"
     },
     {
       "title": "[ブルアカ]シミコさんの絆ランク95、ゴールが見えてきた",
@@ -569,6 +560,15 @@
       "published": "2026-09-01T11:50:32+00:00",
       "source": "RSS",
       "id": "7468e1c9f160382e"
+    },
+    {
+      "title": "【MUGEN】美形会議主催！狂上位４ｖｓ４チームバトル　リクエスト募集",
+      "url": "https://zinnzouninngennhachigou.doorblog.jp/archives/14714411.html",
+      "site": "はちまんのmugenブログ",
+      "site_url": "https://zinnzouninngennhachigou.doorblog.jp/",
+      "published": "2026-08-31T04:00:00+00:00",
+      "source": "RSS",
+      "id": "b4458e1487ca2268"
     },
     {
       "title": "唐突に遊戯王動画を上げてみた&ちょっとした実験",
