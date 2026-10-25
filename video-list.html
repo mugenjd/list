@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -315,6 +314,7 @@ button:hover:not(:disabled) {
   margin: 26px 0 18px;
   padding: 0 0 12px;
   border-bottom: 3px solid var(--primary);
+  scroll-margin-top: 24px;
 }
 
 .result-count {
@@ -736,6 +736,8 @@ const ITEMS_PER_PAGE = 50;
 let allVideos = [];
 let filteredVideos = [];
 let currentPage = 1;
+let debounceTimer = null;
+let currentlyPlayingContainer = null;
 
 function escapeHTML(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -789,6 +791,48 @@ function updateSelect(selectElement, values, defaultLabel) {
   selectElement.value = values.includes(previousValue)
     ? previousValue
     : "";
+}
+
+/* URLパラメータの更新 */
+function updateURLParams() {
+  const params = new URLSearchParams();
+  const keyword = document.getElementById("keyword").value.trim();
+  const category = document.getElementById("categoryFilter").value;
+  const className = document.getElementById("classFilter").value;
+  const tag = document.getElementById("tagFilter").value;
+
+  if (keyword) params.set("q", keyword);
+  if (category) params.set("category", category);
+  if (className) params.set("class", className);
+  if (tag) params.set("tag", tag);
+  if (currentPage > 1) params.set("page", currentPage);
+
+  const query = params.toString();
+  const newURL = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+  window.history.replaceState({ path: newURL }, "", newURL);
+}
+
+/* URLパラメータからの復元 */
+function restoreFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const keyword = params.get("q") || "";
+  const category = params.get("category") || "";
+  const className = params.get("class") || "";
+  const tag = params.get("tag") || "";
+  const page = parseInt(params.get("page") || "1", 10);
+
+  document.getElementById("keyword").value = keyword;
+
+  updateCategoryOptions();
+  document.getElementById("categoryFilter").value = category;
+
+  updateClassOptions();
+  document.getElementById("classFilter").value = className;
+
+  updateTagOptions();
+  document.getElementById("tagFilter").value = tag;
+
+  currentPage = !isNaN(page) && page > 0 ? page : 1;
 }
 
 /* CSVを読み込む */
@@ -850,10 +894,8 @@ async function loadCSV() {
     status.textContent =
       `読み込み完了：${allVideos.length.toLocaleString()}件の動画を取得しました。`;
 
-    updateCategoryOptions();
-    updateClassOptions();
-    updateTagOptions();
-    applyFilters();
+    restoreFromURL();
+    applyFilters(false);
 
   } catch (error) {
     console.error(error);
@@ -929,14 +971,13 @@ function updateTagOptions() {
 }
 
 /* 検索条件を適用 */
-function applyFilters() {
+function applyFilters(resetPage = true) {
   const keyword = document.getElementById("keyword").value.trim();
   const category = document.getElementById("categoryFilter").value;
   const className = document.getElementById("classFilter").value;
   const tag = document.getElementById("tagFilter").value;
 
   filteredVideos = allVideos.filter(video => {
-    /* IDはキーワード検索の対象に含めない */
     const matchesKeyword = !keyword || [
       video.title,
       video.category,
@@ -959,7 +1000,12 @@ function applyFilters() {
       matchesTag;
   });
 
-  currentPage = 1;
+  if (resetPage) {
+    currentPage = 1;
+  }
+
+  closeActivePlayer();
+  updateURLParams();
   renderVideos();
 }
 
@@ -1117,6 +1163,8 @@ function renderPagination(totalPages) {
   previousButton.disabled = currentPage === 1;
   previousButton.addEventListener("click", () => {
     currentPage--;
+    closeActivePlayer();
+    updateURLParams();
     renderVideos();
     scrollToResults();
   });
@@ -1166,6 +1214,8 @@ function renderPagination(totalPages) {
 
     button.addEventListener("click", () => {
       currentPage = pageNumber;
+      closeActivePlayer();
+      updateURLParams();
       renderVideos();
       scrollToResults();
     });
@@ -1178,6 +1228,8 @@ function renderPagination(totalPages) {
   nextButton.disabled = currentPage === totalPages;
   nextButton.addEventListener("click", () => {
     currentPage++;
+    closeActivePlayer();
+    updateURLParams();
     renderVideos();
     scrollToResults();
   });
@@ -1191,7 +1243,21 @@ function scrollToResults() {
   });
 }
 
-/* チップ選択とページ内プレーヤー */
+/* 開いているプレーヤーを安全に閉じる */
+function closeActivePlayer() {
+  if (currentlyPlayingContainer) {
+    currentlyPlayingContainer.replaceChildren();
+    currentlyPlayingContainer.hidden = true;
+    const card = currentlyPlayingContainer.closest(".video-card");
+    if (card) {
+      const btn = card.querySelector("[data-player-id]");
+      if (btn) btn.textContent = "ページ内で再生";
+    }
+    currentlyPlayingContainer = null;
+  }
+}
+
+/* チップ選択とページ内プレーヤー操作 */
 document.getElementById("videoGrid").addEventListener("click", event => {
   const chip = event.target.closest("[data-filter-type]");
 
@@ -1201,19 +1267,14 @@ document.getElementById("videoGrid").addEventListener("click", event => {
 
     if (type === "category") {
       document.getElementById("categoryFilter").value = value;
-
       updateClassOptions();
       document.getElementById("classFilter").value = "";
-
       updateTagOptions();
       document.getElementById("tagFilter").value = "";
-
     } else if (type === "class") {
       document.getElementById("classFilter").value = value;
-
       updateTagOptions();
       document.getElementById("tagFilter").value = "";
-
     } else if (type === "tag") {
       document.getElementById("tagFilter").value = value;
     }
@@ -1226,18 +1287,7 @@ document.getElementById("videoGrid").addEventListener("click", event => {
   const closeButton = event.target.closest("[data-close-player]");
 
   if (closeButton) {
-    const playerId = closeButton.dataset.closePlayer;
-    const player = document.getElementById(playerId);
-
-    player.replaceChildren();
-    player.hidden = true;
-
-    const card = player.closest(".video-card");
-    const button = card.querySelector("[data-player-id]");
-
-    if (button) {
-      button.textContent = "ページ内で再生";
-    }
+    closeActivePlayer();
     return;
   }
 
@@ -1249,6 +1299,9 @@ document.getElementById("videoGrid").addEventListener("click", event => {
     const player = document.getElementById(playerId);
 
     if (player.hidden) {
+      // 既存の再生中プレーヤーがあれば先に停止して閉じる
+      closeActivePlayer();
+
       const iframe = document.createElement("iframe");
       iframe.src =
         "https://www.youtube-nocookie.com/embed/" +
@@ -1259,19 +1312,19 @@ document.getElementById("videoGrid").addEventListener("click", event => {
       iframe.referrerPolicy = "strict-origin-when-cross-origin";
       iframe.allowFullscreen = true;
 
-      const closeButton = document.createElement("button");
-      closeButton.type = "button";
-      closeButton.className = "close-player-button";
-      closeButton.dataset.closePlayer = playerId;
-      closeButton.textContent = "再生を閉じる";
+      const closeBtn = document.createElement("button");
+      closeBtn.type = "button";
+      closeBtn.className = "close-player-button";
+      closeBtn.dataset.closePlayer = playerId;
+      closeBtn.textContent = "再生を閉じる";
 
-      player.replaceChildren(iframe, closeButton);
+      player.replaceChildren(iframe, closeBtn);
       player.hidden = false;
       playButton.textContent = "再生を閉じる";
+
+      currentlyPlayingContainer = player;
     } else {
-      player.replaceChildren();
-      player.hidden = true;
-      playButton.textContent = "ページ内で再生";
+      closeActivePlayer();
     }
   }
 });
@@ -1296,19 +1349,31 @@ document.getElementById("classFilter").addEventListener("change", () => {
 });
 
 /* タグ選択時 */
-document.getElementById("tagFilter").addEventListener("change", applyFilters);
+document.getElementById("tagFilter").addEventListener("change", () => applyFilters());
 
-/* キーワード検索 */
-document.getElementById("searchButton").addEventListener("click", applyFilters);
+/* キーワード検索（リアルタイム検索・デバウンス対応） */
+document.getElementById("keyword").addEventListener("input", () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    applyFilters();
+  }, 300);
+});
+
+document.getElementById("searchButton").addEventListener("click", () => {
+  clearTimeout(debounceTimer);
+  applyFilters();
+});
 
 document.getElementById("keyword").addEventListener("keydown", event => {
   if (event.key === "Enter") {
+    clearTimeout(debounceTimer);
     applyFilters();
   }
 });
 
 /* 検索条件をリセット */
 document.getElementById("resetButton").addEventListener("click", () => {
+  clearTimeout(debounceTimer);
   document.getElementById("keyword").value = "";
   document.getElementById("categoryFilter").value = "";
 
@@ -1319,6 +1384,12 @@ document.getElementById("resetButton").addEventListener("click", () => {
   document.getElementById("tagFilter").value = "";
 
   applyFilters();
+});
+
+/* ブラウザの戻る・進むボタン対応 */
+window.addEventListener("popstate", () => {
+  restoreFromURL();
+  applyFilters(false);
 });
 
 /* 起動 */
