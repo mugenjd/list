@@ -73,7 +73,6 @@
 
   <!-- Hero Header -->
   <header class="relative overflow-hidden bg-gradient-to-br from-blue-700 via-indigo-800 to-slate-950 text-white shadow-2xl">
-    <!-- Decorative Ambient Glows -->
     <div class="absolute -top-48 -right-48 w-[500px] h-[500px] rounded-full bg-blue-500/20 blur-[100px] pointer-events-none"></div>
     <div class="absolute -bottom-48 left-1/4 w-[400px] h-[400px] rounded-full bg-indigo-500/15 blur-[100px] pointer-events-none"></div>
 
@@ -233,8 +232,8 @@
         <table class="w-full text-left border-collapse min-w-[1050px]">
           <thead>
             <tr class="bg-slate-100/90 dark:bg-slate-800/90 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs uppercase tracking-wider font-semibold">
-              <th class="hidden group-column px-5 py-4">一覧</th>
-              <th class="px-5 py-4 w-64">ページ</th>
+              <th id="thGroup" class="group-column px-5 py-4 w-48">一覧</th>
+              <th class="px-5 py-4 w-56">ページ</th>
               <th class="px-5 py-4 w-80">ファイル名</th>
               <th class="px-5 py-4">コメント</th>
               <th
@@ -266,6 +265,13 @@
           </tbody>
         </table>
       </div>
+      
+      <!-- Load More Container (大量データ時の表示負荷対策) -->
+      <div id="loadMoreContainer" class="p-4 border-t border-slate-100 dark:border-slate-800/60 text-center hidden">
+        <button id="loadMoreBtn" type="button" class="px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-semibold transition-all">
+          さらに読み込む
+        </button>
+      </div>
     </div>
 
   </main>
@@ -285,6 +291,10 @@
     "use strict";
 
     let allItems = [];
+    let currentFiltered = [];
+    let displayedCount = 0;
+    const PAGE_CHUNK_SIZE = 150; // 一度に描画する行数
+
     let dateSortOrder = "desc";
 
     const search = document.getElementById("search");
@@ -293,6 +303,7 @@
     const page = document.getElementById("page");
     const statusEl = document.getElementById("status");
     const tbody = document.getElementById("rows");
+    const thGroup = document.getElementById("thGroup");
     const dateSort = document.getElementById("dateSort");
     const dateSortIcon = document.getElementById("dateSortIcon");
     const themeToggle = document.getElementById("themeToggle");
@@ -304,6 +315,8 @@
     const toastIcon = document.getElementById("toastIcon");
     const heroStatsCount = document.getElementById("heroStatsCount");
     const groupPills = document.querySelectorAll("[data-group-pill]");
+    const loadMoreContainer = document.getElementById("loadMoreContainer");
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
 
     const groupOrder = [
       "凶悪キャラスレアップローダ",
@@ -356,6 +369,15 @@
         toast.classList.remove("translate-y-0", "opacity-100");
         toast.classList.add("translate-y-24", "opacity-0");
       }, 3000);
+    }
+
+    // Debounce Utility for fast typing
+    function debounce(fn, delay = 250) {
+      let timer;
+      return function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+      };
     }
 
     /**
@@ -417,13 +439,18 @@
         });
     }
 
-    // Date parser helper
+    // Robust Date parser helper (handles 2-digit & 4-digit years, slashes & hyphens)
     function parseDate(value) {
       if (!value) return null;
-      const match = String(value).trim().match(/^(\d{2})\/(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2})$/);
+      const str = String(value).trim();
+      const match = str.match(/^(\d{2,4})[\/\-](\d{1,2})[\/\-](\d{1,2})(?:\s+(\d{1,2}):(\d{2}))?$/);
       if (!match) return null;
-      const [, yy, mm, dd, hh, min] = match;
-      const year = Number(yy) >= 70 ? 1900 + Number(yy) : 2000 + Number(yy);
+
+      let [, yy, mm, dd, hh = "0", min = "0"] = match;
+      let year = Number(yy);
+      if (yy.length === 2) {
+        year = year >= 70 ? 1900 + year : 2000 + year;
+      }
       const month = Number(mm);
       const day = Number(dd);
       const hour = Number(hh);
@@ -432,8 +459,7 @@
       if (month < 1 || month > 12 || day < 1 || day > 31 || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
         return null;
       }
-      const date = new Date(year, month - 1, day, hour, minute);
-      return date.getTime();
+      return new Date(year, month - 1, day, hour, minute).getTime();
     }
 
     // Toggle Date Sort
@@ -533,14 +559,16 @@
       });
     });
 
-    // Search input clear button toggle
+    const debouncedRender = debounce(render, 200);
+
+    // Search input clear button toggle & debounced search
     search.addEventListener("input", () => {
       if (search.value.trim().length > 0) {
         clearSearchBtn.classList.remove("hidden");
       } else {
         clearSearchBtn.classList.add("hidden");
       }
-      render();
+      debouncedRender();
     });
 
     clearSearchBtn.addEventListener("click", () => {
@@ -564,7 +592,7 @@
     function showEmptyMessage(message) {
       const tr = document.createElement("tr");
       const td = document.createElement("td");
-      td.colSpan = 5;
+      td.colSpan = group.value ? 4 : 5;
       td.className = "px-6 py-16 text-center text-slate-400 dark:text-slate-500 animate-fade-in";
       
       const div = document.createElement("div");
@@ -576,57 +604,22 @@
       td.appendChild(div);
       tr.appendChild(td);
       tbody.replaceChildren(tr);
+      loadMoreContainer.classList.add("hidden");
     }
 
-    function render() {
-      const q = search.value.trim().toLocaleLowerCase();
-      const selectedGroup = group.value;
-      const selectedPage = page.value;
-
-      const filtered = allItems.filter(x => {
-        const matchesGroup = !selectedGroup || x.group === selectedGroup;
-        const matchesPage = !selectedPage || x.page === selectedPage;
-        const matchesSearch = [x.name, x.comment, x.page, x.group].some(v =>
-          String(v || "").toLocaleLowerCase().includes(q)
-        );
-        return matchesGroup && matchesPage && matchesSearch;
-      });
-
-      filtered.sort((a, b) => {
-        const dateA = parseDate(a.date);
-        const dateB = parseDate(b.date);
-        if (dateA === null && dateB === null) return 0;
-        if (dateA === null) return 1;
-        if (dateB === null) return -1;
-        return dateSortOrder === "asc" ? dateA - dateB : dateB - dateA;
-      });
-
-      // Render status badge
-      statusEl.replaceChildren();
-      const badge = document.createElement("span");
-      badge.className = "px-2.5 py-1 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold font-mono text-xs";
-      badge.textContent = filtered.length.toLocaleString();
-
-      statusEl.appendChild(badge);
-      statusEl.appendChild(document.createTextNode(` 件ヒット (全 ${allItems.length.toLocaleString()} 件)`));
-
-      tbody.replaceChildren();
-
-      if (filtered.length === 0) {
-        showEmptyMessage(allItems.length === 0 ? "表示できるデータがありません。" : "条件に一致するファイルはありません。");
-        return;
-      }
-
+    function appendRows(items, showGroupColumn) {
       const frag = document.createDocumentFragment();
 
-      for (const x of filtered) {
+      for (const x of items) {
         const tr = document.createElement("tr");
         tr.className = "hover:bg-blue-50/50 dark:hover:bg-slate-800/50 transition-colors animate-fade-in";
 
-        const groupTd = document.createElement("td");
-        groupTd.className = "hidden group-column px-5 py-3.5 text-slate-700 dark:text-slate-300";
-        groupTd.textContent = x.group || "";
-        tr.appendChild(groupTd);
+        if (showGroupColumn) {
+          const groupTd = document.createElement("td");
+          groupTd.className = "group-column px-5 py-3.5 text-slate-700 dark:text-slate-300 font-medium";
+          groupTd.textContent = x.group || "";
+          tr.appendChild(groupTd);
+        }
 
         const pageTd = document.createElement("td");
         pageTd.className = "px-5 py-3.5 text-slate-700 dark:text-slate-300 font-medium";
@@ -669,6 +662,82 @@
 
       tbody.appendChild(frag);
     }
+
+    function render() {
+      const q = search.value.trim().toLocaleLowerCase();
+      const selectedGroup = group.value;
+      const selectedPage = page.value;
+      const showGroupColumn = !selectedGroup; // グループが未指定（すべて表示）の時だけ「一覧」列を表示
+
+      // テーブルヘッダーの「一覧」列 表示/非表示切り替え
+      if (showGroupColumn) {
+        thGroup.classList.remove("hidden");
+      } else {
+        thGroup.classList.add("hidden");
+      }
+
+      currentFiltered = allItems.filter(x => {
+        const matchesGroup = !selectedGroup || x.group === selectedGroup;
+        const matchesPage = !selectedPage || x.page === selectedPage;
+        const matchesSearch = [x.name, x.comment, x.page, x.group].some(v =>
+          String(v || "").toLocaleLowerCase().includes(q)
+        );
+        return matchesGroup && matchesPage && matchesSearch;
+      });
+
+      currentFiltered.sort((a, b) => {
+        const dateA = parseDate(a.date);
+        const dateB = parseDate(b.date);
+        if (dateA === null && dateB === null) return 0;
+        if (dateA === null) return 1;
+        if (dateB === null) return -1;
+        return dateSortOrder === "asc" ? dateA - dateB : dateB - dateA;
+      });
+
+      // Render status badge
+      statusEl.replaceChildren();
+      const badge = document.createElement("span");
+      badge.className = "px-2.5 py-1 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold font-mono text-xs";
+      badge.textContent = currentFiltered.length.toLocaleString();
+
+      statusEl.appendChild(badge);
+      statusEl.appendChild(document.createTextNode(` 件ヒット (全 ${allItems.length.toLocaleString()} 件)`));
+
+      tbody.replaceChildren();
+      displayedCount = 0;
+
+      if (currentFiltered.length === 0) {
+        showEmptyMessage(allItems.length === 0 ? "表示できるデータがありません。" : "条件に一致するファイルはありません。");
+        return;
+      }
+
+      // 最初のチャンクを表示
+      const nextBatch = currentFiltered.slice(0, PAGE_CHUNK_SIZE);
+      displayedCount = nextBatch.length;
+      appendRows(nextBatch, showGroupColumn);
+
+      // さらに表示ボタンの制御
+      if (displayedCount < currentFiltered.length) {
+        loadMoreContainer.classList.remove("hidden");
+        loadMoreBtn.textContent = `さらに読み込む (残り ${(currentFiltered.length - displayedCount).toLocaleString()} 件)`;
+      } else {
+        loadMoreContainer.classList.add("hidden");
+      }
+    }
+
+    // 「さらに読み込む」ボタン処理
+    loadMoreBtn.addEventListener("click", () => {
+      const showGroupColumn = !group.value;
+      const nextBatch = currentFiltered.slice(displayedCount, displayedCount + PAGE_CHUNK_SIZE);
+      displayedCount += nextBatch.length;
+      appendRows(nextBatch, showGroupColumn);
+
+      if (displayedCount < currentFiltered.length) {
+        loadMoreBtn.textContent = `さらに読み込む (残り ${(currentFiltered.length - displayedCount).toLocaleString()} 件)`;
+      } else {
+        loadMoreContainer.classList.add("hidden");
+      }
+    });
 
     group.addEventListener("change", () => {
       updatePages();
