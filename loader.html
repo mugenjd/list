@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#2563eb">
-<title>getuploaderデータ一覧 - High-End Dashboard</title>
+<title>MUGENアーカイブ統合ダッシュボード</title>
 <!-- Tailwind CSS for modern utility styling -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -52,7 +52,6 @@
     animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  /* Skeleton Loading Pulse Animation */
   @keyframes pulseGlow {
     0%, 100% { opacity: 0.6; }
     50% { opacity: 1; }
@@ -102,11 +101,10 @@
           <i class="ph ph-shield-check text-blue-300"></i> Archive Dashboard
         </div>
         <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white drop-shadow-sm">
-          getuploaderデータ一覧
+          MUGEN データアーカイブ一覧
         </h1>
         <p class="max-w-3xl text-sm sm:text-base text-blue-100/90 leading-relaxed font-normal">
-          凶悪キャラスレアップローダ(2〜22)・ターゲット倉庫(1〜16)・むげん代理公開場(1〜9)のアーカイブデータを高速一括検索。<br class="hidden sm:inline">
-          ピルフィルターやキーワードによる絞り込み、ファイル名クリックでの転送に対応しています。ご利用は自己責任でお願いします。
+          getuploader過去アーカイブおよび「はちまんのmugenブログ」転載データを横断的に閲覧・検索できます。
         </p>
       </div>
     </div>
@@ -115,105 +113,52 @@
   <!-- Main Dashboard Container -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
-    <!-- 転載中キャラ・外部リンク専用インフォメーションセクション -->
-    <section class="glass-card bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-purple-500/10 dark:from-blue-900/20 dark:via-indigo-900/15 dark:to-purple-900/20 border border-blue-200/70 dark:border-blue-800/60 rounded-2xl p-5 sm:p-6 shadow-md transition-all">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-blue-200/50 dark:border-blue-800/40">
+    <!-- Primary Source Tabs -->
+    <div class="flex border-b border-slate-200 dark:border-slate-800 gap-2 sm:gap-4">
+      <button id="tabGetuploader" type="button" class="tab-btn active pb-3 px-3 sm:px-4 text-sm sm:text-base font-bold flex items-center gap-2 border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 transition-colors">
+        <i class="ph ph-cloud-arrow-down text-lg"></i>
+        <span>getuploader アーカイブ</span>
+      </button>
+      <button id="tabHachiman" type="button" class="tab-btn pb-3 px-3 sm:px-4 text-sm sm:text-base font-medium flex items-center gap-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+        <i class="ph ph-google-drive-logo text-lg text-emerald-500"></i>
+        <span>はちまんブログ転載データ (Google Drive)</span>
+        <span id="hachimanBadgeCount" class="ml-1 px-2 py-0.5 rounded-full text-[11px] bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-300 dark:border-emerald-800">読込中</span>
+      </button>
+    </div>
+
+    <!-- はちまんブログ転載情報バナー (タブ選択時に表示) -->
+    <section id="hachimanBanner" class="hidden glass-card bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-blue-500/10 dark:from-emerald-900/20 dark:via-teal-900/15 dark:to-blue-900/20 border border-emerald-200/70 dark:border-emerald-800/60 rounded-2xl p-5 shadow-sm transition-all">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="flex items-start sm:items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl shadow-md shadow-blue-500/30 shrink-0">
+          <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xl shadow-md shadow-emerald-500/30 shrink-0">
             <i class="ph ph-folder-user"></i>
           </div>
           <div>
             <div class="flex items-center gap-2 flex-wrap">
-              <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">はちまんのmugenブログ 転載アーカイブ</h2>
-              <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border border-blue-300 dark:border-blue-700">外部保管庫</span>
+              <h2 class="text-base font-bold text-slate-900 dark:text-white">はちまんのmugenブログ 代理公開所</h2>
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">Google Drive共有</span>
             </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">アップローダーとは別枠で管理・保管されている代理公開データです</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">ファイル名をクリックすることで各Google Driveから直接ダウンロードが可能です。</p>
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2.5">
-          <a href="https://zinnzouninngennhachigou.doorblog.jp/archives/15475237.html" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 transition-all shadow-sm group">
-            <i class="ph ph-article text-sm text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform"></i>
+        <div class="flex flex-wrap items-center gap-2">
+          <a href="https://zinnzouninngennhachigou.doorblog.jp/archives/15475237.html" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 transition-all shadow-xs group">
+            <i class="ph ph-article text-emerald-600 dark:text-emerald-400"></i>
             ブログ元記事
             <i class="ph ph-arrow-square-out text-xs text-slate-400"></i>
           </a>
-          <a href="https://drive.google.com/drive/folders/1npYcjr2yAIfsOz5neRKio4IWX7jNCPKS?usp=drive_link" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/25 transition-all group">
-            <i class="ph ph-google-drive-logo text-sm group-hover:scale-110 transition-transform"></i>
-            Google Drive 公開先を開く
+          <a href="https://drive.google.com/drive/folders/1npYcjr2yAIfsOz5neRKio4IWX7jNCPKS?usp=drive_link" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all group">
+            <i class="ph ph-google-drive-logo"></i>
+            公開先フォルダを開く
             <i class="ph ph-arrow-square-out text-xs opacity-80"></i>
           </a>
         </div>
       </div>
-
-      <!-- 転載キャラリスト -->
-      <div class="mt-4 pt-1">
-        <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3">
-          <i class="ph ph-list-bullets text-blue-500 text-sm"></i>
-          <span>現在転載中のキャラクター・制作者一覧:</span>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-          <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60 shadow-xs">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <div class="text-xs">
-              <span class="font-bold text-slate-900 dark:text-slate-100">masquer氏</span>
-              <span class="text-slate-500 dark:text-slate-400 text-[11px] block">全制作物</span>
-            </div>
-          </div>
-          <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60 shadow-xs">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <div class="text-xs">
-              <span class="font-bold text-slate-900 dark:text-slate-100">R_R_K氏</span>
-              <span class="text-slate-500 dark:text-slate-400 text-[11px] block">全制作物</span>
-            </div>
-          </div>
-          <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60 shadow-xs">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <div class="text-xs">
-              <span class="font-bold text-slate-900 dark:text-slate-100">SABA氏</span>
-              <span class="text-slate-500 dark:text-slate-400 text-[11px] block">全制作物</span>
-            </div>
-          </div>
-          <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60 shadow-xs">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <div class="text-xs">
-              <span class="font-bold text-slate-900 dark:text-slate-100">Graf_Zeppelin氏</span>
-              <span class="text-slate-500 dark:text-slate-400 text-[11px] block">全制作物</span>
-            </div>
-          </div>
-          <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60 shadow-xs">
-            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-            <div class="text-xs">
-              <span class="font-bold text-slate-900 dark:text-slate-100">アロイ氏</span>
-              <span class="text-slate-500 dark:text-slate-400 text-[11px] block">一部キャラ (禁止明言除く)</span>
-            </div>
-          </div>
-          <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60 shadow-xs">
-            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-            <div class="text-xs">
-              <span class="font-bold text-slate-900 dark:text-slate-100">608氏</span>
-              <span class="text-slate-500 dark:text-slate-400 text-[11px] block">一部キャラ</span>
-            </div>
-          </div>
-          <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60 shadow-xs">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <div class="text-xs">
-              <span class="font-bold text-slate-900 dark:text-slate-100">hanma氏</span>
-              <span class="text-slate-500 dark:text-slate-400 text-[11px] block">全公開物 (転載含む)</span>
-            </div>
-          </div>
-          <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60 shadow-xs">
-            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-            <div class="text-xs">
-              <span class="font-bold text-slate-900 dark:text-slate-100">marancv氏</span>
-              <span class="text-slate-500 dark:text-slate-400 text-[11px] block">god vega (神ベガ)</span>
-            </div>
-          </div>
-        </div>
-      </div>
     </section>
 
-    <!-- Quick Group Pill Filters -->
-    <section aria-label="クイックフィルター" class="flex flex-wrap items-center gap-2">
+    <!-- Quick Group Pill Filters (getuploader用) -->
+    <section id="uploaderQuickFilters" aria-label="クイックフィルター" class="flex flex-wrap items-center gap-2">
       <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-1">クイック一覧:</span>
       <button type="button" data-group-pill="" class="group-pill active px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm cursor-pointer bg-blue-600 text-white shadow-blue-500/25">
         すべて表示
@@ -242,15 +187,14 @@
           </div>
         </div>
 
-        <!-- Reset Button -->
         <button id="resetFilters" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all cursor-pointer">
           <i class="ph ph-arrow-counter-clockwise"></i> リセット
         </button>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-        <!-- Keyword Search with Clear Button -->
-        <div class="md:col-span-6 space-y-1.5">
+        <!-- Keyword Search -->
+        <div id="searchContainerCol" class="md:col-span-6 space-y-1.5">
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider" for="search">
             キーワード検索
           </label>
@@ -264,16 +208,15 @@
               placeholder="ファイル名・コメント・ページ名で検索..."
               class="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-950/50 text-slate-900 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
             >
-            <!-- Clear Input Button -->
             <button id="clearSearch" type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors hidden" title="クリア">
               <i class="ph ph-x-circle text-base"></i>
             </button>
           </div>
         </div>
 
-        <!-- Group Select -->
-        <div class="md:col-span-3 space-y-1.5">
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider" for="group">
+        <!-- Group / Folder Select -->
+        <div id="groupSelectCol" class="md:col-span-3 space-y-1.5">
+          <label id="groupLabel" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider" for="group">
             一覧を選択
           </label>
           <div class="relative">
@@ -292,8 +235,8 @@
           </div>
         </div>
 
-        <!-- Page Select -->
-        <div class="md:col-span-3 space-y-1.5">
+        <!-- Page Select (getuploader用) -->
+        <div id="pageSelectCol" class="md:col-span-3 space-y-1.5">
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider" for="page">
             ページを選択
           </label>
@@ -316,46 +259,28 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
       <div class="flex items-center gap-2">
         <span class="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse"></span>
-        <h3 class="text-base font-bold text-slate-900 dark:text-white">検索結果</h3>
+        <h3 id="tableTitle" class="text-base font-bold text-slate-900 dark:text-white">検索結果</h3>
       </div>
       <div id="status" class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2" aria-live="polite">
-        CSVデータを読み込み中...
+        データを読み込み中...
       </div>
     </div>
 
     <!-- Data Table Container -->
     <div class="glass-card bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[1050px]">
+        <table class="w-full text-left border-collapse min-w-[950px]">
           <thead>
-            <tr class="bg-slate-100/90 dark:bg-slate-800/90 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs uppercase tracking-wider font-semibold">
-              <th id="thGroup" class="group-column px-5 py-4 w-48">一覧</th>
-              <th class="px-5 py-4 w-56">ページ</th>
-              <th class="px-5 py-4 w-80">ファイル名</th>
-              <th class="px-5 py-4">コメント</th>
-              <th
-                id="dateSort"
-                class="px-5 py-4 w-44 cursor-pointer select-none hover:bg-slate-200/70 dark:hover:bg-slate-700/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                aria-sort="descending"
-                tabindex="0"
-                title="クリックで日時の昇順・降順を切り替え"
-              >
-                <div class="flex items-center justify-between gap-2">
-                  <span>日時</span>
-                  <span id="dateSortIcon" class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-bold transition-transform">
-                    <i class="ph ph-sort-descending text-sm"></i>
-                  </span>
-                </div>
-              </th>
+            <tr id="tableHeadRow" class="bg-slate-100/90 dark:bg-slate-800/90 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs uppercase tracking-wider font-semibold">
+              <!-- 動的生成 -->
             </tr>
           </thead>
           <tbody id="rows" class="divide-y divide-slate-100 dark:divide-slate-800/60 text-sm">
-            <!-- Skeleton Loader Rows -->
             <tr class="skeleton-loader">
               <td colspan="5" class="px-6 py-12">
                 <div class="flex flex-col items-center justify-center gap-3">
                   <div class="w-10 h-10 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
-                  <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">CSVアーカイブデータを読み込んでいます...</p>
+                  <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">データを読み込んでいます...</p>
                 </div>
               </td>
             </tr>
@@ -376,7 +301,7 @@
   <!-- Footer -->
   <footer class="mt-16 py-8 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <p>© getuploader Data Archive Viewer. Crafted with high-end dashboard aesthetics.</p>
+      <p>© MUGEN Archive Viewer. Crafted with high-end dashboard aesthetics.</p>
       <div class="flex items-center gap-4">
         <span class="flex items-center gap-1.5"><i class="ph ph-shield-check text-blue-500"></i> Secure Client Archive</span>
       </div>
@@ -387,22 +312,35 @@
   <script>
     "use strict";
 
-    let allItems = [];
+    let activeTab = "getuploader"; // デフォルトは getuploader
+
+    let uploaderItems = [];
+    let hachimanItems = [];
+
     let currentFiltered = [];
     let displayedCount = 0;
     const PAGE_CHUNK_SIZE = 150;
 
     let dateSortOrder = "desc";
 
+    // DOM Elements
+    const tabGetuploader = document.getElementById("tabGetuploader");
+    const tabHachiman = document.getElementById("tabHachiman");
+    const hachimanBadgeCount = document.getElementById("hachimanBadgeCount");
+    const hachimanBanner = document.getElementById("hachimanBanner");
+    const uploaderQuickFilters = document.getElementById("uploaderQuickFilters");
     const search = document.getElementById("search");
     const clearSearchBtn = document.getElementById("clearSearch");
+    const searchContainerCol = document.getElementById("searchContainerCol");
+    const groupSelectCol = document.getElementById("groupSelectCol");
+    const pageSelectCol = document.getElementById("pageSelectCol");
+    const groupLabel = document.getElementById("groupLabel");
     const group = document.getElementById("group");
     const page = document.getElementById("page");
     const statusEl = document.getElementById("status");
+    const tableTitle = document.getElementById("tableTitle");
+    const tableHeadRow = document.getElementById("tableHeadRow");
     const tbody = document.getElementById("rows");
-    const thGroup = document.getElementById("thGroup");
-    const dateSort = document.getElementById("dateSort");
-    const dateSortIcon = document.getElementById("dateSortIcon");
     const themeToggle = document.getElementById("themeToggle");
     const themeIcon = document.getElementById("themeIcon");
     const themeText = document.getElementById("themeText");
@@ -424,7 +362,6 @@
     function initTheme() {
       const savedTheme = localStorage.getItem("theme");
       const isDark = savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches);
-      
       if (isDark) {
         document.documentElement.classList.add("dark");
         themeIcon.className = "ph ph-sun text-base";
@@ -459,14 +396,13 @@
       toastIcon.className = `ph ${iconClass} text-lg ${iconColor}`;
       toast.classList.remove("translate-y-24", "opacity-0");
       toast.classList.add("translate-y-0", "opacity-100");
-      
       toastTimeout = setTimeout(() => {
         toast.classList.remove("translate-y-0", "opacity-100");
         toast.classList.add("translate-y-24", "opacity-0");
       }, 3000);
     }
 
-    function debounce(fn, delay = 250) {
+    function debounce(fn, delay = 200) {
       let timer;
       return function (...args) {
         clearTimeout(timer);
@@ -510,14 +446,11 @@
           }
         }
       }
-
       if (field !== "" || row.length > 0) {
         row.push(field);
         rows.push(row);
       }
-
       if (rows.length === 0) return [];
-
       const headers = rows.shift().map(h => h.trim());
       return rows
         .filter(r => r.some(v => v.trim() !== ""))
@@ -541,33 +474,8 @@
       if (yy.length === 2) {
         year = year >= 70 ? 1900 + year : 2000 + year;
       }
-      const month = Number(mm);
-      const day = Number(dd);
-      const hour = Number(hh);
-      const minute = Number(min);
-
-      if (month < 1 || month > 12 || day < 1 || day > 31 || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-        return null;
-      }
-      return new Date(year, month - 1, day, hour, minute).getTime();
+      return new Date(year, Number(mm) - 1, Number(dd), Number(hh), Number(min)).getTime();
     }
-
-    function toggleDateSort() {
-      dateSortOrder = dateSortOrder === "desc" ? "asc" : "desc";
-      dateSortIcon.innerHTML = dateSortOrder === "desc" 
-        ? '<i class="ph ph-sort-descending text-sm"></i>' 
-        : '<i class="ph ph-sort-ascending text-sm"></i>';
-      dateSort.setAttribute("aria-sort", dateSortOrder === "desc" ? "descending" : "ascending");
-      render();
-    }
-
-    dateSort.addEventListener("click", toggleDateSort);
-    dateSort.addEventListener("keydown", event => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        toggleDateSort();
-      }
-    });
 
     function getPageNumber(name) {
       const match = String(name).match(/(\d+)\s*(?:\||$)/);
@@ -587,19 +495,119 @@
       return a.localeCompare(b, "ja");
     }
 
+    function setupHeader() {
+      tableHeadRow.replaceChildren();
+
+      if (activeTab === "getuploader") {
+        const showGroupCol = !group.value;
+        if (showGroupCol) {
+          const th1 = document.createElement("th");
+          th1.className = "px-5 py-4 w-48";
+          th1.textContent = "一覧";
+          tableHeadRow.appendChild(th1);
+        }
+
+        const th2 = document.createElement("th");
+        th2.className = "px-5 py-4 w-52";
+        th2.textContent = "ページ";
+        tableHeadRow.appendChild(th2);
+
+        const th3 = document.createElement("th");
+        th3.className = "px-5 py-4 w-80";
+        th3.textContent = "ファイル名";
+        tableHeadRow.appendChild(th3);
+
+        const th4 = document.createElement("th");
+        th4.className = "px-5 py-4";
+        th4.textContent = "コメント";
+        tableHeadRow.appendChild(th4);
+
+        const th5 = document.createElement("th");
+        th5.className = "px-5 py-4 w-44 cursor-pointer select-none hover:bg-slate-200/70 dark:hover:bg-slate-700/70 transition-colors";
+        th5.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <span>日時</span>
+            <span class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-bold">
+              <i class="ph ${dateSortOrder === 'desc' ? 'ph-sort-descending' : 'ph-sort-ascending'} text-sm"></i>
+            </span>
+          </div>
+        `;
+        th5.addEventListener("click", () => {
+          dateSortOrder = dateSortOrder === "desc" ? "asc" : "desc";
+          setupHeader();
+          render();
+        });
+        tableHeadRow.appendChild(th5);
+
+      } else {
+        // はちまんブログ転載データ（共有設定結果列は除外）
+        const th1 = document.createElement("th");
+        th1.className = "px-5 py-4 w-60";
+        th1.textContent = "制作者 / フォルダ名";
+        tableHeadRow.appendChild(th1);
+
+        const th2 = document.createElement("th");
+        th2.className = "px-5 py-4";
+        th2.textContent = "ファイル名 (Google Driveリンク)";
+        tableHeadRow.appendChild(th2);
+
+        const th3 = document.createElement("th");
+        th3.className = "px-5 py-4 w-36 text-right";
+        th3.textContent = "操作";
+        tableHeadRow.appendChild(th3);
+      }
+    }
+
+    function updateGroupOptions() {
+      const prevVal = group.value;
+      group.replaceChildren();
+
+      if (activeTab === "getuploader") {
+        groupLabel.textContent = "一覧を選択";
+        const allOpt = document.createElement("option");
+        allOpt.value = "";
+        allOpt.textContent = "すべての一覧";
+        group.appendChild(allOpt);
+
+        groupOrder.forEach(g => {
+          const opt = document.createElement("option");
+          opt.value = g;
+          opt.textContent = g;
+          group.appendChild(opt);
+        });
+        group.value = groupOrder.includes(prevVal) ? prevVal : "";
+      } else {
+        groupLabel.textContent = "制作者を選択";
+        const allOpt = document.createElement("option");
+        allOpt.value = "";
+        allOpt.textContent = "すべての制作者";
+        group.appendChild(allOpt);
+
+        const authors = [...new Set(hachimanItems.map(x => x.folder))].sort((a,b) => a.localeCompare(b, "ja"));
+        authors.forEach(a => {
+          const opt = document.createElement("option");
+          opt.value = a;
+          opt.textContent = a;
+          group.appendChild(opt);
+        });
+        group.value = authors.includes(prevVal) ? prevVal : "";
+      }
+    }
+
     function updatePages() {
+      if (activeTab !== "getuploader") return;
       const selectedGroup = group.value;
       const previousPage = page.value;
 
       const pages = [...new Set(
-        allItems
+        uploaderItems
           .filter(x => !selectedGroup || x.group === selectedGroup)
           .map(x => x.page || "")
           .filter(Boolean)
       )].sort((a, b) => {
         if (!selectedGroup) {
-          const groupA = groupOrder.findIndex(g => allItems.some(x => x.group === g && x.page === a));
-          const groupB = groupOrder.findIndex(g => allItems.some(x => x.group === g && x.page === b));
+          const groupA = groupOrder.findIndex(g => uploaderItems.some(x => x.group === g && x.page === a));
+          const groupB = groupOrder.findIndex(g => uploaderItems.some(x => x.group === g && x.page === b));
           if (groupA !== groupB) {
             return (groupA === -1 ? Infinity : groupA) - (groupB === -1 ? Infinity : groupB);
           }
@@ -619,31 +627,248 @@
         option.textContent = pageName;
         page.appendChild(option);
       }
-
       page.value = pages.includes(previousPage) ? previousPage : "";
     }
 
-    function updateGroupPillsUI() {
-      const currentGroup = group.value;
-      groupPills.forEach(pill => {
-        const pillGroup = pill.getAttribute("data-group-pill");
-        if (pillGroup === currentGroup) {
-          pill.className = "group-pill active px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm cursor-pointer bg-blue-600 text-white shadow-blue-500/25";
-        } else {
-          pill.className = "group-pill px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm cursor-pointer bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-blue-500/50 hover:bg-slate-50 dark:hover:bg-slate-800";
-        }
-      });
+    function switchTab(tab) {
+      activeTab = tab;
+      search.value = "";
+      clearSearchBtn.classList.add("hidden");
+
+      if (tab === "getuploader") {
+        tabGetuploader.className = "tab-btn active pb-3 px-3 sm:px-4 text-sm sm:text-base font-bold flex items-center gap-2 border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 transition-colors";
+        tabHachiman.className = "tab-btn pb-3 px-3 sm:px-4 text-sm sm:text-base font-medium flex items-center gap-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors";
+        
+        uploaderQuickFilters.classList.remove("hidden");
+        hachimanBanner.classList.add("hidden");
+        pageSelectCol.classList.remove("hidden");
+        searchContainerCol.className = "md:col-span-6 space-y-1.5";
+        groupSelectCol.className = "md:col-span-3 space-y-1.5";
+        tableTitle.textContent = "getuploader 検索結果";
+
+        updateGroupOptions();
+        updatePages();
+      } else {
+        tabHachiman.className = "tab-btn active pb-3 px-3 sm:px-4 text-sm sm:text-base font-bold flex items-center gap-2 border-b-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 transition-colors";
+        tabGetuploader.className = "tab-btn pb-3 px-3 sm:px-4 text-sm sm:text-base font-medium flex items-center gap-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors";
+        
+        uploaderQuickFilters.classList.add("hidden");
+        hachimanBanner.classList.remove("hidden");
+        pageSelectCol.classList.add("hidden");
+        searchContainerCol.className = "md:col-span-8 space-y-1.5";
+        groupSelectCol.className = "md:col-span-4 space-y-1.5";
+        tableTitle.textContent = "転載アーカイブ 検索結果";
+
+        updateGroupOptions();
+      }
+
+      setupHeader();
+      render();
     }
 
-    groupPills.forEach(pill => {
-      pill.addEventListener("click", () => {
-        const targetGroup = pill.getAttribute("data-group-pill");
-        group.value = targetGroup;
-        updatePages();
-        updateGroupPillsUI();
-        render();
-        showToast(targetGroup ? `「${targetGroup}」に絞り込みました` : "すべての一覧を表示中", "ph-funnel", "text-blue-400");
-      });
+    tabGetuploader.addEventListener("click", () => switchTab("getuploader"));
+    tabHachiman.addEventListener("click", () => switchTab("hachiman"));
+
+    function appendUploaderRows(items, showGroupCol) {
+      const frag = document.createDocumentFragment();
+      for (const x of items) {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-blue-50/50 dark:hover:bg-slate-800/50 transition-colors animate-fade-in";
+
+        if (showGroupCol) {
+          const groupTd = document.createElement("td");
+          groupTd.className = "px-5 py-3.5 text-slate-700 dark:text-slate-300 font-medium";
+          groupTd.textContent = x.group || "";
+          tr.appendChild(groupTd);
+        }
+
+        const pageTd = document.createElement("td");
+        pageTd.className = "px-5 py-3.5 text-slate-700 dark:text-slate-300 font-medium";
+        pageTd.textContent = x.page || "";
+        tr.appendChild(pageTd);
+
+        const nameTd = document.createElement("td");
+        nameTd.className = "px-5 py-3.5";
+        if (x.url) {
+          const a = document.createElement("a");
+          a.className = "inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold hover:underline group/link";
+          a.href = x.url;
+          a.textContent = x.name || x.url;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          const icon = document.createElement("i");
+          icon.className = "ph ph-arrow-square-out text-xs opacity-70 group-hover/link:opacity-100 transition-opacity";
+          a.appendChild(icon);
+          nameTd.appendChild(a);
+        } else {
+          nameTd.textContent = x.name || "";
+          nameTd.className += " text-slate-700 dark:text-slate-300";
+        }
+        tr.appendChild(nameTd);
+
+        const commentTd = document.createElement("td");
+        commentTd.className = "px-5 py-3.5 text-slate-600 dark:text-slate-400 whitespace-pre-wrap leading-relaxed";
+        commentTd.textContent = x.comment || "";
+        tr.appendChild(commentTd);
+
+        const dateTd = document.createElement("td");
+        dateTd.className = "px-5 py-3.5 text-slate-500 dark:text-slate-400 font-mono text-xs whitespace-nowrap";
+        dateTd.textContent = x.date || "";
+        tr.appendChild(dateTd);
+
+        frag.appendChild(tr);
+      }
+      tbody.appendChild(frag);
+    }
+
+    function appendHachimanRows(items) {
+      const frag = document.createDocumentFragment();
+      for (const x of items) {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-emerald-50/50 dark:hover:bg-slate-800/50 transition-colors animate-fade-in";
+
+        // 制作者 / フォルダ名
+        const folderTd = document.createElement("td");
+        folderTd.className = "px-5 py-3.5 font-bold text-slate-900 dark:text-slate-100";
+        const folderBadge = document.createElement("span");
+        folderBadge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs";
+        folderBadge.innerHTML = `<i class="ph ph-user text-blue-500"></i> ${x.folder}`;
+        folderTd.appendChild(folderBadge);
+        tr.appendChild(folderTd);
+
+        // ファイル名
+        const nameTd = document.createElement("td");
+        nameTd.className = "px-5 py-3.5 font-medium";
+        const a = document.createElement("a");
+        a.className = "inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-semibold hover:underline group/link";
+        a.href = x.url;
+        a.textContent = x.name;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        const icon = document.createElement("i");
+        icon.className = "ph ph-arrow-square-out text-xs opacity-70 group-hover/link:opacity-100 transition-opacity";
+        a.appendChild(icon);
+        nameTd.appendChild(a);
+        tr.appendChild(nameTd);
+
+        // 操作ボタン
+        const actTd = document.createElement("td");
+        actTd.className = "px-5 py-3.5 text-right";
+        const dlBtn = document.createElement("a");
+        dlBtn.href = x.url;
+        dlBtn.target = "_blank";
+        dlBtn.rel = "noopener noreferrer";
+        dlBtn.className = "inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-600 hover:text-white dark:bg-slate-800 dark:hover:bg-emerald-600 text-slate-700 dark:text-slate-300 text-xs font-semibold transition-all shadow-xs";
+        dlBtn.innerHTML = `<i class="ph ph-download-simple"></i> 開く`;
+        actTd.appendChild(dlBtn);
+        tr.appendChild(actTd);
+
+        frag.appendChild(tr);
+      }
+      tbody.appendChild(frag);
+    }
+
+    function showEmptyMessage(message) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = activeTab === "getuploader" ? (group.value ? 4 : 5) : 3;
+      td.className = "px-6 py-16 text-center text-slate-400 dark:text-slate-500 animate-fade-in";
+      
+      const div = document.createElement("div");
+      div.className = "flex flex-col items-center justify-center gap-2";
+      div.innerHTML = `
+        <i class="ph ph-folder-open text-3xl text-slate-300 dark:text-slate-600"></i>
+        <p class="text-sm font-medium">${message}</p>
+      `;
+      td.appendChild(div);
+      tr.appendChild(td);
+      tbody.replaceChildren(tr);
+      loadMoreContainer.classList.add("hidden");
+    }
+
+    function render() {
+      const q = search.value.trim().toLocaleLowerCase();
+      const selectedGroup = group.value;
+
+      if (activeTab === "getuploader") {
+        const selectedPage = page.value;
+        currentFiltered = uploaderItems.filter(x => {
+          const matchesGroup = !selectedGroup || x.group === selectedGroup;
+          const matchesPage = !selectedPage || x.page === selectedPage;
+          const matchesSearch = [x.name, x.comment, x.page, x.group].some(v =>
+            String(v || "").toLocaleLowerCase().includes(q)
+          );
+          return matchesGroup && matchesPage && matchesSearch;
+        });
+
+        currentFiltered.sort((a, b) => {
+          const dateA = parseDate(a.date);
+          const dateB = parseDate(b.date);
+          if (dateA === null && dateB === null) return 0;
+          if (dateA === null) return 1;
+          if (dateB === null) return -1;
+          return dateSortOrder === "asc" ? dateA - dateB : dateB - dateA;
+        });
+      } else {
+        // はちまんブログ転載データ
+        currentFiltered = hachimanItems.filter(x => {
+          const matchesFolder = !selectedGroup || x.folder === selectedGroup;
+          const matchesSearch = [x.name, x.folder].some(v =>
+            String(v || "").toLocaleLowerCase().includes(q)
+          );
+          return matchesFolder && matchesSearch;
+        });
+      }
+
+      // Status Badge
+      statusEl.replaceChildren();
+      const badge = document.createElement("span");
+      const totalCount = activeTab === "getuploader" ? uploaderItems.length : hachimanItems.length;
+      badge.className = `px-2.5 py-1 rounded-lg ${activeTab === 'getuploader' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'} font-bold font-mono text-xs`;
+      badge.textContent = currentFiltered.length.toLocaleString();
+
+      statusEl.appendChild(badge);
+      statusEl.appendChild(document.createTextNode(` 件ヒット (全 ${totalCount.toLocaleString()} 件)`));
+
+      tbody.replaceChildren();
+      displayedCount = 0;
+
+      if (currentFiltered.length === 0) {
+        showEmptyMessage(totalCount === 0 ? "表示できるデータがありません。" : "条件に一致するファイルはありません。");
+        return;
+      }
+
+      const nextBatch = currentFiltered.slice(0, PAGE_CHUNK_SIZE);
+      displayedCount = nextBatch.length;
+
+      if (activeTab === "getuploader") {
+        appendUploaderRows(nextBatch, !group.value);
+      } else {
+        appendHachimanRows(nextBatch);
+      }
+
+      if (displayedCount < currentFiltered.length) {
+        loadMoreContainer.classList.remove("hidden");
+        loadMoreBtn.textContent = `さらに読み込む (残り ${(currentFiltered.length - displayedCount).toLocaleString()} 件)`;
+      } else {
+        loadMoreContainer.classList.add("hidden");
+      }
+    }
+
+    loadMoreBtn.addEventListener("click", () => {
+      const nextBatch = currentFiltered.slice(displayedCount, displayedCount + PAGE_CHUNK_SIZE);
+      displayedCount += nextBatch.length;
+      if (activeTab === "getuploader") {
+        appendUploaderRows(nextBatch, !group.value);
+      } else {
+        appendHachimanRows(nextBatch);
+      }
+
+      if (displayedCount < currentFiltered.length) {
+        loadMoreBtn.textContent = `さらに読み込む (残り ${(currentFiltered.length - displayedCount).toLocaleString()} 件)`;
+      } else {
+        loadMoreContainer.classList.add("hidden");
+      }
     });
 
     const debouncedRender = debounce(render, 200);
@@ -664,193 +889,73 @@
       showToast("キーワードをクリアしました", "ph-x-circle", "text-slate-400");
     });
 
-    resetFiltersBtn.addEventListener("click", () => {
-      search.value = "";
-      group.value = "";
-      clearSearchBtn.classList.add("hidden");
-      updatePages();
-      updateGroupPillsUI();
-      render();
-      showToast("すべての検索条件をリセットしました", "ph-arrow-counter-clockwise", "text-blue-400");
-    });
-
-    function showEmptyMessage(message) {
-      const tr = document.createElement("tr");
-      const td = document.createElement("td");
-      td.colSpan = group.value ? 4 : 5;
-      td.className = "px-6 py-16 text-center text-slate-400 dark:text-slate-500 animate-fade-in";
-      
-      const div = document.createElement("div");
-      div.className = "flex flex-col items-center justify-center gap-2";
-      div.innerHTML = `
-        <i class="ph ph-folder-open text-3xl text-slate-300 dark:text-slate-600"></i>
-        <p class="text-sm font-medium">${message}</p>
-      `;
-      td.appendChild(div);
-      tr.appendChild(td);
-      tbody.replaceChildren(tr);
-      loadMoreContainer.classList.add("hidden");
-    }
-
-    function appendRows(items, showGroupColumn) {
-      const frag = document.createDocumentFragment();
-
-      for (const x of items) {
-        const tr = document.createElement("tr");
-        tr.className = "hover:bg-blue-50/50 dark:hover:bg-slate-800/50 transition-colors animate-fade-in";
-
-        if (showGroupColumn) {
-          const groupTd = document.createElement("td");
-          groupTd.className = "group-column px-5 py-3.5 text-slate-700 dark:text-slate-300 font-medium";
-          groupTd.textContent = x.group || "";
-          tr.appendChild(groupTd);
-        }
-
-        const pageTd = document.createElement("td");
-        pageTd.className = "px-5 py-3.5 text-slate-700 dark:text-slate-300 font-medium";
-        pageTd.textContent = x.page || "";
-        tr.appendChild(pageTd);
-
-        const nameTd = document.createElement("td");
-        nameTd.className = "px-5 py-3.5";
-        if (x.url) {
-          const a = document.createElement("a");
-          a.className = "inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold hover:underline group/link";
-          a.href = x.url;
-          a.textContent = x.name || x.url;
-          a.target = "_blank";
-          a.rel = "noopener noreferrer";
-          
-          const icon = document.createElement("i");
-          icon.className = "ph ph-arrow-square-out text-xs opacity-70 group-hover/link:opacity-100 transition-opacity";
-          a.appendChild(icon);
-
-          nameTd.appendChild(a);
-        } else {
-          nameTd.textContent = x.name || "";
-          nameTd.className += " text-slate-700 dark:text-slate-300";
-        }
-        tr.appendChild(nameTd);
-
-        const commentTd = document.createElement("td");
-        commentTd.className = "px-5 py-3.5 text-slate-600 dark:text-slate-400 whitespace-pre-wrap leading-relaxed";
-        commentTd.textContent = x.comment || "";
-        tr.appendChild(commentTd);
-
-        const dateTd = document.createElement("td");
-        dateTd.className = "px-5 py-3.5 text-slate-500 dark:text-slate-400 font-mono text-xs whitespace-nowrap";
-        dateTd.textContent = x.date || "";
-        tr.appendChild(dateTd);
-
-        frag.appendChild(tr);
-      }
-
-      tbody.appendChild(frag);
-    }
-
-    function render() {
-      const q = search.value.trim().toLocaleLowerCase();
-      const selectedGroup = group.value;
-      const selectedPage = page.value;
-      const showGroupColumn = !selectedGroup;
-
-      if (showGroupColumn) {
-        thGroup.classList.remove("hidden");
-      } else {
-        thGroup.classList.add("hidden");
-      }
-
-      currentFiltered = allItems.filter(x => {
-        const matchesGroup = !selectedGroup || x.group === selectedGroup;
-        const matchesPage = !selectedPage || x.page === selectedPage;
-        const matchesSearch = [x.name, x.comment, x.page, x.group].some(v =>
-          String(v || "").toLocaleLowerCase().includes(q)
-        );
-        return matchesGroup && matchesPage && matchesSearch;
-      });
-
-      currentFiltered.sort((a, b) => {
-        const dateA = parseDate(a.date);
-        const dateB = parseDate(b.date);
-        if (dateA === null && dateB === null) return 0;
-        if (dateA === null) return 1;
-        if (dateB === null) return -1;
-        return dateSortOrder === "asc" ? dateA - dateB : dateB - dateA;
-      });
-
-      statusEl.replaceChildren();
-      const badge = document.createElement("span");
-      badge.className = "px-2.5 py-1 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold font-mono text-xs";
-      badge.textContent = currentFiltered.length.toLocaleString();
-
-      statusEl.appendChild(badge);
-      statusEl.appendChild(document.createTextNode(` 件ヒット (全 ${allItems.length.toLocaleString()} 件)`));
-
-      tbody.replaceChildren();
-      displayedCount = 0;
-
-      if (currentFiltered.length === 0) {
-        showEmptyMessage(allItems.length === 0 ? "表示できるデータがありません。" : "条件に一致するファイルはありません。");
-        return;
-      }
-
-      const nextBatch = currentFiltered.slice(0, PAGE_CHUNK_SIZE);
-      displayedCount = nextBatch.length;
-      appendRows(nextBatch, showGroupColumn);
-
-      if (displayedCount < currentFiltered.length) {
-        loadMoreContainer.classList.remove("hidden");
-        loadMoreBtn.textContent = `さらに読み込む (残り ${(currentFiltered.length - displayedCount).toLocaleString()} 件)`;
-      } else {
-        loadMoreContainer.classList.add("hidden");
-      }
-    }
-
-    loadMoreBtn.addEventListener("click", () => {
-      const showGroupColumn = !group.value;
-      const nextBatch = currentFiltered.slice(displayedCount, displayedCount + PAGE_CHUNK_SIZE);
-      displayedCount += nextBatch.length;
-      appendRows(nextBatch, showGroupColumn);
-
-      if (displayedCount < currentFiltered.length) {
-        loadMoreBtn.textContent = `さらに読み込む (残り ${(currentFiltered.length - displayedCount).toLocaleString()} 件)`;
-      } else {
-        loadMoreContainer.classList.add("hidden");
-      }
-    });
-
     group.addEventListener("change", () => {
-      updatePages();
-      updateGroupPillsUI();
+      if (activeTab === "getuploader") {
+        setupHeader();
+        updatePages();
+        updateGroupPillsUI();
+      }
       render();
     });
 
     page.addEventListener("change", render);
 
-    fetch("./loader.csv")
-      .then(response => {
-        if (!response.ok) throw new Error("loader.csv を取得できません");
-        return response.text();
+    function updateGroupPillsUI() {
+      const currentGroup = group.value;
+      groupPills.forEach(pill => {
+        const pillGroup = pill.getAttribute("data-group-pill");
+        if (pillGroup === currentGroup) {
+          pill.className = "group-pill active px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm cursor-pointer bg-blue-600 text-white shadow-blue-500/25";
+        } else {
+          pill.className = "group-pill px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm cursor-pointer bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-blue-500/50 hover:bg-slate-50 dark:hover:bg-slate-800";
+        }
+      });
+    }
+
+    groupPills.forEach(pill => {
+      pill.addEventListener("click", () => {
+        const targetGroup = pill.getAttribute("data-group-pill");
+        group.value = targetGroup;
+        setupHeader();
+        updatePages();
+        updateGroupPillsUI();
+        render();
+        showToast(targetGroup ? `「${targetGroup}」に絞り込みました` : "すべての一覧を表示中", "ph-funnel", "text-blue-400");
+      });
+    });
+
+    resetFiltersBtn.addEventListener("click", () => {
+      search.value = "";
+      group.value = "";
+      clearSearchBtn.classList.add("hidden");
+      if (activeTab === "getuploader") {
+        setupHeader();
+        updatePages();
+        updateGroupPillsUI();
+      }
+      render();
+      showToast("すべての検索条件をリセットしました", "ph-arrow-counter-clockwise", "text-blue-400");
+    });
+
+    // 初期化セットアップ
+    setupHeader();
+    updateGroupOptions();
+
+    // 2つのCSV（loader.csv, hachiman.csv）を並行して読み込み
+    Promise.allSettled([
+      fetch("./loader.csv").then(r => {
+        if (!r.ok) throw new Error("loader.csv取得不可");
+        return r.text();
+      }),
+      fetch("./hachiman.csv").then(r => {
+        if (!r.ok) throw new Error("hachiman.csv取得不可");
+        return r.text();
       })
-      .then(text => {
-        const data = parseCSV(text);
-        if (data.length === 0) {
-          allItems = [];
-          updatePages();
-          render();
-          heroStatsCount.textContent = "0 件";
-          return;
-        }
-
-        const requiredColumns = ["group", "page", "url", "name", "comment", "date"];
-        const headers = Object.keys(data[0]);
-        const missingColumns = requiredColumns.filter(key => !headers.includes(key));
-
-        if (missingColumns.length > 0) {
-          throw new Error("CSVの列名が不足しています: " + missingColumns.join(", "));
-        }
-
-        allItems = data.map(item => ({
+    ]).then(([resUploader, resHachiman]) => {
+      // 1. loader.csv 処理
+      if (resUploader.status === "fulfilled") {
+        const data = parseCSV(resUploader.value);
+        uploaderItems = data.map(item => ({
           group: item.group || "",
           page: item.page || "",
           url: item.url || "",
@@ -858,19 +963,35 @@
           comment: item.comment || "",
           date: item.date || ""
         }));
+      } else {
+        console.warn("loader.csv の読み込みに失敗しました:", resUploader.reason);
+      }
 
-        heroStatsCount.textContent = `${allItems.length.toLocaleString()} 件のアーカイブ`;
-        updatePages();
-        render();
-        showToast("CSVデータを正常に読み込みました", "ph-check-circle", "text-emerald-400");
-      })
-      .catch(error => {
-        statusEl.textContent = "データを読み込めませんでした。";
-        heroStatsCount.textContent = "読み込み失敗";
-        showEmptyMessage("loader.csv が同じフォルダにあるか、CSVの列名・形式が正しいか確認してください。");
-        console.error("CSV読み込みエラー:", error);
-        showToast("データの読み込みに失敗しました", "ph-warning-circle", "text-rose-400");
-      });
+      // 2. hachiman.csv 処理 (共有設定結果は取得しない)
+      if (resHachiman.status === "fulfilled") {
+        const data = parseCSV(resHachiman.value);
+        hachimanItems = data.map(item => ({
+          folder: item["フォルダ名"] || item.folder || "",
+          name: item["ファイル名"] || item.name || "",
+          url: item["公開リンク"] || item.url || ""
+        }));
+        hachimanBadgeCount.textContent = `${hachimanItems.length.toLocaleString()}件`;
+      } else {
+        hachimanBadgeCount.textContent = "未配置";
+        console.warn("hachiman.csv の読み込みに失敗しました:", resHachiman.reason);
+      }
+
+      // ヘッダースタッツ更新と初期描画
+      const totalAll = uploaderItems.length + hachimanItems.length;
+      heroStatsCount.textContent = totalAll > 0 ? `${totalAll.toLocaleString()} 件のアーカイブ` : "データなし";
+      
+      updatePages();
+      render();
+
+      if (uploaderItems.length > 0) {
+        showToast("アーカイブデータを読み込みました", "ph-check-circle", "text-emerald-400");
+      }
+    });
   </script>
 </body>
 </html>
