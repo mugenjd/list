@@ -1,8 +1,62 @@
 {
-  "updated_at": "2026-10-24T18:48:43.699454+00:00",
-  "site_count": 153,
-  "article_count": 739,
+  "updated_at": "2026-10-25T14:35:07.558841+00:00",
+  "site_count": 154,
+  "article_count": 740,
   "articles": [
+    {
+      "title": "Melty Blood Another 更新 他",
+      "url": "https://unknown37564.blog.jp/archives/55196431.html",
+      "site": "俺の人生=蛙鳴蝉噪",
+      "site_url": "https://unknown37564.blog.jp/",
+      "published": "2026-10-25T13:18:29+00:00",
+      "source": "RSS",
+      "id": "85f00e1f543c8090"
+    },
+    {
+      "title": "なんか来た、なんか見た、なんか勝った。",
+      "url": "https://seki-rou.hateblo.jp/entry/2026/10/25/221203",
+      "site": "seki-rouの謎の地下室",
+      "site_url": "https://seki-rou.hateblo.jp/",
+      "published": "2026-10-25T13:12:03+00:00",
+      "source": "RSS",
+      "id": "10397e2fd03e5012"
+    },
+    {
+      "title": "お知らせ",
+      "url": "https://bubbleisland.hatenablog.com/entry/2026/10/25/203431",
+      "site": "長閑な島の最果て",
+      "site_url": "https://bubbleisland.hatenablog.com/",
+      "published": "2026-10-25T11:34:31+00:00",
+      "source": "RSS",
+      "id": "88ebcee69d8e0b03"
+    },
+    {
+      "title": "闇アリス／更新版89.1",
+      "url": "https://bubbleisland.hatenablog.com/entry/2026/10/25/203205",
+      "site": "長閑な島の最果て",
+      "site_url": "https://bubbleisland.hatenablog.com/",
+      "published": "2026-10-25T11:32:05+00:00",
+      "source": "RSS",
+      "id": "5157b64947fef6b4"
+    },
+    {
+      "title": "uploaderサービス終了のお知らせ",
+      "url": "http://kamasetoyobanaide.blog24.fc2.com/blog-entry-2609.html",
+      "site": "かませの究極系",
+      "site_url": "http://kamasetoyobanaide.blog24.fc2.com/",
+      "published": "2026-10-25T11:00:00+00:00",
+      "source": "RSS",
+      "id": "43cb93ee89bfebbe"
+    },
+    {
+      "title": "【MUGEN】 きぼぜつSG ～反転する絶望、逆襲の希望～",
+      "url": "http://kamasetoyobanaide.blog24.fc2.com/blog-entry-2608.html",
+      "site": "かませの究極系",
+      "site_url": "http://kamasetoyobanaide.blog24.fc2.com/",
+      "published": "2026-10-25T11:00:00+00:00",
+      "source": "RSS",
+      "id": "ea4f3fe553a0c7d0"
+    },
     {
       "title": "転載物 追加",
       "url": "https://cirno193mugen.blog.fc2.com/blog-entry-7.html",
@@ -11,6 +65,15 @@
       "published": "2026-10-24T17:16:17+00:00",
       "source": "RSS",
       "id": "ec7114c71afefa20"
+    },
+    {
+      "title": "「SC東方シリーズ」の配布を始めました",
+      "url": "https://example.com/sunflower/entries/20261024.html",
+      "site": "太阳花厂",
+      "site_url": "https://ssssc-mugen-blog.netlify.app/",
+      "published": "2026-10-24T11:00:00+00:00",
+      "source": "RSS",
+      "id": "bd6318313c24f884"
     },
     {
       "title": "[ブルアカ]シミコさんの絆ランク95、ゴールが見えてきた",
@@ -409,15 +472,6 @@
       "id": "0e4a53dc188e8486"
     },
     {
-      "title": "来月はもしかしたら道化の一座対策がっつりいるかもしれない",
-      "url": "https://seki-rou.hateblo.jp/entry/2026/09/21/212518",
-      "site": "seki-rouの謎の地下室",
-      "site_url": "https://seki-rou.hateblo.jp/",
-      "published": "2026-09-21T12:25:18+00:00",
-      "source": "RSS",
-      "id": "478e8a0fc95a5ad3"
-    },
-    {
       "title": "【MUGEN】男なら拳ひとつで勝負せんかいトーナメント part2 & part3",
       "url": "https://nightofglory.blog.fc2.com/blog-entry-226.html",
       "site": "栄光なる夜の幻想世界",
@@ -454,15 +508,6 @@
       "id": "1b95d3546761d527"
     },
     {
-      "title": "Nintendo Direct 2026.9.9",
-      "url": "http://kamasetoyobanaide.blog24.fc2.com/blog-entry-2604.html",
-      "site": "かませの究極系",
-      "site_url": "http://kamasetoyobanaide.blog24.fc2.com/",
-      "published": "2026-09-13T10:00:00+00:00",
-      "source": "RSS",
-      "id": "10bed3fd8fd71607"
-    },
-    {
       "title": "マスター無界　公開",
       "url": "http://blog.livedoor.jp/dotzone/archives/48913500.html",
       "site": "立て札",
@@ -497,15 +542,6 @@
       "published": "2026-09-06T16:39:47+00:00",
       "source": "RSS",
       "id": "4b2cade0c9680e61"
-    },
-    {
-      "title": "【Mugen凶悪】202６年第４回神最上位テスト結果公開！",
-      "url": "http://kamasetoyobanaide.blog24.fc2.com/blog-entry-2603.html",
-      "site": "かませの究極系",
-      "site_url": "http://kamasetoyobanaide.blog24.fc2.com/",
-      "published": "2026-09-06T11:00:00+00:00",
-      "source": "RSS",
-      "id": "ba3d5c21b3e0e316"
     },
     {
       "title": "レッド更新",
@@ -569,15 +605,6 @@
       "published": "2026-08-24T11:00:08+00:00",
       "source": "RSS",
       "id": "d9a1cfcb2289221b"
-    },
-    {
-      "title": "Melty Blood Another更新",
-      "url": "https://unknown37564.blog.jp/archives/55193586.html",
-      "site": "俺の人生=蛙鳴蝉噪",
-      "site_url": "https://unknown37564.blog.jp/",
-      "published": "2026-08-23T13:46:36+00:00",
-      "source": "RSS",
-      "id": "58266a3c65d89f55"
     },
     {
       "title": "上位神A前後　仲間を集めて神ランク大会　part26",
@@ -1759,15 +1786,6 @@
       "id": "f39ae01a2736112d"
     },
     {
-      "title": "【MUGEN凶悪】2025神最上測試公開",
-      "url": "https://bubbleisland.hatenablog.com/entry/2025/08/17/202751",
-      "site": "長閑な島の最果て",
-      "site_url": "https://bubbleisland.hatenablog.com/",
-      "published": "2025-08-17T11:27:51+00:00",
-      "source": "RSS",
-      "id": "75402dcb53c4a085"
-    },
-    {
       "title": "【MUGEN凶悪】2025神最上検定公開",
       "url": "https://orhm5150jchanblog.blog.fc2.com/blog-entry-26.html",
       "site": "おりひめちゃんの短冊",
@@ -1829,15 +1847,6 @@
       "published": "2025-07-27T13:16:25+00:00",
       "source": "RSS",
       "id": "1b3fb153e776893b"
-    },
-    {
-      "title": "冬の子／更新版20",
-      "url": "https://bubbleisland.hatenablog.com/entry/2025/07/26/205438",
-      "site": "長閑な島の最果て",
-      "site_url": "https://bubbleisland.hatenablog.com/",
-      "published": "2025-07-26T11:54:38+00:00",
-      "source": "RSS",
-      "id": "007bb2792359c604"
     },
     {
       "title": "(個人的)狂ランク視点の凶悪攻撃ヤバさtier",
