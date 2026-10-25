@@ -20,6 +20,8 @@ from urllib.parse import urldefrag, urljoin, urlparse
 from bs4 import BeautifulSoup
 import feedparser
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 ROOT = Path(__file__).resolve().parent
 SITES_FILE = ROOT / "sites.txt"
@@ -28,24 +30,32 @@ OUTPUT_FILE = ROOT / "articles.json"
 RSS_OUTPUT_FILE = ROOT / "rss.xml"
 LOG_FILE = ROOT / "fetch-log.txt"
 
-# RSS配信用メタ情報
-SITE_BASE_URL = "https://ssssc-mugen-blog.netlify.app/"
-SITE_TITLE = "MUGENブログ新着記事一覧"
-SITE_DESCRIPTION = "登録ブログのRSS・新着記事集約フィード"
-
 MAX_PER_SITE = 5
 MAX_SCAN_PER_SITE = 100
 TIMEOUT = 18
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; MugenBlogArticleIndex/1.0; +https://github.com/)"
 }
+
 SESSION = requests.Session()
 SESSION.headers.update(HEADERS)
+retries = Retry(
+    total=2,
+    backoff_factor=0.5,
+    status_forcelist=[500, 502, 503, 504],
+    raise_on_status=False,
+)
+adapter = HTTPAdapter(max_retries=retries)
+SESSION.mount("http://", adapter)
+SESSION.mount("https://", adapter)
 
 
 def normalize_url(url: str) -> str:
     url = urldefrag(url.strip())[0]
-    return url.rstrip("/") if urlparse(url).path not in ("", "/") else url
+    p = urlparse(url)
+    if p.path not in ("", "/"):
+        url = url.rstrip("/")
+    return url
 
 
 def get_site_name(url: str) -> str:
@@ -61,7 +71,7 @@ def parse_date(value):
         if isinstance(value, time.struct_time):
             dt = datetime(*value[:6], tzinfo=timezone.utc)
         else:
-            dt = parsedate_to_datetime(value)
+            dt = parsedate_to_datetime(str(value))
             if dt.tzinfo is None:
                 dt = dt.replace(tzinfo=timezone.utc)
         return dt.astimezone(timezone.utc).isoformat()
@@ -76,7 +86,6 @@ def parse_date(value):
 
 
 def is_future_date(value, now=None):
-    """Return True only when a parseable publication date is later than now (UTC)."""
     if not value:
         return False
     try:
@@ -100,7 +109,6 @@ def fetch(url):
 
 
 def feed_candidates(site_url, homepage_html=None):
-    """Known feed paths plus autodiscovery links from HTML."""
     p = urlparse(site_url)
     origin = f"{p.scheme}://{p.netloc}"
     candidates = []
@@ -171,7 +179,7 @@ def parse_feed(feed_url, site_url):
             continue
         out.append({
             "title": BeautifulSoup(title, "html.parser").get_text(" ", strip=True),
-            "url": urljoin(feed_url, link),
+            "url": normalize_url(urljoin(feed_url, link)),
             "site": blog_name,
             "site_url": site_url,
             "published": date,
@@ -229,8 +237,7 @@ def parse_homepage(site_url):
         if scanned > MAX_SCAN_PER_SITE:
             break
         title = a.get_text(" ", strip=True)
-        href = urljoin(actual_home, a.get("href", ""))
-        href = normalize_url(href)
+        href = normalize_url(urljoin(actual_home, a.get("href", "")))
         if not looks_like_article(href, title, actual_home) or href in seen:
             continue
         if len(title) > 220:
@@ -245,10 +252,15 @@ def parse_homepage(site_url):
                 published = parse_date(time_tag.get("datetime") or time_tag.get_text(" ", strip=True))
             if not published:
                 text = container.get_text(" ", strip=True)
-                match = re.search(r"(20\d{2})[年/.-](\d{1,2})[月/.-](\d{1,2})", text)
+                match = re.search(r"(20\d{2})[年/.-](\d{1,2})[月/.-](\d{1,2})(?:\s*(\d{1,2}):(\d{1,2}))?", text)
                 if match:
                     try:
-                        dt = datetime(int(match.group(1)), int(match.group(2)), int(match.group(3)), tzinfo=timezone.utc)
+                        year = int(match.group(1))
+                        month = int(match.group(2))
+                        day = int(match.group(3))
+                        hour = int(match.group(4)) if match.group(4) else 0
+                        minute = int(match.group(5)) if match.group(5) else 0
+                        dt = datetime(year, month, day, hour, minute, tzinfo=timezone.utc)
                         published = dt.isoformat()
                     except ValueError:
                         pass
@@ -328,7 +340,7 @@ def parse_spreadsheet_csv(site_url, csv_url, display_name=""):
                 continue
             articles.append({
                 "title": BeautifulSoup(title, "html.parser").get_text(" ", strip=True),
-                "url": link,
+                "url": normalize_url(link),
                 "site": site_name,
                 "site_url": site_url,
                 "published": date,
@@ -344,10 +356,9 @@ def stable_id(item):
 
 
 def escape_xml(text: str) -> str:
-    """Escape XML special characters."""
+    text = html.unescape(str(text or ""))
     return (
-        str(text or "")
-        .replace("&", "&amp;")
+        text.replace("&", "&amp;")
         .replace("<", "&lt;")
         .replace(">", "&gt;")
         .replace('"', "&quot;")
@@ -356,7 +367,6 @@ def escape_xml(text: str) -> str:
 
 
 def generate_rss_xml(articles: list[dict], build_time: datetime) -> str:
-    """Generate RSS 2.0 XML string from articles."""
     items_xml = []
     for item in articles:
         title = escape_xml(item.get("title", ""))
@@ -375,7 +385,7 @@ def generate_rss_xml(articles: list[dict], build_time: datetime) -> str:
 
         description = f"ブログ: {site}"
         if source:
-            description += f" (取得方法: {source})"
+            description += f" (取得元: {source})"
 
         items_xml.append(
             f"""    <item>
@@ -391,14 +401,13 @@ def generate_rss_xml(articles: list[dict], build_time: datetime) -> str:
     items_block = "\n".join(items_xml)
 
     return f"""<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0">
   <channel>
-    <title>{escape_xml(SITE_TITLE)}</title>
-    <link>{escape_xml(SITE_BASE_URL)}</link>
-    <description>{escape_xml(SITE_DESCRIPTION)}</description>
+    <title>MUGENブログ新着記事一覧</title>
+    <link>./index.html</link>
+    <description>登録ブログの新着記事集約フィード</description>
     <language>ja</language>
     <lastBuildDate>{last_build}</lastBuildDate>
-    <atom:link href="{escape_xml(urljoin(SITE_BASE_URL, 'rss.xml'))}" rel="self" type="application/rss+xml" />
 {items_block}
   </channel>
 </rss>
@@ -406,13 +415,18 @@ def generate_rss_xml(articles: list[dict], build_time: datetime) -> str:
 
 
 def main():
+    if not SITES_FILE.exists():
+        print(f"Error: {SITES_FILE} not found.")
+        return
+
     sites = [
         line.strip()
-        for line in SITES_FILE.read_text(encoding="utf-8").splitlines()
+        for line in SITES_FILE.read_text(encoding="utf-8-sig").splitlines()
         if line.strip() and not line.strip().startswith("#")
     ]
     all_articles, log_lines = [], []
     spreadsheet_feeds = load_spreadsheet_feeds()
+
     normalized_sites = []
     for site in sites:
         site = site.strip()
@@ -432,7 +446,8 @@ def main():
             log_lines.append(f"FAIL SHEETS\t{site_url}\t{detail}")
 
     for i, site in enumerate(normalized_sites, 1):
-        if normalize_url(site) in spreadsheet_site_keys:
+        norm_site = normalize_url(site)
+        if norm_site in spreadsheet_site_keys:
             print(f"[{i}/{len(normalized_sites)}] {site}: handled via Google Sheets")
             continue
 
@@ -462,7 +477,7 @@ def main():
                 log_lines.append(f"FAIL\t{site}\tNo RSS entries or article links found")
 
         all_articles.extend(articles)
-        print(f"[{i}/{len(sites)}] {site}: {len(articles)} articles")
+        print(f"[{i}/{len(normalized_sites)}] {site}: {len(articles)} articles")
         time.sleep(0.25)
 
     now = datetime.now(timezone.utc)
@@ -470,7 +485,8 @@ def main():
     for item in all_articles:
         if is_future_date(item.get("published"), now):
             continue
-        per_site.setdefault(item.get("site_url") or item.get("site") or "", []).append(item)
+        site_key = item.get("site_url") or item.get("site") or ""
+        per_site.setdefault(site_key, []).append(item)
 
     limited_articles = []
     for site_items in per_site.values():
@@ -494,7 +510,6 @@ def main():
 
     items.sort(key=lambda x: x.get("published") or "", reverse=True)
 
-    # 1. JSON出力
     payload = {
         "updated_at": now.isoformat(),
         "site_count": len(normalized_sites),
@@ -503,13 +518,11 @@ def main():
     }
     OUTPUT_FILE.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    # 2. RSS (XML) 出力
     rss_xml_content = generate_rss_xml(items, now)
     RSS_OUTPUT_FILE.write_text(rss_xml_content, encoding="utf-8")
 
-    # 3. ログ出力
     LOG_FILE.write_text("\n".join(log_lines) + "\n", encoding="utf-8")
-    print(f"Done: {len(items)} unique articles from {len(sites)} sites (JSON & RSS saved)")
+    print(f"Done: {len(items)} unique articles from {len(normalized_sites)} sites (JSON & RSS saved)")
 
 
 if __name__ == "__main__":
