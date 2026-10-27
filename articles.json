@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-10-26T21:02:16.302258+00:00",
+  "updated_at": "2026-10-27T20:42:28.725912+00:00",
   "site_count": 154,
   "article_count": 740,
   "articles": [
+    {
+      "title": "[グラブル]無料チケから突然ヴェルサシアが出てきた話",
+      "url": "https://0saft.blog.fc2.com/blog-entry-12741.html",
+      "site": "ネームレスゼロ",
+      "site_url": "https://0saft.blog.fc2.com/",
+      "published": "2026-10-27T10:39:50+00:00",
+      "source": "RSS",
+      "id": "bb453f68a9de6c35"
+    },
+    {
+      "title": "蜜宵のファミリア ダンジョンMAP※蜜宵ボス詳細追記",
+      "url": "http://blog.livedoor.jp/yanmar195/archives/56002226.html",
+      "site": "鏡の四角立方体",
+      "site_url": "http://blog.livedoor.jp/yanmar195/",
+      "published": "2026-10-27T10:39:33+00:00",
+      "source": "RSS",
+      "id": "b7d67714b4ee0d06"
+    },
     {
       "title": "【ゆっくりRPG】蜜宵のファミリア最小勝利回数クリアpart9【難易度ノーマル】",
       "url": "http://blog.livedoor.jp/yanmar195/archives/56184810.html",
@@ -274,15 +292,6 @@
       "id": "3220a7f7a9df15cb"
     },
     {
-      "title": "[ブルアカ]大決戦 vsゲブラ「ゲブラが大決戦でやってきた地獄」",
-      "url": "https://0saft.blog.fc2.com/blog-entry-12736.html",
-      "site": "ネームレスゼロ",
-      "site_url": "https://0saft.blog.fc2.com/",
-      "published": "2026-10-20T12:35:31+00:00",
-      "source": "RSS",
-      "id": "56e363989f4d203d"
-    },
-    {
       "title": "削りタゲオンリー神ランク大会 OP",
       "url": "https://monsoon08.livedoor.blog/archives/31804758.html",
       "site": "気ままな風",
@@ -335,15 +344,6 @@
       "published": "2026-10-15T16:56:24+00:00",
       "source": "RSS",
       "id": "c77c66de17ce9799"
-    },
-    {
-      "title": "蜜宵のファミリア ダンジョンMAP※蜜宵ボス詳細追記",
-      "url": "http://blog.livedoor.jp/yanmar195/archives/56002226.html",
-      "site": "鏡の四角立方体",
-      "site_url": "http://blog.livedoor.jp/yanmar195/",
-      "published": "2026-10-15T13:19:50+00:00",
-      "source": "RSS",
-      "id": "b7d67714b4ee0d06"
     },
     {
       "title": "何故か前バージョンは本体だけが崩れてたピラミッド",
