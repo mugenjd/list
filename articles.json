@@ -1,8 +1,35 @@
 {
-  "updated_at": "2026-10-27T20:42:28.725912+00:00",
+  "updated_at": "2026-10-28T21:03:54.011077+00:00",
   "site_count": 154,
   "article_count": 740,
   "articles": [
+    {
+      "title": "[グラブル]のんびりドレッドバラージュ",
+      "url": "https://0saft.blog.fc2.com/blog-entry-12743.html",
+      "site": "ネームレスゼロ",
+      "site_url": "https://0saft.blog.fc2.com/",
+      "published": "2026-10-28T12:33:23+00:00",
+      "source": "RSS",
+      "id": "b9220ced7a587a46"
+    },
+    {
+      "title": "[ブルアカ]レーシングヒフミさん、レーシングアズサさんを引けるまで回した結果「今回も100連目で50%が当たる事は無く」",
+      "url": "https://0saft.blog.fc2.com/blog-entry-12742.html",
+      "site": "ネームレスゼロ",
+      "site_url": "https://0saft.blog.fc2.com/",
+      "published": "2026-10-28T11:48:53+00:00",
+      "source": "RSS",
+      "id": "d2d32d5884b4437f"
+    },
+    {
+      "title": "【ゆっくりRPG】蜜宵のファミリア最小勝利回数クリアpart10【難易度ノーマル】",
+      "url": "http://blog.livedoor.jp/yanmar195/archives/56185878.html",
+      "site": "鏡の四角立方体",
+      "site_url": "http://blog.livedoor.jp/yanmar195/",
+      "published": "2026-10-28T03:22:15+00:00",
+      "source": "RSS",
+      "id": "ab9bc4be00618c93"
+    },
     {
       "title": "[グラブル]無料チケから突然ヴェルサシアが出てきた話",
       "url": "https://0saft.blog.fc2.com/blog-entry-12741.html",
@@ -139,15 +166,6 @@
       "id": "ec7114c71afefa20"
     },
     {
-      "title": "[ブルアカ]シミコさんの絆ランク95、ゴールが見えてきた",
-      "url": "https://0saft.blog.fc2.com/blog-entry-12738.html",
-      "site": "ネームレスゼロ",
-      "site_url": "https://0saft.blog.fc2.com/",
-      "published": "2026-10-24T07:04:31+00:00",
-      "source": "RSS",
-      "id": "024bc6e63045e2b7"
-    },
-    {
       "title": "公開場所変更",
       "url": "http://blog.livedoor.jp/awino/archives/46746341.html",
       "site": "awinoのmugen雑記",
@@ -247,15 +265,6 @@
       "id": "2d5c0b6a3c4a4683"
     },
     {
-      "title": "[グラブル]期限は延長されたけど、サプチケを消化する",
-      "url": "https://0saft.blog.fc2.com/blog-entry-12737.html",
-      "site": "ネームレスゼロ",
-      "site_url": "https://0saft.blog.fc2.com/",
-      "published": "2026-10-21T10:59:17+00:00",
-      "source": "RSS",
-      "id": "78c645a71e549ba1"
-    },
-    {
       "title": "【凶悪MUGEN】FSミズチ1P軍vsFSミズチ1P軍による自称だらけの矛vs盾リスペクトを自称した大会 Part22",
       "url": "http://samsara01.blog.fc2.com/blog-entry-30650.html",
       "site": "MUGEN神キャラ置き場",
@@ -335,15 +344,6 @@
       "published": "2026-10-15T17:01:18+00:00",
       "source": "RSS",
       "id": "2e0a0348c8f13229"
-    },
-    {
-      "title": "MonstaFesta譜面画像新規作成",
-      "url": "http://blog.livedoor.jp/yanmar195/archives/56155935.html",
-      "site": "鏡の四角立方体",
-      "site_url": "http://blog.livedoor.jp/yanmar195/",
-      "published": "2026-10-15T16:56:24+00:00",
-      "source": "RSS",
-      "id": "c77c66de17ce9799"
     },
     {
       "title": "何故か前バージョンは本体だけが崩れてたピラミッド",
