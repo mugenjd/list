@@ -24,9 +24,11 @@ SHEETS = [
         "spreadsheet_id": "1VH9nkUrtnHwZmnUsU_Bg5AkgQ6LFTEw_nT7tPoZfUtY",
         "gid": "1931694445",
     },
+    {
         "group": "闇鍋ロダ",
         "spreadsheet_id": "1VH9nkUrtnHwZmnUsU_Bg5AkgQ6LFTEw_nT7tPoZfUtY",
         "gid": "1031532254",
+    },
 ]
 
 # スプレッドシートの見出し名
