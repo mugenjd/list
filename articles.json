@@ -1,8 +1,44 @@
 {
-  "updated_at": "2026-10-30T20:47:01.334437+00:00",
+  "updated_at": "2026-10-31T19:59:24.036852+00:00",
   "site_count": 154,
   "article_count": 740,
   "articles": [
+    {
+      "title": "削りタゲオンリー神ランク大会 part4",
+      "url": "https://monsoon08.livedoor.blog/archives/31852932.html",
+      "site": "気ままな風",
+      "site_url": "https://monsoon08.livedoor.blog/",
+      "published": "2026-10-31T14:30:48+00:00",
+      "source": "RSS",
+      "id": "b093b99b75a954f5"
+    },
+    {
+      "title": "狂化パッチ類",
+      "url": "http://blog.livedoor.jp/dotzone/archives/49074834.html",
+      "site": "立て札",
+      "site_url": "http://blog.livedoor.jp/dotzone/",
+      "published": "2026-10-31T12:43:41+00:00",
+      "source": "RSS",
+      "id": "cb061c95283178ed"
+    },
+    {
+      "title": "[NTE]ver1.4後編とあかねぇを6凸してしまった話",
+      "url": "https://0saft.blog.fc2.com/blog-entry-12745.html",
+      "site": "ネームレスゼロ",
+      "site_url": "https://0saft.blog.fc2.com/",
+      "published": "2026-10-31T09:41:53+00:00",
+      "source": "RSS",
+      "id": "cd3a62dddec0dac2"
+    },
+    {
+      "title": "自キャラ公開場所移転",
+      "url": "http://44100waguna.blog.fc2.com/blog-entry-415.html",
+      "site": "ワーグナーの気ままなブログ",
+      "site_url": "http://44100waguna.blog.fc2.com/",
+      "published": "2026-10-31T05:25:55+00:00",
+      "source": "RSS",
+      "id": "00e46b50aeb18f53"
+    },
     {
       "title": "[Steam]この中に魔女になった少女がいる、魔法議論ミステリーADV「魔法少女ノ魔女裁判」 のプレイ感想",
       "url": "https://0saft.blog.fc2.com/blog-entry-12744.html",
@@ -119,15 +155,6 @@
       "published": "2026-10-26T13:18:22+00:00",
       "source": "RSS",
       "id": "13a7c02484acc034"
-    },
-    {
-      "title": "[ブルアカ]ブルーアーカイブがパブリッシャー変更となるそうで引退を検討中",
-      "url": "https://0saft.blog.fc2.com/blog-entry-12740.html",
-      "site": "ネームレスゼロ",
-      "site_url": "https://0saft.blog.fc2.com/",
-      "published": "2026-10-26T12:51:36+00:00",
-      "source": "RSS",
-      "id": "1c93bb1d942b066f"
     },
     {
       "title": "getuploader",
@@ -733,15 +760,6 @@
       "id": "ff627fa1237af09e"
     },
     {
-      "title": "【MUGEN】ファニートキ7P前後シングルランセレ大会 part11/12/13",
-      "url": "http://blog.livedoor.jp/dotzone/archives/48781635.html",
-      "site": "立て札",
-      "site_url": "http://blog.livedoor.jp/dotzone/",
-      "published": "2026-08-07T12:33:44+00:00",
-      "source": "RSS",
-      "id": "23f4766a5261227a"
-    },
-    {
       "title": "Juwiitscnend氏の制作キャラまとめ",
       "url": "http://blog.livedoor.jp/bus_mugen/archives/48770445.html",
       "site": "Glück",
@@ -803,15 +821,6 @@
       "published": "2026-07-20T14:16:00+00:00",
       "source": "RSS",
       "id": "7d8492e28c54985a"
-    },
-    {
-      "title": "上位神A前後　仲間を集めて神ランク大会　part11~12",
-      "url": "https://monsoon08.livedoor.blog/archives/31311775.html",
-      "site": "気ままな風",
-      "site_url": "https://monsoon08.livedoor.blog/",
-      "published": "2026-07-19T13:09:28+00:00",
-      "source": "RSS",
-      "id": "83de57de4d04057c"
     },
     {
       "title": "廃滅者セト　修正更新",
@@ -1280,15 +1289,6 @@
       "published": "2026-01-16T12:48:00+00:00",
       "source": "RSS",
       "id": "e268a44c301530b9"
-    },
-    {
-      "title": "[MUGEN]リモデル・スネ夫更新",
-      "url": "http://44100waguna.blog.fc2.com/blog-entry-410.html",
-      "site": "ワーグナーの気ままなブログ",
-      "site_url": "http://44100waguna.blog.fc2.com/",
-      "published": "2026-01-12T09:31:24+00:00",
-      "source": "RSS",
-      "id": "460cf912770d56cf"
     },
     {
       "title": "蒼白の信徒 β0.12 更新",
