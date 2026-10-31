@@ -25,7 +25,7 @@ SHEETS = [
         "gid": "1931694445",
     },
     {
-        "group": "闇鍋ロダ",
+        "group": "闇　鍋　アップローダー",
         "spreadsheet_id": "1VH9nkUrtnHwZmnUsU_Bg5AkgQ6LFTEw_nT7tPoZfUtY",
         "gid": "1031532254",
     },
