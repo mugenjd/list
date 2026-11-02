@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-11-01T20:30:53.547360+00:00",
+  "updated_at": "2026-11-02T23:30:39.472191+00:00",
   "site_count": 154,
   "article_count": 740,
   "articles": [
+    {
+      "title": "蒼白の信徒 β0.13 更新",
+      "url": "https://optica.livedoor.blog/archives/35431631.html",
+      "site": "OPTICAL LABOLATORY",
+      "site_url": "https://optica.livedoor.blog/",
+      "published": "2026-11-02T14:23:29+00:00",
+      "source": "RSS",
+      "id": "ccabff86e2945c5e"
+    },
     {
       "title": "【ゆっくりRPG】蜜宵のファミリア最小勝利回数クリアpart12【難易度ノーマル】",
       "url": "http://blog.livedoor.jp/yanmar195/archives/56189781.html",
@@ -1289,15 +1298,6 @@
       "published": "2026-01-16T12:48:00+00:00",
       "source": "RSS",
       "id": "e268a44c301530b9"
-    },
-    {
-      "title": "蒼白の信徒 β0.12 更新",
-      "url": "https://optica.livedoor.blog/archives/33785786.html",
-      "site": "OPTICAL LABOLATORY",
-      "site_url": "https://optica.livedoor.blog/",
-      "published": "2026-01-10T15:45:07+00:00",
-      "source": "RSS",
-      "id": "2d302e89aa011b7e"
     },
     {
       "title": "new character released! 2026/01/06 Fagocitosis",
