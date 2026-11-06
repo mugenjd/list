@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-11-05T21:59:58.492051+00:00",
+  "updated_at": "2026-11-06T21:30:31.869369+00:00",
   "site_count": 154,
   "article_count": 741,
   "articles": [
+    {
+      "title": "蜜宵のファミリア攻略メモ※Ver1.06対応",
+      "url": "http://blog.livedoor.jp/yanmar195/archives/55943762.html",
+      "site": "鏡の四角立方体",
+      "site_url": "http://blog.livedoor.jp/yanmar195/",
+      "published": "2026-11-06T13:54:26+00:00",
+      "source": "RSS",
+      "id": "2f5d10482626196b"
+    },
     {
       "title": "[グラブル]Face the Force(Relink外伝) イベの感想 「うっ、存在しない冒険の記憶が・・・・」",
       "url": "https://0saft.blog.fc2.com/blog-entry-12747.html",
@@ -184,22 +193,13 @@
       "id": "ab9bc4be00618c93"
     },
     {
-      "title": "蜜宵のファミリア ダンジョンMAP※蜜宵ボス詳細追記",
+      "title": "蜜宵のファミリア ダンジョンMAP※EX追記",
       "url": "http://blog.livedoor.jp/yanmar195/archives/56002226.html",
       "site": "鏡の四角立方体",
       "site_url": "http://blog.livedoor.jp/yanmar195/",
-      "published": "2026-10-27T10:39:33+00:00",
+      "published": "2026-10-27T10:39:16+00:00",
       "source": "RSS",
       "id": "b7d67714b4ee0d06"
-    },
-    {
-      "title": "【ゆっくりRPG】蜜宵のファミリア最小勝利回数クリアpart9【難易度ノーマル】",
-      "url": "http://blog.livedoor.jp/yanmar195/archives/56184810.html",
-      "site": "鏡の四角立方体",
-      "site_url": "http://blog.livedoor.jp/yanmar195/",
-      "published": "2026-10-26T16:29:14+00:00",
-      "source": "RSS",
-      "id": "82a3ba395e47bafa"
     },
     {
       "title": "ツール（？）更新しました。（WinMUGEN専用zlib）",
