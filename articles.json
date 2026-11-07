@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-11-06T21:30:31.869369+00:00",
+  "updated_at": "2026-11-07T20:15:04.565900+00:00",
   "site_count": 154,
   "article_count": 741,
   "articles": [
+    {
+      "title": "【ゆっくりRPG】蜜宵のファミリア最小勝利回数クリアpart13(完)【難易度ノーマル】",
+      "url": "http://blog.livedoor.jp/yanmar195/archives/56194809.html",
+      "site": "鏡の四角立方体",
+      "site_url": "http://blog.livedoor.jp/yanmar195/",
+      "published": "2026-11-07T16:11:52+00:00",
+      "source": "RSS",
+      "id": "432b6fd3cec2900e"
+    },
+    {
+      "title": "※製作物の公開先お引越しのお知らせ",
+      "url": "http://myon8phantasm6kari.blog.fc2.com/blog-entry-251.html",
+      "site": "半人半霊の幻想記",
+      "site_url": "http://myon8phantasm6kari.blog.fc2.com/",
+      "published": "2026-11-07T10:45:34+00:00",
+      "source": "RSS",
+      "id": "4cf2935021e759b4"
+    },
     {
       "title": "蜜宵のファミリア攻略メモ※Ver1.06対応",
       "url": "http://blog.livedoor.jp/yanmar195/archives/55943762.html",
@@ -191,15 +209,6 @@
       "published": "2026-10-28T03:22:15+00:00",
       "source": "RSS",
       "id": "ab9bc4be00618c93"
-    },
-    {
-      "title": "蜜宵のファミリア ダンジョンMAP※EX追記",
-      "url": "http://blog.livedoor.jp/yanmar195/archives/56002226.html",
-      "site": "鏡の四角立方体",
-      "site_url": "http://blog.livedoor.jp/yanmar195/",
-      "published": "2026-10-27T10:39:16+00:00",
-      "source": "RSS",
-      "id": "b7d67714b4ee0d06"
     },
     {
       "title": "ツール（？）更新しました。（WinMUGEN専用zlib）",
@@ -5267,15 +5276,6 @@
       "published": "2019-06-12T12:54:03+00:00",
       "source": "RSS",
       "id": "71ba9c34e746af8d"
-    },
-    {
-      "title": "【MUGEN】 狂上位～ 仲間を集めてチーム対抗戦 #5-1(Part5) 【凶悪】",
-      "url": "http://myon8phantasm6kari.blog.fc2.com/blog-entry-246.html",
-      "site": "半人半霊の幻想記",
-      "site_url": "http://myon8phantasm6kari.blog.fc2.com/",
-      "published": "2019-05-16T14:26:54+00:00",
-      "source": "RSS",
-      "id": "93441615874aa0c6"
     },
     {
       "title": "【MUGEN】絶望☆シングルトーナメント！！part46",
