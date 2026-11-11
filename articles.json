@@ -1,8 +1,26 @@
 {
-  "updated_at": "2026-11-10T21:48:59.081938+00:00",
+  "updated_at": "2026-11-11T22:42:29.682011+00:00",
   "site_count": 154,
   "article_count": 741,
   "articles": [
+    {
+      "title": "公開先移転したよという報告+α",
+      "url": "https://nightofglory.blog.fc2.com/blog-entry-231.html",
+      "site": "栄光なる夜の幻想世界",
+      "site_url": "https://nightofglory.blog.fc2.com/",
+      "published": "2026-11-11T14:52:54+00:00",
+      "source": "RSS",
+      "id": "ed2e56d0b6fed034"
+    },
+    {
+      "title": "[グラブル]金剛確定スペシャルスタレを引いた結果",
+      "url": "https://0saft.blog.fc2.com/blog-entry-12750.html",
+      "site": "ネームレスゼロ",
+      "site_url": "https://0saft.blog.fc2.com/",
+      "published": "2026-11-11T14:22:44+00:00",
+      "source": "RSS",
+      "id": "0a04f08cdba06c08"
+    },
     {
       "title": "蜜宵のファミリア ダンジョンMAP※EX追記",
       "url": "http://blog.livedoor.jp/yanmar195/archives/56002226.html",
@@ -98,7 +116,7 @@
       "url": "http://blog.livedoor.jp/yanmar195/archives/55943762.html",
       "site": "鏡の四角立方体",
       "site_url": "http://blog.livedoor.jp/yanmar195/",
-      "published": "2026-11-06T13:54:26+00:00",
+      "published": "2026-11-06T13:54:44+00:00",
       "source": "RSS",
       "id": "2f5d10482626196b"
     },
@@ -191,15 +209,6 @@
       "published": "2026-10-31T12:43:41+00:00",
       "source": "RSS",
       "id": "cb061c95283178ed"
-    },
-    {
-      "title": "[NTE]ver1.4後編とあかねぇを6凸してしまった話",
-      "url": "https://0saft.blog.fc2.com/blog-entry-12745.html",
-      "site": "ネームレスゼロ",
-      "site_url": "https://0saft.blog.fc2.com/",
-      "published": "2026-10-31T09:41:53+00:00",
-      "source": "RSS",
-      "id": "cd3a62dddec0dac2"
     },
     {
       "title": "自キャラ公開場所移転",
@@ -605,15 +614,6 @@
       "published": "2026-09-23T04:23:52+00:00",
       "source": "RSS",
       "id": "0e4a53dc188e8486"
-    },
-    {
-      "title": "【MUGEN】男なら拳ひとつで勝負せんかいトーナメント part2 & part3",
-      "url": "https://nightofglory.blog.fc2.com/blog-entry-226.html",
-      "site": "栄光なる夜の幻想世界",
-      "site_url": "https://nightofglory.blog.fc2.com/",
-      "published": "2026-09-20T13:24:45+00:00",
-      "source": "RSS",
-      "id": "593aa1c234aff335"
     },
     {
       "title": "マスター無界　公開",
