@@ -1,14 +1,32 @@
 {
-  "updated_at": "2026-11-13T22:00:28.668732+00:00",
+  "updated_at": "2026-11-14T20:43:07.035562+00:00",
   "site_count": 154,
   "article_count": 742,
   "articles": [
+    {
+      "title": "【MUGEN】美形会議主催！狂上位4vs4チームバトルOP",
+      "url": "http://blog.livedoor.jp/dotzone/archives/49080363.html",
+      "site": "立て札",
+      "site_url": "http://blog.livedoor.jp/dotzone/",
+      "published": "2026-11-14T10:49:37+00:00",
+      "source": "RSS",
+      "id": "598e78f0e54a1ebd"
+    },
+    {
+      "title": "なんかいた動く石像モドキ",
+      "url": "https://seki-rou.hateblo.jp/entry/2026/11/14/155611",
+      "site": "seki-rouの謎の地下室",
+      "site_url": "https://seki-rou.hateblo.jp/",
+      "published": "2026-11-14T06:56:11+00:00",
+      "source": "RSS",
+      "id": "f15c059dbc9fe472"
+    },
     {
       "title": "【MUGEN】美形会議主催！狂上位4vs4チームバトル 参加者一覧",
       "url": "https://zinnzouninngennhachigou.doorblog.jp/archives/15781439.html",
       "site": "はちまんのmugenブログ",
       "site_url": "https://zinnzouninngennhachigou.doorblog.jp/",
-      "published": "2026-11-13T21:00:16+00:00",
+      "published": "2026-11-13T21:00:33+00:00",
       "source": "RSS",
       "id": "afd2a44684ccc0b4"
     },
@@ -499,15 +517,6 @@
       "id": "1aca26172b4f3efc"
     },
     {
-      "title": "何故か前バージョンは本体だけが崩れてたピラミッド",
-      "url": "https://seki-rou.hateblo.jp/entry/2026/10/13/175036",
-      "site": "seki-rouの謎の地下室",
-      "site_url": "https://seki-rou.hateblo.jp/",
-      "published": "2026-10-13T08:50:36+00:00",
-      "source": "RSS",
-      "id": "d447b26505236913"
-    },
-    {
       "title": "【MUGEN】ギーグ公開",
       "url": "http://stgfullpower.blog.fc2.com/blog-entry-193.html",
       "site": "STGの籠り部屋",
@@ -704,15 +713,6 @@
       "published": "2026-08-30T11:30:39+00:00",
       "source": "RSS",
       "id": "7fffd74e39968759"
-    },
-    {
-      "title": "【MUGEN】HEI_F12p前後狂上位シングルランセレ大会 part19/20/22/23",
-      "url": "http://blog.livedoor.jp/dotzone/archives/48869837.html",
-      "site": "立て札",
-      "site_url": "http://blog.livedoor.jp/dotzone/",
-      "published": "2026-08-30T02:46:23+00:00",
-      "source": "RSS",
-      "id": "5f117fcbff48a921"
     },
     {
       "title": "ファニートキ7P前後シングルランセレ大会　まとめ",
