@@ -1,8 +1,35 @@
 {
-  "updated_at": "2026-11-15T21:03:12.454997+00:00",
+  "updated_at": "2026-11-17T00:15:28.411375+00:00",
   "site_count": 154,
   "article_count": 742,
   "articles": [
+    {
+      "title": "【MUGEN】ショートで終わる！MUGENハイスピードサーキット【OP】",
+      "url": "https://nightofglory.blog.fc2.com/blog-entry-233.html",
+      "site": "栄光なる夜の幻想世界",
+      "site_url": "https://nightofglory.blog.fc2.com/",
+      "published": "2026-11-16T14:59:15+00:00",
+      "source": "RSS",
+      "id": "3e391d879c7cf8d7"
+    },
+    {
+      "title": "[NTE]ver1.5の近況「メインストーリー良かった、そして戦車・・・・」",
+      "url": "https://0saft.blog.fc2.com/blog-entry-12752.html",
+      "site": "ネームレスゼロ",
+      "site_url": "https://0saft.blog.fc2.com/",
+      "published": "2026-11-16T13:49:04+00:00",
+      "source": "RSS",
+      "id": "6102bc1383b12abd"
+    },
+    {
+      "title": "【備忘録】WIN以上のMUGEN本体全バージョン(+IKEMEN GO)対応させたキャラを作るまでの流れ",
+      "url": "https://sakisukebekkan.blog.fc2.com/blog-entry-87.html",
+      "site": "ふざけてる人のふざけてる文章",
+      "site_url": "https://sakisukebekkan.blog.fc2.com/",
+      "published": "2026-11-16T06:17:11+00:00",
+      "source": "RSS",
+      "id": "9bcbc52f47cf73ea"
+    },
     {
       "title": "Melty Blood Another 更新",
       "url": "https://unknown37564.blog.jp/archives/55197350.html",
@@ -71,7 +98,7 @@
       "url": "https://zinnzouninngennhachigou.doorblog.jp/archives/15781439.html",
       "site": "はちまんのmugenブログ",
       "site_url": "https://zinnzouninngennhachigou.doorblog.jp/",
-      "published": "2026-11-13T21:00:49+00:00",
+      "published": "2026-11-13T21:00:20+00:00",
       "source": "RSS",
       "id": "afd2a44684ccc0b4"
     },
@@ -200,15 +227,6 @@
       "published": "2026-11-06T13:54:44+00:00",
       "source": "RSS",
       "id": "2f5d10482626196b"
-    },
-    {
-      "title": "[グラブル]Face the Force(Relink外伝) イベの感想 「うっ、存在しない冒険の記憶が・・・・」",
-      "url": "https://0saft.blog.fc2.com/blog-entry-12747.html",
-      "site": "ネームレスゼロ",
-      "site_url": "https://0saft.blog.fc2.com/",
-      "published": "2026-11-05T12:33:07+00:00",
-      "source": "RSS",
-      "id": "5040f4b6e53e6236"
     },
     {
       "title": "Grok君で遊んで作った",
@@ -569,15 +587,6 @@
       "published": "2026-10-11T13:16:33+00:00",
       "source": "RSS",
       "id": "529d950e8a74ebc8"
-    },
-    {
-      "title": "【MUGEN】デデデ陛下主催！狂中位級作品別変則ターゲット形式ポイント制大会【Part10】&【Part11】, 【MUGEN】新旧連闘　希望VS絶望大会　part48",
-      "url": "https://nightofglory.blog.fc2.com/blog-entry-228.html",
-      "site": "栄光なる夜の幻想世界",
-      "site_url": "https://nightofglory.blog.fc2.com/",
-      "published": "2026-10-09T11:25:15+00:00",
-      "source": "RSS",
-      "id": "fc09a0e8a283c3f7"
     },
     {
       "title": "'el12p×バトルマスター鈴仙11p前後 まとめ",
@@ -2333,15 +2342,6 @@
       "published": "2025-02-02T23:30:00+00:00",
       "source": "RSS",
       "id": "ecc71209508b5896"
-    },
-    {
-      "title": "【備忘録】WIN以上のMUGEN本体全バージョン(+IKEMEN GO)対応させたキャラを作るまでの流れ",
-      "url": "https://sakisukebekkan.blog.fc2.com/blog-entry-87.html",
-      "site": "ふざけてる人のふざけてる文章",
-      "site_url": "https://sakisukebekkan.blog.fc2.com/",
-      "published": "2025-02-02T11:19:48+00:00",
-      "source": "RSS",
-      "id": "9bcbc52f47cf73ea"
     },
     {
       "title": "Kuso Kentei 2",
