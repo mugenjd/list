@@ -1,8 +1,17 @@
 {
-  "updated_at": "2026-11-19T23:04:04.752626+00:00",
+  "updated_at": "2026-11-20T22:41:02.510469+00:00",
   "site_count": 154,
   "article_count": 742,
   "articles": [
+    {
+      "title": "混沌久那妓更新&公開先移転",
+      "url": "https://monsoon08.livedoor.blog/archives/31868702.html",
+      "site": "気ままな風",
+      "site_url": "https://monsoon08.livedoor.blog/",
+      "published": "2026-11-20T13:19:41+00:00",
+      "source": "RSS",
+      "id": "bf1973baf374868c"
+    },
     {
       "title": "【凶悪MUGEN】FSミズチ1P軍vsFSミズチ1P軍による自称だらけの矛vs盾リスペクトを自称した大会 Part26",
       "url": "http://samsara01.blog.fc2.com/blog-entry-30656.html",
@@ -35,7 +44,7 @@
       "url": "http://blog.livedoor.jp/dotzone/archives/49081503.html",
       "site": "立て札",
       "site_url": "http://blog.livedoor.jp/dotzone/",
-      "published": "2026-11-17T13:51:29+00:00",
+      "published": "2026-11-17T13:51:51+00:00",
       "source": "RSS",
       "id": "9e2679ba7528e156"
     },
@@ -803,15 +812,6 @@
       "published": "2026-08-08T12:00:15+00:00",
       "source": "RSS",
       "id": "3b0e50c644fe90e8"
-    },
-    {
-      "title": "【MUGEN凶悪】2026神最上測試公開",
-      "url": "https://monsoon08.livedoor.blog/archives/31411939.html",
-      "site": "気ままな風",
-      "site_url": "https://monsoon08.livedoor.blog/",
-      "published": "2026-08-08T11:55:56+00:00",
-      "source": "RSS",
-      "id": "5f99d47aafed562c"
     },
     {
       "title": "【MUGEN凶悪】2026神最上測試公開",
